@@ -1,9 +1,11 @@
-# ⚡ VSCode Portfolio Template
+#  VSCode Portfolio Template
 
 A developer portfolio that looks, feels, and behaves like your favorite IDE.
 
 Built with **React**, **Tailwind CSS**, and **Vite**, this template features a fully interactive file system, an AI-powered terminal, and a powerful window management system.
 
+---
+![VSCode Portfolio Preview](https://raw.githubusercontent.com/arnofrxdd/ide-portfolio/assests/Screenshot%202026-01-12%20045030.png)
 ---
 
 ## ✨ Key Features
