@@ -1,73 +1,198 @@
-# React + TypeScript + Vite
+# ⚡ VSCode Portfolio Template
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A developer portfolio that looks, feels, and behaves like your favorite IDE.
 
-Currently, two official plugins are available:
+Built with **React**, **Tailwind CSS**, and **Vite**, this template features a fully interactive file system, an AI-powered terminal, and a powerful window management system.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+---
 
-## React Compiler
+## ✨ Key Features
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### 🪟 Draggable & Resizable Windows
 
-## Expanding the ESLint configuration
+This is **not** a static UI.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+* Drag tabs out of the dock to create floating windows
+* Resize from all corners
+* Maximize / restore like a real OS window
+* True multitasking experience
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+### 🤖 AI‑Integrated Terminal
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+A functional CLI connected to **Google Gemini API**.
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+* Ask questions about projects or skills
+* Natural language queries
+* Built‑in commands (`ls`, `cat`, `open`, etc.)
+
+### 📂 Interactive File Explorer
+
+* Folder tree navigation
+* Open `.md`, `.json`, `.tsx` files
+* Project search & filtering
+
+### 🎨 Authentic VSCode Theme
+
+* Pixel‑accurate VSCode‑inspired UI
+* Built entirely with Tailwind CSS
+* Smooth animations & transitions
+
+---
+
+## 🚀 Getting Started
+
+### 1️⃣ Clone & Install
+
+```bash
+git clone https://github.com/yourusername/vscode-portfolio.git
+cd vscode-portfolio
+npm install
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+---
+
+### 2️⃣ Configure Environment (Gemini AI)
+
+To enable AI terminal features, get a **free Gemini API key** from:
+
+👉 [https://aistudio.google.com](https://aistudio.google.com)
+
+Create a `.env` file in the root directory:
+
+```bash
+touch .env
+```
+
+Add your API key:
+
+```env
+VITE_GEMINI_API_KEY=your_actual_api_key_here
+```
+
+---
+
+### 3️⃣ Run Development Server
+
+```bash
+npm run dev
+```
+
+---
+
+## 🛠️ Customization Tutorial
+
+### 1️⃣ Adding Your Projects
+
+File:
+
+```bash
+src/data/projects.js
+```
+
+This file drives:
+
+* File Explorer
+* Search
+* Terminal commands
+
+Example:
 
 ```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
+export const PROJECTS_DATA = [
   {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+    id: "my-cool-app",
+    title: "My Cool App",
+    type: "Web App",
+    tech: ["React", "Node.js", "MongoDB"],
+    date: "2024",
+    description: "Short description for cards",
+    longDescription: "Detailed markdown shown in file view",
+  }
+]
 ```
+
+---
+
+### 2️⃣ Editing Personal Info (Home Screen)
+
+File:
+
+```bash
+src/App.jsx
+```
+
+Search for:
+
+```js
+type === 'home'
+```
+
+Edit:
+
+* `WORDS` array (typing animation)
+* JSX content for intro text
+
+---
+
+### 3️⃣ Modifying README.md Content
+
+Search for:
+
+```js
+type === 'readme'
+```
+
+Edit:
+
+* Markdown preview content
+* Bio, skills, and contact info
+
+---
+
+### 4️⃣ Extending the Terminal
+
+Component:
+
+```bash
+IntegratedTerminal.jsx
+```
+
+Add new commands inside `handleCommand`:
+
+```js
+if (command === 'mycommand') {
+  // custom logic
+}
+```
+
+---
+
+## ⌨️ Terminal Commands
+
+| Command          | Description             |
+| ---------------- | ----------------------- |
+| `help`           | Show available commands |
+| `ls` / `list`    | List all projects       |
+| `cat <project>`  | Print project summary   |
+| `open <project>` | Open project window     |
+| `clear`          | Clear terminal          |
+| `whoami`         | Show user info          |
+| *(any text)*     | Chat with Gemini AI     |
+
+---
+
+## 📦 Tech Stack
+
+* **Framework:** React 18
+* **Build Tool:** Vite
+* **Styling:** Tailwind CSS
+* **Icons:** Lucide React
+* **AI:** Google Gemini API
+
+---
+
+## 📄 License
+
+MIT License.
+
+Use it, fork it, remix it, ship it 🚀
