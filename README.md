@@ -1,16 +1,16 @@
-#  VSCode Portfolio Template
+# VSCode Portfolio Template
+
+![VSCode Portfolio Preview](https://raw.githubusercontent.com/arnofrxdd/ide-portfolio/assests/Screenshot%202026-01-12%20045030.png)
 
 A developer portfolio that looks, feels, and behaves like your favorite IDE.
 
 Built with **React**, **Tailwind CSS**, and **Vite**, this template features a fully interactive file system, an AI-powered terminal, and a powerful window management system.
 
 ---
-![VSCode Portfolio Preview](https://raw.githubusercontent.com/arnofrxdd/ide-portfolio/assests/Screenshot%202026-01-12%20045030.png)
----
 
-## ✨ Key Features
+## Key Features
 
-### 🪟 Draggable & Resizable Windows
+### Draggable & Resizable Windows
 
 This is **not** a static UI.
 
@@ -19,7 +19,7 @@ This is **not** a static UI.
 * Maximize / restore like a real OS window
 * True multitasking experience
 
-### 🤖 AI‑Integrated Terminal
+### AI‑Integrated Terminal
 
 A functional CLI connected to **Google Gemini API**.
 
@@ -27,13 +27,13 @@ A functional CLI connected to **Google Gemini API**.
 * Natural language queries
 * Built‑in commands (`ls`, `cat`, `open`, etc.)
 
-### 📂 Interactive File Explorer
+### Interactive File Explorer
 
 * Folder tree navigation
 * Open `.md`, `.json`, `.tsx` files
 * Project search & filtering
 
-### 🎨 Authentic VSCode Theme
+### Authentic VSCode Theme
 
 * Pixel‑accurate VSCode‑inspired UI
 * Built entirely with Tailwind CSS
@@ -41,9 +41,9 @@ A functional CLI connected to **Google Gemini API**.
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
-### 1️⃣ Clone & Install
+### Clone & Install
 
 ```bash
 git clone https://github.com/yourusername/vscode-portfolio.git
@@ -53,11 +53,11 @@ npm install
 
 ---
 
-### 2️⃣ Configure Environment (Gemini AI)
+### Configure Environment (Gemini AI)
 
 To enable AI terminal features, get a **free Gemini API key** from:
 
-👉 [https://aistudio.google.com](https://aistudio.google.com)
+[https://aistudio.google.com](https://aistudio.google.com)
 
 Create a `.env` file in the root directory:
 
@@ -73,7 +73,7 @@ VITE_GEMINI_API_KEY=your_actual_api_key_here
 
 ---
 
-### 3️⃣ Run Development Server
+### Run Development Server
 
 ```bash
 npm run dev
@@ -81,9 +81,9 @@ npm run dev
 
 ---
 
-## 🛠️ Customization Tutorial
+## Customization Tutorial
 
-### 1️⃣ Adding Your Projects
+### Adding Your Projects
 
 File:
 
@@ -115,7 +115,7 @@ export const PROJECTS_DATA = [
 
 ---
 
-### 2️⃣ Editing Personal Info (Home Screen)
+### Editing Personal Info (Home Screen)
 
 File:
 
@@ -136,7 +136,7 @@ Edit:
 
 ---
 
-### 3️⃣ Modifying README.md Content
+### Modifying README.md Content
 
 Search for:
 
@@ -151,7 +151,7 @@ Edit:
 
 ---
 
-### 4️⃣ Extending the Terminal
+### Extending the Terminal
 
 Component:
 
@@ -169,7 +169,7 @@ if (command === 'mycommand') {
 
 ---
 
-## ⌨️ Terminal Commands
+## Terminal Commands
 
 | Command          | Description             |
 | ---------------- | ----------------------- |
@@ -183,7 +183,7 @@ if (command === 'mycommand') {
 
 ---
 
-## 📦 Tech Stack
+## Tech Stack
 
 * **Framework:** React 18
 * **Build Tool:** Vite
@@ -193,8 +193,8 @@ if (command === 'mycommand') {
 
 ---
 
-## 📄 License
+## License
 
 MIT License.
 
-Use it, fork it, remix it, ship it 🚀
+Use it, fork it, remix it, ship it
