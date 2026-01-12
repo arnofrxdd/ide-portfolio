@@ -2648,21 +2648,42 @@ const App = () => {
             {tabs.length === 0 && <div className="h-full flex items-center justify-center text-[var(--text-secondary)] font-mono text-sm">No active files.</div>}
           </div>
           <div className="h-6 bg-[#007acc] md:bg-[var(--bg-activity)] border-t border-[var(--border)] flex justify-between items-center px-3 text-[10px] md:text-xs font-mono text-[var(--text-secondary)] z-30 relative shrink-0 transition-colors duration-300 select-none">
-            <div className="flex gap-4">
-              <button onClick={() => setIsTerminalOpen(!isTerminalOpen)} className="flex items-center gap-1 hover:text-white cursor-pointer hover:bg-slate-800 px-2 rounded transition-colors">
+
+            {/* LEFT SIDE */}
+            <div className="flex gap-4 items-center">
+              <button
+                onClick={() => setIsTerminalOpen(!isTerminalOpen)}
+                className="flex items-center gap-1 hover:text-white cursor-pointer hover:bg-slate-800 px-2 rounded transition-colors"
+              >
                 <Terminal size={10} />
-                <span>TERMINAL</span>
+                <span className="hidden sm:inline">TERMINAL</span>
               </button>
-              <div className="flex items-center gap-1 hover:text-white cursor-pointer"><GitBranch size={10} /> <span>main*</span></div>
-              <div className="flex items-center gap-1 hover:text-white cursor-pointer"><AlertCircle size={10} /> <span>0 errors</span></div>
+
+              <div className="hidden md:flex items-center gap-1 hover:text-white cursor-pointer">
+                <GitBranch size={10} />
+                <span>main*</span>
+              </div>
+
+              <div className="hidden md:flex items-center gap-1 hover:text-white cursor-pointer">
+                <AlertCircle size={10} />
+                <span>0 errors</span>
+              </div>
             </div>
-            <div className="flex gap-4">
+
+            {/* RIGHT SIDE (DESKTOP ONLY) */}
+            <div className="hidden md:flex gap-4 items-center">
               <span className="hover:text-white cursor-pointer">Ln 12, Col 45</span>
               <span className="hover:text-white cursor-pointer">UTF-8</span>
-              <span className="hover:text-white cursor-pointer text-emerald-500 flex items-center gap-1"><CheckCircle size={10} /> Prettier</span>
-              <span className="hover:text-white cursor-pointer text-blue-400 flex items-center gap-1"><Bell size={10} /></span>
+              <span className="hover:text-white cursor-pointer text-emerald-500 flex items-center gap-1">
+                <CheckCircle size={10} /> Prettier
+              </span>
+              <span className="hover:text-white cursor-pointer text-blue-400 flex items-center gap-1">
+                <Bell size={10} />
+              </span>
             </div>
+
           </div>
+
         </div>
         {windows.map(win => (
           <div
