@@ -1388,6 +1388,13 @@ const CommandPalette = ({ isOpen, onClose, onOpenFile }) => {
   // Generate a flat list of all openable items
   const allItems = useMemo(() => {
     const items = [];
+    items.push({
+      id: 'open_terminal',
+      title: 'Open Terminal',
+      type: 'command',
+      icon: Terminal,
+      action: 'open_terminal'
+    });
 
     // Pages
     items.push({ id: 'home', title: 'home.tsx', type: 'home', icon: FileCode, path: 'src/pages/home.tsx' });
@@ -1397,7 +1404,17 @@ const CommandPalette = ({ isOpen, onClose, onOpenFile }) => {
     PROJECTS_DATA.forEach(p => {
       items.push({ id: p.id, title: `${p.title}.tsx`, type: 'detail', data: p, icon: FileCode, path: `src/projects/${p.title}.tsx` });
     });
-
+    Object.entries(THEMES).forEach(([key, theme]) => {
+      items.push({
+        id: `theme_${key}`,
+        title: `Theme: ${theme.name}`,
+        type: 'command',
+        action: 'set_theme',
+        themeKey: key,
+        icon: Palette,
+        path: 'Preferences / Theme'
+      });
+    });
     // Config files
     items.push({ id: 'env', title: '.env', type: 'code', content: FILE_CONTENTS.env, lang: 'bash', icon: Lock, path: '.env' });
     items.push({ id: 'gitignore', title: '.gitignore', type: 'code', content: FILE_CONTENTS.gitignore, lang: 'bash', icon: GitBranch, path: '.gitignore' });
@@ -1421,9 +1438,10 @@ const CommandPalette = ({ isOpen, onClose, onOpenFile }) => {
     const lowerQ = query.toLowerCase();
     return allItems.filter(item =>
       item.title.toLowerCase().includes(lowerQ) ||
-      item.path.toLowerCase().includes(lowerQ)
+      item.path?.toLowerCase().includes(lowerQ)
     );
   }, [query, allItems]);
+
 
   useEffect(() => {
     if (isOpen) {
@@ -1442,11 +1460,30 @@ const CommandPalette = ({ isOpen, onClose, onOpenFile }) => {
       setSelectedIndex(prev => (prev - 1 + filteredItems.length) % filteredItems.length);
     } else if (e.key === 'Enter') {
       e.preventDefault();
-      if (filteredItems[selectedIndex]) {
-        onOpenFile(filteredItems[selectedIndex]);
-        onClose();
+      const item = filteredItems[selectedIndex];
+      if (!item) return;
+
+      if (item.type === 'command') {
+        if (item.action === 'open_terminal') {
+          window.dispatchEvent(new CustomEvent('open-terminal'));
+          onClose();
+          return;
+        }
+
+        if (item.action === 'set_theme') {
+          window.dispatchEvent(
+            new CustomEvent('set-theme', { detail: item.themeKey })
+          );
+          onClose();
+          return;
+        }
       }
-    } else if (e.key === 'Escape') {
+
+
+      onOpenFile(item);
+      onClose();
+    }
+    else if (e.key === 'Escape') {
       onClose();
     }
   };
@@ -1478,7 +1515,27 @@ const CommandPalette = ({ isOpen, onClose, onOpenFile }) => {
           {filteredItems.map((item, idx) => (
             <div
               key={idx}
-              onClick={() => { onOpenFile(item); onClose(); }}
+              onClick={() => {
+                if (item.type === 'command') {
+                  if (item.action === 'open_terminal') {
+                    window.dispatchEvent(new CustomEvent('open-terminal'));
+                    onClose();
+                    return;
+                  }
+
+                  if (item.action === 'set_theme') {
+                    window.dispatchEvent(
+                      new CustomEvent('set-theme', { detail: item.themeKey })
+                    );
+                    onClose();
+                    return;
+                  }
+                }
+
+
+                onOpenFile(item);
+                onClose();
+              }}
               className={`flex items-center gap-3 px-3 py-2 rounded cursor-pointer group ${idx === selectedIndex ? 'bg-[var(--accent)] text-white' : 'text-[var(--text-primary)] hover:bg-[var(--bg-activity)]'}`}
             >
               <item.icon size={14} className={idx === selectedIndex ? 'text-white' : 'text-[var(--text-secondary)]'} />
@@ -1501,18 +1558,32 @@ const CommandPalette = ({ isOpen, onClose, onOpenFile }) => {
 const Breadcrumbs = ({ path }) => {
   if (!path) return null;
   const parts = path.split('/');
+
   return (
-    <div className="flex items-center gap-1 text-[10px] text-[var(--text-secondary)] px-4 py-1 border-b border-[var(--border)] bg-[var(--bg-main)] font-mono select-none overflow-hidden">
-      <span className="opacity-50">src</span>
+    <div
+      className="
+        sticky top-0 z-20
+        flex items-center gap-1
+        text-[10px] text-[var(--text-secondary)]
+        px-4 py-1
+        border-b border-[var(--border)]
+        bg-[var(--bg-main)]
+        font-mono select-none
+      "
+    >
+      <span className="opacity-50">Portfolio</span>
       {parts.map((part, i) => (
         <React.Fragment key={i}>
           <ChevronRight size={10} className="opacity-50" />
-          <span className={i === parts.length - 1 ? 'text-[var(--text-primary)]' : ''}>{part}</span>
+          <span className={i === parts.length - 1 ? 'text-[var(--text-primary)]' : ''}>
+            {part}
+          </span>
         </React.Fragment>
       ))}
     </div>
   );
 };
+
 
 /* --- CONTENT RENDERER --- */
 
@@ -1532,6 +1603,10 @@ const ContentRenderer = ({ type, data, title, onOpenFile, content, lang }) => {
       if (title?.startsWith('recruiter/'))
         return title;
 
+      // pages-level json
+      if (title === 'projects.json')
+        return 'src/pages/projects.json';
+
       // root config files
       if (title?.startsWith('.'))
         return title;
@@ -1548,6 +1623,7 @@ const ContentRenderer = ({ type, data, title, onOpenFile, content, lang }) => {
 
     return '';
   };
+
 
 
   const path = getPath();
@@ -2082,6 +2158,22 @@ const App = () => {
   const editorScrollRef = useRef(null);
   const tabRefs = useRef({});
   const tabScrollRef = useRef(null);
+  useEffect(() => {
+    const handler = () => setIsTerminalOpen(true);
+    window.addEventListener('open-terminal', handler);
+    return () => window.removeEventListener('open-terminal', handler);
+  }, []);
+  useEffect(() => {
+    const handler = (e) => {
+      const themeKey = e.detail;
+      if (THEMES[themeKey]) {
+        setCurrentTheme(themeKey);
+      }
+    };
+
+    window.addEventListener('set-theme', handler);
+    return () => window.removeEventListener('set-theme', handler);
+  }, []);
 
   // Apply Theme Colors
   // Apply Theme Colors & Save
