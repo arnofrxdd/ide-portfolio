@@ -2013,6 +2013,15 @@ const App = () => {
   const [toasts, setToasts] = useState([]);
 
   const dragItem = useRef(null);
+  const scrollPositions = useRef({});
+  const editorScrollRef = useRef(null);
+  useEffect(() => {
+    const el = editorScrollRef.current;
+    if (!el) return;
+
+    el.scrollTop = scrollPositions.current[activeTabId] ?? 0;
+  }, [activeTabId]);
+
   useEffect(() => {
     if (isDragging) {
       document.body.style.userSelect = 'none';
@@ -2321,7 +2330,13 @@ const App = () => {
           ))}
         </div>
 
-        <div className="flex-1 bg-[#0f0f11] relative overflow-y-auto scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent custom-scrollbar">
+        <div
+          ref={editorScrollRef}
+          onScroll={(e) => {
+            scrollPositions.current[activeTabId] = e.currentTarget.scrollTop;
+          }}
+          className="flex-1 bg-[#0f0f11] relative overflow-y-auto scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent custom-scrollbar"
+        >
           {tabs.map(tab => (
             <div key={tab.id} className={`h-full w-full ${activeTabId === tab.id ? 'block' : 'hidden'}`}>
               <ContentRenderer
@@ -2392,7 +2407,16 @@ const App = () => {
               </div>
             </div>
           </div>
-          <div className="flex-1 bg-[#0f0f11] overflow-y-auto p-1 scrollbar-thin scrollbar-thumb-slate-700 custom-scrollbar">
+          <div
+            onScroll={(e) => {
+              scrollPositions.current[win.id] = e.currentTarget.scrollTop;
+            }}
+            ref={(el) => {
+              if (!el) return;
+              el.scrollTop = scrollPositions.current[win.id] ?? 0;
+            }}
+            className="flex-1 bg-[#0f0f11] overflow-y-auto p-1 scrollbar-thin scrollbar-thumb-slate-700 custom-scrollbar"
+          >
             <ContentRenderer
               type={win.type}
               data={win.data}
