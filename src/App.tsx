@@ -486,8 +486,11 @@ const FileTreeItem = ({
   isActive,
   hasChildren,
   isOpen,
-  onToggle
+  onToggle,
+  onClose,
+  showClose
 }) => (
+
   <div
     onClick={() => {
       if (hasChildren) {
@@ -506,7 +509,17 @@ const FileTreeItem = ({
   >
 
     {/* Chevron / spacer — fixed width */}
-    {hasChildren ? (
+    {showClose ? (
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          onClose?.();
+        }}
+        className="w-4 h-4 flex items-center justify-center text-slate-500 hover:text-red-400"
+      >
+        <X size={10} />
+      </button>
+    ) : hasChildren ? (
       <div
         onClick={(e) => { e.stopPropagation(); onToggle(); }}
         className="p-0.5 hover:bg-slate-700 rounded shrink-0"
@@ -516,6 +529,7 @@ const FileTreeItem = ({
     ) : (
       <span className="w-4 shrink-0" />
     )}
+
 
     {/* Icon + filename wrapper (THIS IS THE KEY) */}
     <div className="flex items-center gap-1.5 min-w-0 flex-1">
@@ -527,8 +541,32 @@ const FileTreeItem = ({
   </div>
 );
 
+const getFileIcon = (tab) => {
+  if (tab.type === 'home') return FileCode;
+  if (tab.type === 'package') return FileJson;
+  if (tab.type === 'readme') return FileText;
+  if (tab.type === 'projects') return FileCode;
+  return FileText;
+};
 
-const Sidebar = ({ onOpenFile, onToast, onToggleTerminal }) => {
+const getFileIconColor = (tab) => {
+  if (tab.type === 'home') return 'text-indigo-400';
+  if (tab.type === 'package') return 'text-red-400';
+  if (tab.type === 'readme') return 'text-blue-400';
+  if (tab.type === 'projects') return 'text-emerald-400';
+  return 'text-amber-400';
+};
+
+const Sidebar = ({
+  onOpenFile,
+  onToast,
+  onToggleTerminal,
+  tabs,
+  activeTabId,
+  setActiveTabId,
+  setTabs          // 🔥 ADD THIS
+}) => {
+
   const [activeView, setActiveView] = useState('explorer');
   const [isPanelVisible, setIsPanelVisible] = useState(true);
   const [expandedFolders, setExpandedFolders] = useState({
@@ -736,6 +774,34 @@ const Sidebar = ({ onOpenFile, onToast, onToggleTerminal }) => {
             </div>
 
             <div className="flex-1 overflow-y-auto py-2 custom-scrollbar">
+              {/* OPEN EDITORS */}
+              <div className="mb-2">
+                <div className="px-4 text-xs font-bold text-slate-500 mb-1">
+                  OPEN EDITORS
+                </div>
+
+                {tabs.map(tab => (
+                  <FileTreeItem
+                    key={tab.id}
+                    depth={0}
+                    name={tab.title}
+                    icon={getFileIcon(tab)}
+                    color={getFileIconColor(tab)}
+                    isActive={tab.id === activeTabId}
+                    onClick={() => setActiveTabId(tab.id)}
+                    showClose={tab.id !== 'home'}
+                    onClose={() => {
+                      if (tab.id === 'home') return;
+                      setActiveTabId(prev =>
+                        prev === tab.id ? 'home' : prev
+                      );
+                      setTabs(prev => prev.filter(t => t.id !== tab.id));
+                    }}
+                  />
+
+
+                ))}
+              </div>
               <div className="px-4 mb-2 flex items-center gap-1 text-indigo-400 font-bold text-xs"><ChevronDown size={12} /> <span>PORTFOLIO</span></div>
 
               {/* Folders */}
@@ -2015,6 +2081,9 @@ const App = () => {
   const dragItem = useRef(null);
   const scrollPositions = useRef({});
   const editorScrollRef = useRef(null);
+  const tabRefs = useRef({});
+  const tabScrollRef = useRef(null);
+
   useEffect(() => {
     const el = editorScrollRef.current;
     if (!el) return;
@@ -2036,6 +2105,17 @@ const App = () => {
       document.body.style.cursor = '';
     };
   }, [isDragging]);
+  useEffect(() => {
+    const el = tabRefs.current[activeTabId];
+    if (!el) return;
+
+    el.scrollIntoView({
+      behavior: "smooth",
+      inline: "nearest",
+      block: "nearest"
+    });
+  }, [activeTabId]);
+
   const addToast = (msg, type = 'info') => {
     const id = Date.now();
     setToasts(prev => [...prev, { id, msg, type }]);
@@ -2298,19 +2378,36 @@ const App = () => {
         onOpenFile={openFile}
         onToast={addToast}
         onToggleTerminal={() => setIsTerminalOpen(true)}
+        tabs={tabs}
+        activeTabId={activeTabId}
+        setActiveTabId={setActiveTabId}
+        setTabs={setTabs}   // 🔥 ADD THIS
       />
 
       {/* MAIN */}
       <div className="flex-1 flex flex-col relative z-10 h-full overflow-hidden min-w-0">
-        <div className={`h-10 bg-[#0a0a0c] border-b border-slate-800/50 flex items-end px-2 gap-1 overflow-x-auto relative transition-colors duration-300 shrink-0 custom-scrollbar ${dockHighlight ? 'bg-indigo-900/20 border-indigo-500/50' : ''}`}>
+        <div
+          ref={tabScrollRef}
+          onWheel={(e) => {
+            if (e.deltaY !== 0) {
+              e.preventDefault();
+              e.currentTarget.scrollLeft += e.deltaY;
+            }
+          }}
+          className={`h-10 bg-[#0a0a0c] border-b border-slate-800/50 flex items-end px-2 gap-1 overflow-x-auto overflow-y-hidden relative transition-colors duration-300 shrink-0 whitespace-nowrap custom-scrollbar ${dockHighlight ? 'bg-indigo-900/20 border-indigo-500/50' : ''}`}
+        >
           {dockHighlight && (
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none bg-indigo-500/10 text-indigo-300 font-mono text-xs z-50">
               <ArrowLeft size={14} className="rotate-90 mr-2" /> Release to Dock
             </div>
           )}
+
           {tabs.map(tab => (
             <div
               key={tab.id}
+              ref={(el) => {
+                if (el) tabRefs.current[tab.id] = el;
+              }}
               onMouseDown={(e) => handleMouseDown(e, 'tab', tab.id)}
               onClick={() => setActiveTabId(tab.id)}
               className={`
