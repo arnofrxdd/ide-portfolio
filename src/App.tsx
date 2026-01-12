@@ -16,7 +16,6 @@ import {
 import { PROJECTS_DATA } from "./data/projects";
 
 /* --- CONFIGURATION & DATA --- */
-const apiKey = "AIzaSyBUuAPXRd8acR0qOkkd89_3WW8ZumsU35s"; // Injected by environment
 
 const SYSTEM_PROMPT = `
 You are a CLI Assistant for Arnav's Portfolio. 
