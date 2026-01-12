@@ -12,12 +12,17 @@ import {
   Download, Trash2, Plus, MoreHorizontal as MoreHorizontalIcon,
   Menu, Smartphone, Tablet, Square, Copy, Coffee, Bell, Wifi, Eye, Edit3
 } from 'lucide-react';
+import FONT_5x7 from "./data/font5x7";
 
 import { PROJECTS_DATA } from "./data/projects";
 
 /* --- CONFIGURATION & DATA --- */
-const apiKey = "AIzaSyBUuAPXRd8acR0qOkkd89_3WW8ZumsU35s"; // Injected by environment
-
+const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+if (!apiKey) {
+  console.error(
+    "❌ Gemini API key missing. Set VITE_GEMINI_API_KEY in .env"
+  );
+}
 const SYSTEM_PROMPT = `
 You are a CLI Assistant for Arnav's Portfolio. 
 Answer purely in text/markdown suitable for a terminal window.
@@ -523,7 +528,7 @@ const FileTreeItem = ({
 );
 
 
-const Sidebar = ({ onOpenFile, onToast }) => {
+const Sidebar = ({ onOpenFile, onToast, onToggleTerminal }) => {
   const [activeView, setActiveView] = useState('explorer');
   const [isPanelVisible, setIsPanelVisible] = useState(true);
   const [expandedFolders, setExpandedFolders] = useState({
@@ -534,6 +539,19 @@ const Sidebar = ({ onOpenFile, onToast }) => {
     'projects': false,
     'recruiter': true
   });
+  const [isExplorerMenuOpen, setIsExplorerMenuOpen] = useState(false);
+  const explorerMenuRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (explorerMenuRef.current && !explorerMenuRef.current.contains(e.target)) {
+        setIsExplorerMenuOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [stagedFiles, setStagedFiles] = useState(['resume_old.pdf', 'resume_new.pdf']);
@@ -542,7 +560,9 @@ const Sidebar = ({ onOpenFile, onToast }) => {
     "TypeScript Importer": true,
     "Tailwind CSS": true,
     "Go Tools": false,
-    "Python": false
+    "Python": false,
+    "Motivation.js": false
+
   });
   const [settings, setSettings] = useState({
     "Word Wrap": true,
@@ -579,8 +599,28 @@ const Sidebar = ({ onOpenFile, onToast }) => {
       onToast(`Uninstalling ${name}...`, 'warning');
     }
     setInstalledExtensions(prev => ({ ...prev, [name]: !prev[name] }));
-  };
+    setTimeout(() => {
+      fireMotivation();
+    }, 300);
 
+  };
+  const motivationQuotes = [
+    "This worked yesterday. You didn't change anything. Right?",
+    "You've been debugging for 2 hours. Skill issue.",
+    "Senior dev moment detected.",
+    "Trust the process. Or don't.",
+    "It compiles. Ship it."
+  ];
+
+  const fireMotivation = () => {
+    // Only fire if extension is installed
+    if (!installedExtensions["Motivation.js"]) return;
+
+    const quote =
+      motivationQuotes[Math.floor(Math.random() * motivationQuotes.length)];
+
+    onToast(quote, "info");
+  };
   const toggleSetting = (key) => {
     const val = !settings[key];
     setSettings(prev => ({ ...prev, [key]: val }));
@@ -644,6 +684,13 @@ const Sidebar = ({ onOpenFile, onToast }) => {
           <div className={`p-2 rounded-lg cursor-pointer transition-all ${activeView === 'settings' && isPanelVisible ? 'text-white border-l-2 border-indigo-500 bg-slate-800/50' : 'text-slate-500 hover:text-slate-300'}`} onClick={() => handleActivityClick('settings')} title="Settings"><Settings size={20} /></div>
         </div>
       </div>
+      {/* Mobile backdrop to close sidebar */}
+      {isPanelVisible && (
+        <div
+          className="fixed inset-0 z-10 bg-black/40 md:hidden"
+          onClick={() => setIsPanelVisible(false)}
+        />
+      )}
 
       {/* SIDEBAR PANEL CONTENT - Responsive */}
       {/* On desktop: Relative (pushes content). On mobile: Absolute/Fixed (overlay). */}
@@ -660,7 +707,31 @@ const Sidebar = ({ onOpenFile, onToast }) => {
             <div className="h-9 px-4 flex items-center justify-between text-xs font-bold text-slate-400 tracking-wider">
               <span>EXPLORER</span>
               <div className="flex gap-2">
-                <MoreHorizontalIcon size={14} className="hover:text-white cursor-pointer" />
+                <div className="relative" ref={explorerMenuRef}>
+                  <MoreHorizontalIcon
+                    size={14}
+                    className="hover:text-white cursor-pointer"
+                    onClick={() => setIsExplorerMenuOpen(v => !v)}
+                  />
+
+                  {isExplorerMenuOpen && (
+                    <div className="absolute right-0 top-6 w-40 bg-[#0f0f11] border border-slate-700 rounded shadow-xl z-50">
+
+                      {/* MENU ITEM */}
+                      <button
+                        onClick={() => {
+
+                          onToggleTerminal();   // 🔥 THIS LINE
+                          setIsExplorerMenuOpen(false);
+                        }}
+                        className="w-full text-left px-3 py-2 text-xs font-mono text-slate-300 hover:bg-slate-800"
+                      >
+                        Open Terminal
+                      </button>
+
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 
@@ -960,7 +1031,7 @@ const Sidebar = ({ onOpenFile, onToast }) => {
 /* --- INTEGRATED TERMINAL (Updated for Mobile) --- */
 const IntegratedTerminal = ({ isOpen, onClose, onOpenFile }) => {
   const [history, setHistory] = useState([
-    { type: 'system', content: 'Gemini Shell v2.5.0' },
+    { type: 'system', content: 'Shell v2.5.0' },
     { type: 'system', content: 'Type "help" for commands or just ask a question.' },
   ]);
   const [input, setInput] = useState("");
@@ -973,11 +1044,14 @@ const IntegratedTerminal = ({ isOpen, onClose, onOpenFile }) => {
   }, [history]);
 
   useEffect(() => {
-    if (isOpen && inputRef.current) {
-      // Slight delay to allow transition to finish on mobile
-      setTimeout(() => inputRef.current?.focus(), 100);
+    if (!isProcessing && isOpen) {
+      const t = setTimeout(() => {
+        inputRef.current?.focus();
+      }, 0);
+      return () => clearTimeout(t);
     }
-  }, [isOpen]);
+  }, [isProcessing, isOpen]);
+
 
   const handleCommand = async () => {
     const cmd = input.trim();
@@ -985,7 +1059,8 @@ const IntegratedTerminal = ({ isOpen, onClose, onOpenFile }) => {
 
     setHistory(prev => [...prev, { type: 'user', content: cmd }]);
     setInput("");
-    setIsProcessing(true);
+
+
 
     const args = cmd.split(' ');
     const command = args[0].toLowerCase();
@@ -1051,16 +1126,48 @@ const IntegratedTerminal = ({ isOpen, onClose, onOpenFile }) => {
     }
 
     try {
+      // 👉 START GEMINI MODE HERE
+      setIsProcessing(true);
+
+      const thinkingId = Date.now();
+      setHistory(prev => [
+        ...prev,
+        { id: thinkingId, type: 'system', content: 'gemini: thinking' }
+      ]);
+
+      let frame = 0;
+      const frames = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'];
+
+      const thinkingInterval = setInterval(() => {
+        frame = (frame + 1) % frames.length;
+        setHistory(prev =>
+          prev.map(line =>
+            line.id === thinkingId
+              ? { ...line, content: `gemini: ${frames[frame]} thinking` }
+              : line
+          )
+        );
+      }, 120);
+
       const aiResponse = await generateGeminiResponse(cmd);
-      setHistory(prev => [...prev, { type: 'output', content: aiResponse }]);
+
+      const delay = 800 + Math.random() * 800;
+
+      setTimeout(() => {
+        clearInterval(thinkingInterval);
+        setHistory(prev => [
+          ...prev.filter(line => line.id !== thinkingId),
+          { type: 'output', content: aiResponse }
+        ]);
+        setIsProcessing(false);
+      }, delay);
+
+      return;
     } catch (e) {
       setHistory(prev => [...prev, { type: 'error', content: "Error connecting to AI." }]);
-    } finally {
       setIsProcessing(false);
-      requestAnimationFrame(() => {
-        inputRef.current?.focus();
-      });
     }
+
 
   };
 
@@ -1071,7 +1178,7 @@ const IntegratedTerminal = ({ isOpen, onClose, onOpenFile }) => {
       <div className="h-8 bg-slate-900 border-b border-slate-800 flex justify-between items-center px-4 select-none flex-shrink-0">
         <div className="flex items-center gap-2 text-slate-400 text-xs font-mono">
           <Terminal size={12} />
-          <span>GEMINI TERMINAL</span>
+          <span>TERMINAL</span>
         </div>
         <div className="flex items-center gap-4">
           <span className="text-[10px] text-slate-500 font-mono hidden md:inline">Node v20.1.0</span>
@@ -1086,7 +1193,9 @@ const IntegratedTerminal = ({ isOpen, onClose, onOpenFile }) => {
       <div
         ref={scrollRef}
         className="flex-1 overflow-y-auto p-4 font-mono text-xs md:text-sm bg-[#0a0a0c] scrollbar-thin scrollbar-thumb-slate-700 custom-scrollbar"
-        onClick={() => inputRef.current?.focus()}
+        onClick={() => {
+          if (!isProcessing) inputRef.current?.focus();
+        }}
       >
         {history.map((line, i) => (
           <div key={i} className="mb-1 whitespace-pre-wrap break-words">
@@ -1111,16 +1220,21 @@ const IntegratedTerminal = ({ isOpen, onClose, onOpenFile }) => {
               ref={inputRef}
               type="text"
               value={input}
+              disabled={isProcessing}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => {
-                if (e.key === 'Enter') {
+                if (e.key === 'Enter' && !isProcessing) {
                   e.preventDefault();
-                  if (!isProcessing) handleCommand();
+                  handleCommand();
                 }
+
               }}
-              className="w-full bg-transparent border-none outline-none text-slate-200 placeholder-slate-700 caret-slate-200 text-sm"
-              autoComplete="off"
+              className={`
+    w-full bg-transparent border-none outline-none
+    ${isProcessing ? 'text-slate-600 cursor-wait' : 'text-slate-200'}
+  `}
             />
+
 
             {isProcessing && (
               <div className="absolute top-0 right-0">
@@ -1157,37 +1271,53 @@ const ContentRenderer = ({ type, data, onOpenFile, content, lang }) => {
   if (type === 'home') {
     const featuredProjects = PROJECTS_DATA.filter(p => p.featured);
     const recentActivity = [
-      { action: "Shipped feature update for", target: "MouseShifter", time: "2h ago" },
-      { action: "Refactored input pipeline in", target: "MouseShifter", time: "6h ago" },
-      { action: "Deployed full-stack app on", target: "Vercel", time: "1d ago" },
-      { action: "Debugged networking issue in", target: "proxy_tunnel", time: "2d ago" },
+      { action: "Optimizing", target: "frontend performance", time: "ongoing" },
+      { action: "Designing", target: "scalable systems", time: "active" },
+      { action: "Refining", target: "developer experience", time: "constant" },
+      { action: "Building", target: "production-ready tools", time: "always" },
     ];
 
 
-    // Helper to generate text on grid
+
+    const WORDS = [
+      "HELLO",
+      "BUILDER",
+      "SYSTEMS",
+      "REACT",
+      "NETWORK"
+    ];
+
+    const [wordIndex, setWordIndex] = useState(0);
+
+    useEffect(() => {
+      const interval = setInterval(() => {
+        setWordIndex(i => (i + 1) % WORDS.length);
+      }, 3000); // change every 3s
+
+      return () => clearInterval(interval);
+    }, []);
+
+    const TEXT = WORDS[wordIndex];
+
+    const LETTER_WIDTH = 5;
+    const LETTER_GAP = 1;
+
     const getDotActive = (col, row) => {
-      // H: col 0-4
-      if (col === 0 || col === 4) return true;
-      if (row === 3 && col > 0 && col < 4) return true;
+      const letterIndex = Math.floor(col / (LETTER_WIDTH + LETTER_GAP));
+      const localCol = col % (LETTER_WIDTH + LETTER_GAP);
 
-      // E: col 6-10
-      if (col === 6) return true;
-      if ((row === 0 || row === 3 || row === 6) && col >= 6 && col <= 9) return true;
+      // gap between letters
+      if (localCol >= LETTER_WIDTH) return false;
 
-      // L: col 12-16
-      if (col === 12) return true;
-      if (row === 6 && col >= 12 && col <= 15) return true;
+      const letter = TEXT[letterIndex];
+      if (!letter) return false;
 
-      // L: col 18-22
-      if (col === 18) return true;
-      if (row === 6 && col >= 18 && col <= 21) return true;
+      const bitmap = FONT_5x7[letter.toUpperCase()];
+      if (!bitmap) return false;
 
-      // O: col 24-28
-      if (col === 24 || col === 28) return row !== 0 && row !== 6;
-      if (row === 0 || row === 6) return col > 24 && col < 28;
-
-      return false;
+      return bitmap[row]?.[localCol] === "1";
     };
+
 
     return (
       <div className="p-4 md:p-12 max-w-5xl mx-auto animate-in fade-in zoom-in-95 duration-300 pb-20">
@@ -1272,21 +1402,33 @@ const ContentRenderer = ({ type, data, onOpenFile, content, lang }) => {
               })
             }
             className="
-    flex items-center gap-2
-    px-4 py-2
-    bg-[#0a0a0c]
-    border border-slate-700
-    text-slate-300
-    font-mono text-xs
-    rounded
-    hover:border-indigo-500
-    hover:text-indigo-400
-    transition-all
+    group
+    flex items-center gap-3
+    px-6 py-3
+    bg-indigo-600/10
+    border border-indigo-500/50
+    text-indigo-300
+    font-mono text-sm
+    rounded-md
+    shadow-[0_0_0_1px_rgba(99,102,241,0.2)]
+    hover:bg-indigo-600/20
+    hover:border-indigo-400
+    hover:text-indigo-200
+    transition-colors
   "
           >
-            <Terminal size={14} />
-            <span>./view_all_projects</span>
+            <Terminal
+              size={16}
+              className="text-indigo-400 group-hover:text-indigo-300"
+            />
+
+            <span className="tracking-wide">
+              ./view_all_projects
+            </span>
+
+
           </button>
+
 
 
         </div>
@@ -1296,27 +1438,38 @@ const ContentRenderer = ({ type, data, onOpenFile, content, lang }) => {
           <h2 className="text-sm font-bold text-slate-400 mb-4 flex items-center gap-2 font-mono uppercase tracking-wider">
             <Activity size={14} className="text-emerald-500" /> Contribution Map
           </h2>
-          <div className="bg-[#0a0a0c] border border-slate-800 p-4 rounded-lg overflow-x-auto">
-            <div className="flex gap-1 min-w-max">
-              {Array.from({ length: 50 }).map((_, col) => (
-                <div key={col} className="flex flex-col gap-1">
-                  {Array.from({ length: 7 }).map((_, row) => {
-                    // Shift text start to column 2
-                    const isText = getDotActive(col - 2, row);
-                    // Add some random noise
-                    const isRandom = Math.random() > 0.92;
 
-                    let color = 'bg-slate-800';
-                    if (isText) color = 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.5)]';
-                    else if (isRandom) color = 'bg-emerald-900/50';
+          {/* SHRINK-WRAPPED BOX */}
+          <div className="inline-block bg-[#0a0a0c] border border-slate-800 p-3 rounded-lg max-w-full">
 
-                    return <div key={row} className={`w-2.5 h-2.5 rounded-sm ${color} transition-all duration-500 hover:scale-125`} />
-                  })}
-                </div>
-              ))}
+            {/* SCROLL LAYER */}
+            <div className="overflow-x-auto overflow-y-hidden">
+              <div className="flex gap-1 min-w-max">
+                {Array.from({ length: 50 }).map((_, col) => (
+                  <div key={col} className="flex flex-col gap-1">
+                    {Array.from({ length: 7 }).map((_, row) => {
+                      const isText = getDotActive(col - 2, row);
+                      const isRandom = Math.random() > 0.92;
+
+                      let color = 'bg-slate-800';
+                      if (isText) color = 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.5)]';
+                      else if (isRandom) color = 'bg-emerald-900/50';
+
+                      return (
+                        <div
+                          key={row}
+                          className={`w-2.5 h-2.5 rounded-sm ${color} transition-all duration-500`}
+                        />
+                      );
+                    })}
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
+
+
 
         {/* Activity Feed */}
         <div className="mb-12">
@@ -1564,18 +1717,26 @@ const ContentRenderer = ({ type, data, onOpenFile, content, lang }) => {
             )}
           </div>
           <div className="space-y-6 min-w-0">
-            <div className="rounded-lg border border-slate-800 shadow-2xl relative group p-4 flex justify-center bg-black/20">
+            <div
+              className="
+    rounded-lg border border-slate-800 shadow-2xl relative group
+    p-4 flex justify-center items-center bg-black/20
+    overflow-hidden
+    h-[240px] sm:h-auto
+  "
+            >
               <img
                 src={data.image}
                 alt={data.title}
-                style={{
-                  maxWidth: data.imageStyle?.maxWidth ?? "100%",
-                  maxHeight: data.imageStyle?.maxHeight ?? "none",
-                  objectFit: data.imageStyle?.objectFit ?? "cover"
-                }}
-                className="w-auto h-auto"
+                className="
+      max-w-full max-h-full
+      object-contain
+      sm:w-auto sm:h-auto sm:object-cover
+    "
               />
             </div>
+
+
 
 
             {/* Languages Bar */}
@@ -1852,13 +2013,26 @@ const App = () => {
   const [toasts, setToasts] = useState([]);
 
   const dragItem = useRef(null);
+  useEffect(() => {
+    if (isDragging) {
+      document.body.style.userSelect = 'none';
+      document.body.style.cursor = 'grabbing';
+    } else {
+      document.body.style.userSelect = '';
+      document.body.style.cursor = '';
+    }
 
+    return () => {
+      document.body.style.userSelect = '';
+      document.body.style.cursor = '';
+    };
+  }, [isDragging]);
   const addToast = (msg, type = 'info') => {
     const id = Date.now();
     setToasts(prev => [...prev, { id, msg, type }]);
     setTimeout(() => {
       setToasts(prev => prev.filter(t => t.id !== id));
-    }, 4000);
+    }, 7000);
   };
 
   const openFile = useCallback((file) => {
@@ -1966,9 +2140,40 @@ const App = () => {
           const newTabs = tabs.filter(t => t.id !== id);
           setTabs(newTabs);
           if (activeTabId === id && newTabs.length > 0) setActiveTabId(newTabs[newTabs.length - 1].id);
-          const newWindow = { ...tabToDetach, position: { x: e.clientX - 200, y: e.clientY - 20 }, size: { w: 600, h: 400 }, zIndex: 100, isMaximized: false };
+          const viewportW = window.innerWidth;
+          const viewportH = window.innerHeight;
+
+          // Large default, but safe on small screens
+          const DEFAULT_W = Math.min(900, viewportW * 0.75);
+          const DEFAULT_H = Math.min(650, viewportH * 0.75);
+
+          // Centered spawn
+          // ✅ Spawn from cursor (dock position)
+          const posX = Math.max(20, e.clientX - DEFAULT_W / 2);
+          const posY = Math.max(40, e.clientY - 16); // title bar height offset
+
+
+          const newWindow = {
+            ...tabToDetach,
+            position: { x: posX, y: posY },
+            size: { w: DEFAULT_W, h: DEFAULT_H },
+            zIndex: 100,
+            isMaximized: false
+          };
+
           setWindows(prev => [...prev, newWindow]);
-          dragItem.current = { type: 'window', id: id, startX: e.clientX, startY: e.clientY, initialPos: { x: e.clientX - 200, y: e.clientY - 20 }, initialSize: { w: 600, h: 400 }, hasDetached: true };
+
+          // IMPORTANT: update dragItem to match new size & position
+          dragItem.current = {
+            type: 'window',
+            id,
+            startX: e.clientX,
+            startY: e.clientY,
+            initialPos: { x: posX, y: posY },
+            initialSize: { w: DEFAULT_W, h: DEFAULT_H },
+            hasDetached: true
+          };
+
         }
       }
     }
@@ -2080,7 +2285,11 @@ const App = () => {
       <ToastContainer toasts={toasts} />
 
       {/* SIDEBAR */}
-      <Sidebar onOpenFile={openFile} onToast={addToast} />
+      <Sidebar
+        onOpenFile={openFile}
+        onToast={addToast}
+        onToggleTerminal={() => setIsTerminalOpen(true)}
+      />
 
       {/* MAIN */}
       <div className="flex-1 flex flex-col relative z-10 h-full overflow-hidden min-w-0">
