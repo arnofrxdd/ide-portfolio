@@ -31,61 +31,35 @@ Data Context:
 const THEMES = {
   // --- DARK THEMES ---
   default: {
-
     name: 'Dark Modern',
-
     colors: {
-
       '--bg-main': '#0a0a0c',
-
       '--bg-panel': '#0f0f11',
-
       '--bg-activity': '#050505',
-
       '--border': '#1e293b',
-
       '--accent': '#6366f1', // indigo
-
       '--text-primary': '#e2e8f0',
-
       '--text-secondary': '#94a3b8',
-
       '--selection': 'rgba(99, 102, 241, 0.3)',
-
       '--line-number': '#475569',
-
       '--line-number-active': '#e2e8f0',
-
     }
-
   },
   vscode: {
     name: 'VS Code Dark+',
     colors: {
-      // Core backgrounds
       '--bg-main': '#1e1e1e',        // editor.background
       '--bg-panel': '#252526',       // sideBar.background
       '--bg-activity': '#333333',    // activityBar.background
-
-      // Borders & dividers
       '--border': '#2a2a2a',         // subtle separators
-
-      // Accent (VS Code blue)
       '--accent': '#007acc',
-
-      // Text
       '--text-primary': '#d4d4d4',   // editor.foreground
       '--text-secondary': '#9da0a6', // muted UI text
-
-      // Selection & highlights
       '--selection': '#264f78',      // editor.selectionBackground
-
-      // Line numbers
       '--line-number': '#858585',
       '--line-number-active': '#c6c6c6',
     }
   },
-
   githubDark: {
     name: 'GitHub Dark',
     colors: {
@@ -131,52 +105,6 @@ const THEMES = {
       '--line-number-active': '#f8f8f2',
     }
   },
-  gruvbox: {
-    name: 'Gruvbox Dark',
-    colors: {
-      '--bg-main': '#282828',
-      '--bg-panel': '#1d2021',
-      '--bg-activity': '#1d2021',
-      '--border': '#504945',
-      '--accent': '#fabd2f',
-      '--text-primary': '#fbf1c7',  // Brightest Gruvbox white
-      '--text-secondary': '#d5c4a1',
-      '--selection': 'rgba(214, 93, 14, 0.3)',
-      '--line-number': '#928374',
-      '--line-number-active': '#fabd2f',
-    }
-  },
-  nord: {
-    name: 'Nord',
-    colors: {
-      '--bg-main': '#2e3440',
-      '--bg-panel': '#3b4252',
-      '--bg-activity': '#242933',
-      '--border': '#4c566a',
-      '--accent': '#88c0d0',
-      '--text-primary': '#eceff4',  // Brightest Nord Snow
-      '--text-secondary': '#d8dee9',
-      '--selection': 'rgba(67, 76, 94, 0.5)',
-      '--line-number': '#4c566a',
-      '--line-number-active': '#eceff4',
-    }
-  },
-  highContrast: {
-    name: 'High Contrast',
-    colors: {
-      '--bg-main': '#000000',
-      '--bg-panel': '#000000',
-      '--bg-activity': '#000000',
-      '--border': '#6fc3df',        // Stark Cyan Border
-      '--accent': '#ffff00',        // Stark Yellow
-      '--text-primary': '#ffffff',  // Pure White
-      '--text-secondary': '#00ff00',// Terminal Green
-      '--selection': 'rgba(255, 255, 255, 0.3)',
-      '--line-number': '#ffffff',
-      '--line-number-active': '#ffff00',
-    }
-  },
-
   // --- LIGHT THEMES ---
   githubLight: {
     name: 'GitHub Light',
@@ -196,7 +124,7 @@ const THEMES = {
 };
 const ThemeContext = createContext({
   theme: 'default',
-  setTheme: (theme) => { }
+  setTheme: (theme: string) => { }
 });
 
 /* --- FILE CONTENT CONSTANTS --- */
@@ -227,6 +155,67 @@ SANITY_CHECK=skipped
   }, null, 2)).join(',\n')}
 ]
 `,
+  word_wrap_from_hell: JSON.stringify(
+    {
+      warning: "DO NOT TURN OFF WORD WRAP",
+      reason: "because some people like pain",
+      payload: "A".repeat(50000)
+    },
+    null,
+    2
+  ),
+
+  minimap_stress_test: `
+{
+  "meta": {
+    "file": "minimap_stress_test.json",
+    "purpose": "stress minimap scrolling",
+    "vibes": "vertical suffering"
+  },
+  "rows": [
+${Array.from({ length: 200 }, (_, i) => `
+    {
+      "row": ${i + 1},
+      "status": "OK",
+      "payload": {
+        "numbers": [${i}, ${i + 1}, ${i + 2}, ${i + 3}, ${i + 4}],
+        "nested": {
+          "level": ${i % 5},
+          "message": "scrolling intensifies"
+        }
+      }
+    }${i < 199 ? "," : ""}
+`).join("")}
+  ]
+}
+`,
+  package_json: `
+{
+  "name": "arnav-portfolio",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "react": "^18.2.0",
+    "framer-motion": "^10.16.4",
+    "lucide-react": "^0.292.0",
+    "tailwindcss": "^3.3.5",
+    "typescript": "^5.2.2",
+    "vite": "^5.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.37",
+    "@types/node": "^20.9.0",
+    "eslint": "^8.53.0",
+    "prettier": "^3.1.0"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  }
+}
+`
+  ,
   gitignore: `
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
@@ -310,7 +299,7 @@ export const Terminal = () => {
       {output.map(line => (
         <div className="line">{line}</div>
       ))}
-<span className="cursor animate-pulse">_</span>
+      <span className="cursor animate-pulse">_</span>
     </div>
   );
 };
@@ -402,6 +391,184 @@ const getTechColorStyles = (tech) => {
   };
   return map[tech] || "text-slate-300 border-slate-600/30 bg-slate-800/30";
 };
+
+/* --- REAL MINIMAP COMPONENT (FIXED) --- */
+const RealMinimap = ({ content, editorRef }) => {
+  const minimapRef = useRef(null);
+  const codeContentRef = useRef(null);
+  const [viewport, setViewport] = useState({ top: 0, height: 0 });
+  const isDragging = useRef(false);
+
+  // Track the max travel distance for drag calculations
+  const scrollTrackMaxRef = useRef(0);
+
+  useEffect(() => {
+    const editor = editorRef.current;
+    if (!editor) return;
+
+    const updateMap = () => {
+      if (!minimapRef.current || !codeContentRef.current) return;
+
+      const { scrollTop, scrollHeight, clientHeight } = editor;
+      const mapHeight = minimapRef.current.clientHeight;
+      const miniCodeHeight = codeContentRef.current.scrollHeight;
+
+      if (mapHeight === 0 || miniCodeHeight === 0) return;
+
+      // 1. Calculate Slider Height (Proportional)
+      // Ratio: visible_code / total_code = slider_height / total_mini_code
+      let sliderHeight = (clientHeight / scrollHeight) * miniCodeHeight;
+
+      // Clamp slider height to be usable
+      const MIN_SLIDER_HEIGHT = 20;
+      sliderHeight = Math.max(MIN_SLIDER_HEIGHT, sliderHeight);
+
+      // If code fits entirely in view, slider is full height of mini representation
+      if (scrollHeight <= clientHeight) {
+        sliderHeight = miniCodeHeight;
+      }
+
+      // 2. Calculate Scroll Percentage
+      const maxScrollTop = scrollHeight - clientHeight;
+      const scrollPercent = maxScrollTop > 0 ? scrollTop / maxScrollTop : 0;
+      const safePercent = Math.max(0, Math.min(1, scrollPercent));
+
+      let sliderTop = 0;
+      let mapTranslateY = 0;
+
+      // --- LOGIC FORK: BIG FILES VS SMALL FILES ---
+
+      // CASE 1: Small/Medium File (Minimap representation fits inside container)
+      // The code in minimap does NOT scroll. The slider moves over it.
+      if (miniCodeHeight <= mapHeight) {
+        mapTranslateY = 0;
+
+        // Slider travels from 0 to (miniCodeHeight - sliderHeight)
+        const maxSliderTop = Math.max(0, miniCodeHeight - sliderHeight);
+        sliderTop = safePercent * maxSliderTop;
+
+        scrollTrackMaxRef.current = maxSliderTop;
+      }
+      // CASE 2: Big File (Minimap representation is taller than container)
+      // The slider stays relatively static/proportional while content scrolls underneath
+      else {
+        // Slider travels from 0 to (mapHeight - sliderHeight)
+        const maxSliderMove = mapHeight - sliderHeight;
+        sliderTop = safePercent * maxSliderMove;
+
+        // Content scrolls from 0 to (miniCodeHeight - mapHeight)
+        const maxContentScroll = miniCodeHeight - mapHeight;
+        mapTranslateY = safePercent * maxContentScroll;
+
+        scrollTrackMaxRef.current = maxSliderMove;
+      }
+
+      setViewport({ top: sliderTop, height: sliderHeight });
+
+      if (codeContentRef.current) {
+        codeContentRef.current.style.transform = `translateY(-${mapTranslateY}px)`;
+      }
+    };
+
+    // Attach listeners
+    editor.addEventListener('scroll', updateMap);
+    const observer = new ResizeObserver(updateMap);
+    observer.observe(editor);
+    observer.observe(minimapRef.current); // Watch minimap resize too
+
+    // Initial update
+    requestAnimationFrame(updateMap);
+
+    return () => {
+      editor.removeEventListener('scroll', updateMap);
+      observer.disconnect();
+    };
+  }, [editorRef, content]);
+
+  const teleport = (e) => {
+    const editor = editorRef.current;
+    if (!editor || !minimapRef.current || !codeContentRef.current) return;
+
+    const minimapRect = minimapRef.current.getBoundingClientRect();
+    const clickY = e.clientY - minimapRect.top;
+
+    const miniContentHeight = codeContentRef.current.scrollHeight;
+    const editorScrollHeight = editor.scrollHeight;
+    const editorClientHeight = editor.clientHeight;
+
+    // Clamp click inside minimap
+    const clampedY = Math.max(0, Math.min(clickY, minimapRect.height));
+
+    // Convert click position → percentage of minimap content
+    const percent = miniContentHeight <= minimapRect.height
+      ? clampedY / miniContentHeight
+      : (clampedY + Math.abs(
+        parseFloat(
+          codeContentRef.current.style.transform
+            ?.replace('translateY(', '')
+            ?.replace('px)', '') || 0
+        ))) / miniContentHeight;
+
+    // Jump editor directly to that position
+    editor.scrollTop = percent * (editorScrollHeight - editorClientHeight);
+  };
+
+
+  const handleMouseDown = (e) => {
+    const rect = minimapRef.current.getBoundingClientRect();
+    const clickY = e.clientY - rect.top;
+
+    // Check if clicked ON the slider
+    const isSlider = clickY >= viewport.top && clickY <= viewport.top + viewport.height;
+
+    if (!isSlider) {
+      teleport(e);
+    }
+
+    isDragging.current = true;
+  };
+
+  useEffect(() => {
+    const handleMove = (e) => {
+      if (!isDragging.current || !minimapRef.current) return;
+      e.preventDefault();
+      teleport(e);
+    };
+
+    const handleUp = () => {
+      isDragging.current = false;
+    };
+
+    window.addEventListener('mousemove', handleMove);
+    window.addEventListener('mouseup', handleUp);
+    return () => {
+      window.removeEventListener('mousemove', handleMove);
+      window.removeEventListener('mouseup', handleUp);
+    };
+  }, [viewport.height]); // Re-bind if viewport height changes significantly to keep logic fresh
+
+  return (
+    <div
+      ref={minimapRef}
+      onMouseDown={handleMouseDown}
+      className="w-24 bg-[var(--bg-main)] border-l border-[var(--border)] relative hidden md:block select-none overflow-hidden shrink-0"
+    >
+      {/* Code Representation */}
+      <div ref={codeContentRef} className="absolute top-0 left-0 w-full opacity-60 pointer-events-none p-1 transition-transform duration-75 will-change-transform">
+        <div className="text-[2px] leading-[4px] text-[var(--text-secondary)] font-mono whitespace-pre-wrap break-all select-none">
+          {content}
+        </div>
+      </div>
+
+      {/* Viewport Slider Overlay */}
+      <div
+        style={{ top: viewport.top, height: viewport.height }}
+        className="absolute left-0 w-full bg-[var(--text-secondary)]/10 hover:bg-[var(--text-secondary)]/20 transition-colors border-y border-[var(--selection)] shadow-[0_0_10px_rgba(0,0,0,0.1)] backdrop-blur-[0.5px] cursor-grab active:cursor-grabbing"
+      />
+    </div>
+  );
+};
+
 
 const generateGeminiResponse = async (userMessage) => {
   try {
@@ -544,18 +711,22 @@ const CustomScrollbarStyles = () => (
   <style>{`
     /* Webkit browsers (Chrome, Safari, Edge) */
     ::-webkit-scrollbar {
-      width: 8px;
-      height: 8px;
+      width: 10px;
+      height: 10px;
     }
     ::-webkit-scrollbar-track {
       background: transparent; 
     }
     ::-webkit-scrollbar-thumb {
       background: var(--border); 
-      border-radius: 4px;
+      border-radius: 5px;
+      border: 2px solid transparent;
+      background-clip: content-box;
     }
     ::-webkit-scrollbar-thumb:hover {
       background: #475569; 
+      border: 2px solid transparent;
+      background-clip: content-box;
     }
     ::-webkit-scrollbar-corner {
       background: transparent;
@@ -564,6 +735,10 @@ const CustomScrollbarStyles = () => (
       0%, 49% { opacity: 1; }
       50%, 100% { opacity: 0; }
     }
+.dragging * {
+  user-select: none !important;
+  cursor: grabbing !important;
+}
 
     /* Firefox */
     * {
@@ -641,8 +816,11 @@ const Sidebar = ({
   tabs,
   activeTabId,
   setActiveTabId,
-  setTabs
+  setTabs,
+  editorSettings,
+  setEditorSettings
 }) => {
+
   const { theme, setTheme } = useContext(ThemeContext);
   const [activeView, setActiveView] = useState('explorer');
   const [isPanelVisible, setIsPanelVisible] = useState(true);
@@ -676,12 +854,7 @@ const Sidebar = ({
     "Python": false,
     "Motivation.js": false
   });
-  const [settings, setSettings] = useState({
-    "Word Wrap": true,
-    "Minimap": false,
-    "Format On Save": true,
-    "Auto Save": false
-  });
+
 
   useEffect(() => {
     if (window.innerWidth < 768) {
@@ -730,16 +903,25 @@ const Sidebar = ({
   };
 
   const toggleSetting = (key) => {
-    const val = !settings[key];
-    setSettings(prev => ({ ...prev, [key]: val }));
-    if (key === 'Format On Save') {
-      onToast(val ? "Prettier formatting enabled." : "Chaos mode enabled.", 'info');
-    } else if (key === 'Auto Save') {
-      onToast(val ? "Auto-save active. Don't worry." : "Auto-save off. Good luck.", val ? 'success' : 'warning');
-    } else {
-      onToast(`${key} changed.`, 'info');
+    if (key === "Minimap") {
+      setEditorSettings(prev => ({
+        ...prev,
+        minimap: !prev.minimap
+      }));
+      onToast(`Minimap ${editorSettings.minimap ? "disabled" : "enabled"}`, "info");
+      return;
+    }
+
+    if (key === "Word Wrap") {
+      setEditorSettings(prev => ({
+        ...prev,
+        wordWrap: !prev.wordWrap
+      }));
+      onToast(`Word wrap ${editorSettings.wordWrap ? "disabled" : "enabled"}`, "info");
+      return;
     }
   };
+
 
   const stageFile = (file) => {
     setStagedFiles(prev => prev.filter(f => f !== file));
@@ -946,6 +1128,38 @@ const Sidebar = ({
                         color={getFileIcon("Window.tsx").color}
                         onClick={() => onOpenFile({ id: 'window_comp', title: 'Window.tsx', type: 'code', content: FILE_CONTENTS.window_component, lang: 'typescript' })}
                       />
+                      <FileTreeItem
+                        depth={2}
+                        name="word_wrap_from_hell.json"
+                        icon={getFileIcon("word_wrap_from_hell.json").icon}
+                        color={getFileIcon("word_wrap_from_hell.json").color}
+                        onClick={() =>
+                          onOpenFile({
+                            id: 'word_wrap_from_hell',
+                            title: 'components/word_wrap_from_hell.json',
+                            type: 'code',
+                            content: FILE_CONTENTS.word_wrap_from_hell,
+                            lang: 'json'
+                          })
+                        }
+                      />
+
+                      <FileTreeItem
+                        depth={2}
+                        name="minimap_stress_test.json"
+                        icon={getFileIcon("minimap_stress_test.json").icon}
+                        color={getFileIcon("minimap_stress_test.json").color}
+                        onClick={() =>
+                          onOpenFile({
+                            id: 'minimap_stress_test',
+                            title: 'components/minimap_stress_test.json',
+                            type: 'code',
+                            content: FILE_CONTENTS.minimap_stress_test,
+                            lang: 'json'
+                          })
+                        }
+                      />
+
                     </>
                   )}
                 </>
@@ -955,7 +1169,14 @@ const Sidebar = ({
               {[
                 { name: ".env", type: 'code', content: FILE_CONTENTS.env, lang: 'bash' },
                 { name: ".gitignore", type: 'code', content: FILE_CONTENTS.gitignore, lang: 'bash' },
-                { name: "package.json", type: 'package' },
+                {
+                  name: "package.json",
+                  type: "code",
+                  content: FILE_CONTENTS.package_json,
+                  lang: "json"
+                },
+
+
                 { name: "README.md", type: 'readme' }
               ].map(f => {
                 const fileMeta = getFileIcon(f.name);
@@ -1110,14 +1331,26 @@ const Sidebar = ({
           <div className="flex-1 flex flex-col p-4 min-w-[15rem]">
             <div className="text-xs font-bold text-[var(--text-secondary)] mb-4 tracking-wider">SETTINGS</div>
             <div className="space-y-4 mb-6">
-              {Object.entries(settings).map(([key, value]) => (
-                <div key={key} className="flex items-center justify-between group">
-                  <span className="text-xs text-[var(--text-primary)]">{key}</span>
-                  <button onClick={() => toggleSetting(key)} className={`text-[var(--text-secondary)] hover:text-white`}>
-                    {value ? <ToggleRight size={24} className="text-indigo-400" /> : <ToggleLeft size={24} />}
+              <div className="space-y-4 mb-6">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-[var(--text-primary)]">Word Wrap</span>
+                  <button onClick={() => toggleSetting("Word Wrap")}>
+                    {editorSettings.wordWrap
+                      ? <ToggleRight size={24} className="text-indigo-400" />
+                      : <ToggleLeft size={24} />}
                   </button>
                 </div>
-              ))}
+
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-[var(--text-primary)]">Minimap</span>
+                  <button onClick={() => toggleSetting("Minimap")}>
+                    {editorSettings.minimap
+                      ? <ToggleRight size={24} className="text-indigo-400" />
+                      : <ToggleLeft size={24} />}
+                  </button>
+                </div>
+              </div>
+
             </div>
 
             {/* THEME ENGINE SELECTOR */}
@@ -1415,12 +1648,50 @@ const CommandPalette = ({ isOpen, onClose, onOpenFile }) => {
         path: 'Preferences / Theme'
       });
     });
+    // --- INSERT THIS BLOCK ---
+    items.push({
+      id: 'toggle_minimap',
+      title: 'View: Toggle Minimap',
+      type: 'command',
+      action: 'toggle_setting',
+      settingKey: 'minimap',
+      icon: ToggleLeft,
+      path: 'Preferences'
+    });
+    items.push({
+      id: 'toggle_wordwrap',
+      title: 'View: Toggle Word Wrap',
+      type: 'command',
+      action: 'toggle_setting',
+      settingKey: 'wordWrap',
+      icon: FileText,
+      path: 'Preferences'
+    });
     // Config files
     items.push({ id: 'env', title: '.env', type: 'code', content: FILE_CONTENTS.env, lang: 'bash', icon: Lock, path: '.env' });
     items.push({ id: 'gitignore', title: '.gitignore', type: 'code', content: FILE_CONTENTS.gitignore, lang: 'bash', icon: GitBranch, path: '.gitignore' });
     items.push({ id: 'package', title: 'package.json', type: 'package', icon: Box, path: 'package.json' });
     items.push({ id: 'readme', title: 'README.md', type: 'readme', icon: FileText, path: 'README.md' });
     items.push({ id: 'projects_json', title: 'projects.json', type: 'code', content: FILE_CONTENTS.projects_json, lang: 'json', icon: FileJson, path: 'src/projects.json' });
+    items.push({
+      id: 'word_wrap_from_hell',
+      title: 'word_wrap_from_hell.json',
+      type: 'code',
+      content: FILE_CONTENTS.word_wrap_from_hell,
+      lang: 'json',
+      icon: FileJson,
+      path: 'word_wrap_from_hell.json'
+    });
+    items.push({
+      id: "minimap_stress_test",
+      title: "minimap_stress_test.json",
+      type: "code",
+      content: FILE_CONTENTS.minimap_stress_test,
+      lang: "json",
+      icon: FileJson,
+      path: "minimap_stress_test.json"
+    }
+    );
 
     // Components
     items.push({ id: 'terminal_comp', title: 'Terminal.tsx', type: 'code', content: FILE_CONTENTS.terminal_component, lang: 'typescript', icon: FileCode, path: 'src/components/Terminal.tsx' });
@@ -1473,6 +1744,13 @@ const CommandPalette = ({ isOpen, onClose, onOpenFile }) => {
         if (item.action === 'set_theme') {
           window.dispatchEvent(
             new CustomEvent('set-theme', { detail: item.themeKey })
+          );
+          onClose();
+          return;
+        }
+        if (item.action === 'toggle_setting') {
+          window.dispatchEvent(
+            new CustomEvent('toggle-setting', { detail: item.settingKey })
           );
           onClose();
           return;
@@ -1530,6 +1808,13 @@ const CommandPalette = ({ isOpen, onClose, onOpenFile }) => {
                     onClose();
                     return;
                   }
+                  if (item.action === 'toggle_setting') {
+                    window.dispatchEvent(
+                      new CustomEvent('toggle-setting', { detail: item.settingKey })
+                    );
+                    onClose();
+                    return;
+                  }
                 }
 
 
@@ -1562,13 +1847,13 @@ const Breadcrumbs = ({ path }) => {
   return (
     <div
       className="
-        sticky top-0 z-20
-        flex items-center gap-1
-        text-[10px] text-[var(--text-secondary)]
-        px-4 py-1
-        border-b border-[var(--border)]
-        bg-[var(--bg-main)]
-        font-mono select-none
+      sticky top-0 z-20
+      flex items-center gap-1
+      text-[10px] text-[var(--text-secondary)]
+      px-4 py-1
+      border-b border-[var(--border)]
+      bg-[var(--bg-main)]
+      font-mono select-none
       "
     >
       <span className="opacity-50">Portfolio</span>
@@ -1587,8 +1872,16 @@ const Breadcrumbs = ({ path }) => {
 
 /* --- CONTENT RENDERER --- */
 
-const ContentRenderer = ({ type, data, title, onOpenFile, content, lang }) => {
-  const [minimapVisible, setMinimapVisible] = useState(false); // Simulate settings state
+const ContentRenderer = ({
+  type,
+  data,
+  title,
+  onOpenFile,
+  content,
+  lang,
+  editorSettings
+}) => {  // Use a ref for the scrollable container to pass to minimap
+  const editorScrollRef = useRef(null);
 
   // Logic to get breadcrumb path
   const getPath = () => {
@@ -1618,49 +1911,84 @@ const ContentRenderer = ({ type, data, title, onOpenFile, content, lang }) => {
       return title || 'Unknown';
     }
 
-    if (type === 'package') return 'package.json';
     if (type === 'readme') return 'README.md';
 
     return '';
   };
 
-
-
   const path = getPath();
 
+  // ... inside ContentRenderer ...
+
   if (type === 'code') {
-    // FIX: Trim the content to remove the empty newlines at start and end
+    // 1. Keep the trimming logic (or remove .trim() if you want exact file representation)
     const cleanContent = content ? content.trim() : "";
     const lines = cleanContent ? cleanContent.split('\n') : [];
 
     return (
       <div className="h-full flex flex-col bg-[var(--bg-panel)]">
         <Breadcrumbs path={path} />
+
         <div className="flex-1 overflow-hidden flex relative">
-          <div className="flex-1 overflow-auto custom-scrollbar flex">
-            {/* Line Numbers */}
-            <div className="w-10 flex-shrink-0 bg-[var(--bg-activity)] border-r border-[var(--border)] text-[var(--line-number)] text-right font-mono text-sm py-4 px-2 select-none leading-relaxed">
-              {lines.map((_, i) => (
-                <div key={i}>{i + 1}</div>
+
+          {/* Main Scrollable Editor Area */}
+          <div
+            ref={editorScrollRef}
+            className="flex-1 overflow-auto custom-scrollbar flex flex-col"
+          >
+            {/* We map over LINES instead of creating two separate columns.
+               This ensures that if a line wraps, the container grows, 
+               and the number stays aligned to the top.
+            */}
+            <div className="min-w-fit min-h-full py-4">
+              {lines.map((line, i) => (
+                <div key={i} className="flex flex-row hover:bg-[var(--bg-activity)]/30 w-full">
+
+                  {/* Line Number: Fixed width, aligns to top, does not shrink */}
+                  <div className="w-12 shrink-0 text-right pr-4 text-[var(--line-number)] font-mono text-sm select-none opacity-50 leading-relaxed">
+                    {i + 1}
+                  </div>
+
+                  {/* Code Content: 
+                     1. min-w-0 is CRITICAL. It allows flex child to shrink below content size to force wrapping.
+                     2. whitespace-pre-wrap enables wrapping.
+                     3. break-words breaks long strings.
+                  */}
+                  <div
+                    className={`
+                      flex-1 pl-2 font-mono text-sm text-[var(--text-primary)] leading-relaxed min-w-0 pr-4
+                      ${editorSettings.wordWrap
+                        ? "whitespace-pre-wrap break-words break-all"
+                        : "whitespace-pre"
+                      }
+                    `}
+                  >
+                    {/* Render a space if the line is empty so it keeps its height */}
+                    {line || " "}
+                  </div>
+                </div>
               ))}
-            </div>
-            {/* Code Content */}
-            <div className="flex-1 p-4 font-mono text-sm text-[var(--text-primary)] leading-relaxed whitespace-pre">
-              {cleanContent || "No content."}
+
+              {/* Fallback if file is completely empty */}
+              {lines.length === 0 && (
+                <div className="pl-14 text-[var(--text-secondary)] italic text-xs">No content.</div>
+              )}
             </div>
           </div>
-          {/* Mock Minimap */}
-          {true && (
-            <div className="w-16 bg-[var(--bg-activity)] border-l border-[var(--border)] opacity-50 overflow-hidden pointer-events-none hidden md:block select-none">
-              <div className="text-[2px] leading-[3px] p-1 text-[var(--text-secondary)] whitespace-pre-wrap font-mono break-all">
-                {cleanContent?.substring(0, 2000) || ""}
-              </div>
-            </div>
+
+          {/* REAL MINIMAP (Keep as is) */}
+          {editorSettings.minimap && (
+            <RealMinimap
+              content={cleanContent}
+              editorRef={editorScrollRef}
+            />
           )}
         </div>
       </div>
     );
   }
+
+  // ... rest of component
 
   if (type === 'home') {
     const featuredProjects = PROJECTS_DATA.filter(p => p.featured);
@@ -2036,46 +2364,7 @@ const ContentRenderer = ({ type, data, title, onOpenFile, content, lang }) => {
     );
   }
 
-  if (type === 'package') {
-    return (
-      <div className="h-full overflow-y-auto custom-scrollbar">
-        <Breadcrumbs path={path} />
-        <div className="p-4 md:p-12 max-w-4xl mx-auto">
-          <h2 className="text-xl font-bold text-[var(--text-primary)] mb-6 flex items-center gap-2 font-mono"><FileJson size={20} className="text-red-400" /> package.json</h2>
-          <div className="bg-[var(--bg-panel)] border border-[var(--border)] rounded-lg p-6 overflow-x-auto custom-scrollbar">
-            <pre className="font-mono text-sm text-emerald-300 leading-relaxed">
-              {`{
-  "name": "arnav-portfolio",
-  "version": "1.0.0",
-  "private": true,
-  "dependencies": {
-    "react": "^18.2.0",
-    "framer-motion": "^10.16.4",
-    "lucide-react": "^0.292.0",
-    "tailwindcss": "^3.3.5",
-    "typescript": "^5.2.2",
-    "vite": "^5.0.0"
-  },
-  "devDependencies": {
-    "@types/react": "^18.2.37",
-    "@types/node": "^20.9.0",
-    "eslint": "^8.53.0",
-    "prettier": "^3.1.0"
-  },
-  "scripts": {
-    "dev": "vite",
-    "build": "tsc && vite build",
-    "preview": "vite preview"
-  },
-  "author": "Arnav",
-  "license": "MIT"
-}`}
-            </pre>
-          </div>
-        </div>
-      </div>
-    );
-  }
+
 
   if (type === 'readme') {
     const [isPreview, setIsPreview] = useState(true);
@@ -2148,7 +2437,15 @@ const App = () => {
   });
   const [contextMenu, setContextMenu] = useState(null); // { x, y, type, id }
   const [toasts, setToasts] = useState([]);
-
+  // Initialize from Local Storage if available
+  const [editorSettings, setEditorSettings] = useState(() => {
+    const saved = localStorage.getItem('portfolio_editor_settings');
+    return saved ? JSON.parse(saved) : { minimap: true, wordWrap: false };
+  });
+  // Save to Local Storage whenever settings change
+  useEffect(() => {
+    localStorage.setItem('portfolio_editor_settings', JSON.stringify(editorSettings));
+  }, [editorSettings]);
   const tabBarRef = useRef(null);
   const draggingTabId = useRef(null);
   const [dropIndex, setDropIndex] = useState(null);
@@ -2174,7 +2471,36 @@ const App = () => {
     window.addEventListener('set-theme', handler);
     return () => window.removeEventListener('set-theme', handler);
   }, []);
+  // 1. Add a Ref to track current settings (prevents stale closures in the listener)
+  const settingsRef = useRef(editorSettings);
 
+  // 2. Keep the Ref in sync with the state
+  useEffect(() => {
+    settingsRef.current = editorSettings;
+  }, [editorSettings]);
+
+  // 3. The Fixed Listener
+  useEffect(() => {
+    const handler = (e) => {
+      const key = e.detail; // 'minimap' or 'wordWrap'
+
+      // Get the CURRENT value from the ref
+      const currentVal = settingsRef.current[key];
+      const newVal = !currentVal;
+
+      // TRIGGER TOAST HERE (Outside the state setter)
+      addToast(`Toggled ${key === 'wordWrap' ? 'Word Wrap' : 'Minimap'} ${newVal ? 'On' : 'Off'}`, 'info');
+
+      // Update the state
+      setEditorSettings(prev => ({
+        ...prev,
+        [key]: newVal
+      }));
+    };
+
+    window.addEventListener('toggle-setting', handler);
+    return () => window.removeEventListener('toggle-setting', handler);
+  }, []);
   // Apply Theme Colors
   // Apply Theme Colors & Save
   useEffect(() => {
@@ -2225,6 +2551,16 @@ const App = () => {
     return () => {
       document.body.style.userSelect = '';
       document.body.style.cursor = '';
+    };
+  }, [isDragging]);
+  useEffect(() => {
+    if (isDragging) {
+      document.documentElement.classList.add('dragging');
+    } else {
+      document.documentElement.classList.remove('dragging');
+    }
+    return () => {
+      document.documentElement.classList.remove('dragging');
     };
   }, [isDragging]);
 
@@ -2294,6 +2630,12 @@ const App = () => {
   };
 
   const handleMouseDown = (e, type, id, extra = {}) => {
+    // FIX 1: Allow default behavior (text selection) when clicking content ('focus')
+    // Only prevent default for drag handles (window title, resize grips, tabs)
+    if (type !== 'focus') {
+      e.preventDefault();
+    }
+
     e.stopPropagation();
     if (e.button !== 0) return;
 
@@ -2302,6 +2644,9 @@ const App = () => {
     // Handle Z-Index / Focus logic
     if (type === 'focus' || type === 'window') {
       setWindows(prev => prev.map(w => w.id === id ? { ...w, zIndex: 100 } : { ...w, zIndex: 40 }));
+
+      // FIX 2: If we are just focusing (clicking content), STOP HERE.
+      // Do not attach drag listeners. This allows the browser to handle text selection naturally.
       if (type === 'focus') return;
     }
 
@@ -2580,7 +2925,10 @@ const App = () => {
           activeTabId={activeTabId}
           setActiveTabId={setActiveTabId}
           setTabs={setTabs}
+          editorSettings={editorSettings}
+          setEditorSettings={setEditorSettings}
         />
+
         <div className="flex-1 flex flex-col relative z-10 h-full overflow-hidden min-w-0">
           <div
             ref={(el) => { tabScrollRef.current = el; tabBarRef.current = el; }}
@@ -2637,11 +2985,13 @@ const App = () => {
                 <ContentRenderer
                   type={tab.type}
                   data={tab.data}
-                  title={tab.title}   // ✅ ADD THIS
+                  title={tab.title}
                   content={tab.content}
                   lang={tab.lang}
                   onOpenFile={openFile}
+                  editorSettings={editorSettings}
                 />
+
 
               </div>
             ))}
@@ -2693,10 +3043,17 @@ const App = () => {
             className="bg-[var(--bg-main)] border border-[var(--border)] rounded-lg shadow-2xl flex flex-col overflow-hidden ring-1 ring-black/50"
           >
             <div
-              className="h-8 bg-[var(--bg-activity)] border-b border-[var(--border)] flex justify-between items-center px-2 cursor-grab active:cursor-grabbing select-none"
-              onMouseDown={(e) => handleMouseDown(e, 'window', win.id)}
+              className="h-8 bg-[var(--bg-activity)] border-b border-[var(--border)]
+             flex justify-between items-center px-2
+             cursor-grab active:cursor-grabbing select-none"
+              onMouseDown={(e) => {
+                e.preventDefault();        // 🔥 stops selection instantly
+                e.stopPropagation();
+                handleMouseDown(e, 'window', win.id);
+              }}
               onDoubleClick={(e) => toggleMaximize(e, win.id)}
             >
+
               <div className="flex items-center gap-2 text-xs font-mono text-[var(--text-secondary)]">
                 <GripHorizontal size={12} />
                 {(() => {
@@ -2725,15 +3082,52 @@ const App = () => {
                 content={win.content}
                 lang={win.lang}
                 onOpenFile={openFile}
+                editorSettings={editorSettings}
               />
             </div>
             {!win.isMaximized && (
               <>
-                <div className="absolute top-0 left-0 w-4 h-4 cursor-nw-resize z-50" onMouseDown={(e) => handleMouseDown(e, 'resize', win.id, { action: 'resize', dir: 'nw' })} />
-                <div className="absolute top-0 right-0 w-4 h-4 cursor-ne-resize z-50" onMouseDown={(e) => handleMouseDown(e, 'resize', win.id, { action: 'resize', dir: 'ne' })} />
-                <div className="absolute bottom-0 left-0 w-4 h-4 cursor-sw-resize z-50" onMouseDown={(e) => handleMouseDown(e, 'resize', win.id, { action: 'resize', dir: 'sw' })} />
-                <div className="absolute bottom-0 right-0 w-4 h-4 cursor-se-resize z-50" onMouseDown={(e) => handleMouseDown(e, 'resize', win.id, { action: 'resize', dir: 'se' })} />
+                {/* Top-left */}
+                <div
+                  className="absolute top-0 left-0 w-4 h-4 cursor-nw-resize z-50"
+                  onMouseDown={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleMouseDown(e, 'resize', win.id, { action: 'resize', dir: 'nw' });
+                  }}
+                />
+
+                {/* Top-right */}
+                <div
+                  className="absolute top-0 right-0 w-4 h-4 cursor-ne-resize z-50"
+                  onMouseDown={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleMouseDown(e, 'resize', win.id, { action: 'resize', dir: 'ne' });
+                  }}
+                />
+
+                {/* Bottom-left */}
+                <div
+                  className="absolute bottom-0 left-0 w-4 h-4 cursor-sw-resize z-50"
+                  onMouseDown={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleMouseDown(e, 'resize', win.id, { action: 'resize', dir: 'sw' });
+                  }}
+                />
+
+                {/* Bottom-right */}
+                <div
+                  className="absolute bottom-0 right-0 w-4 h-4 cursor-se-resize z-50"
+                  onMouseDown={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleMouseDown(e, 'resize', win.id, { action: 'resize', dir: 'se' });
+                  }}
+                />
               </>
+
             )}
           </div>
         ))}
