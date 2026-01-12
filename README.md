@@ -44,8 +44,8 @@ A functional CLI connected to **Google Gemini API**.
 ### 1️⃣ Clone & Install
 
 ```bash
-git clone https://github.com/yourusername/vscode-portfolio.git
-cd vscode-portfolio
+git clone https://github.com/arnofrxdd/ide-portfolio.git
+cd ide-portfolio
 npm install
 ```
 

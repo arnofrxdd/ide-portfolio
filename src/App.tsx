@@ -18,7 +18,7 @@ import { PROJECTS_DATA } from "./data/projects";
 import FONT_5x7 from "./data/font5x7";
 
 /* --- CONFIGURATION & DATA --- */
-const apiKey = ""; // Set your API key here or via env vars
+const apiKey = import.meta.env.VITE_GEMINI_API_KEY || "";
 
 const SYSTEM_PROMPT = `
 You are a CLI Assistant for Arnav's Portfolio. 
@@ -27,6 +27,7 @@ Keep responses concise, technical, and cool.
 Data Context:
 `;
 
+/* --- THEME CONFIGURATION --- */
 /* --- THEME CONFIGURATION --- */
 const THEMES = {
   // --- DARK THEMES ---
@@ -37,27 +38,39 @@ const THEMES = {
       '--bg-panel': '#0f0f11',
       '--bg-activity': '#050505',
       '--border': '#1e293b',
-      '--accent': '#6366f1', // indigo
+      '--accent': '#6366f1', // Indigo
       '--text-primary': '#e2e8f0',
       '--text-secondary': '#94a3b8',
       '--selection': 'rgba(99, 102, 241, 0.3)',
       '--line-number': '#475569',
       '--line-number-active': '#e2e8f0',
+      // New Homepage Specifics
+      '--hero-gradient-start': '#818cf8', // Indigo 400
+      '--hero-gradient-end': '#22d3ee',   // Cyan 400
+      '--success': '#34d399',             // Emerald
+      '--warning': '#fbbf24',             // Amber
+      '--info': '#38bdf8',                // Sky
     }
   },
   vscode: {
     name: 'VS Code Dark+',
     colors: {
-      '--bg-main': '#1e1e1e',        // editor.background
-      '--bg-panel': '#252526',       // sideBar.background
-      '--bg-activity': '#333333',    // activityBar.background
-      '--border': '#2a2a2a',         // subtle separators
+      '--bg-main': '#1e1e1e',
+      '--bg-panel': '#252526',
+      '--bg-activity': '#333333',
+      '--border': '#2a2a2a',
       '--accent': '#007acc',
-      '--text-primary': '#d4d4d4',   // editor.foreground
-      '--text-secondary': '#9da0a6', // muted UI text
-      '--selection': '#264f78',      // editor.selectionBackground
+      '--text-primary': '#d4d4d4',
+      '--text-secondary': '#9da0a6',
+      '--selection': '#264f78',
       '--line-number': '#858585',
       '--line-number-active': '#c6c6c6',
+      // VS Code Specifics
+      '--hero-gradient-start': '#007acc',
+      '--hero-gradient-end': '#00b4d8',
+      '--success': '#4ec9b0',
+      '--warning': '#cca700',
+      '--info': '#9cdcfe',
     }
   },
   githubDark: {
@@ -68,11 +81,17 @@ const THEMES = {
       '--bg-activity': '#010409',
       '--border': '#30363d',
       '--accent': '#58a6ff',
-      '--text-primary': '#f0f6fc',  // Brightened GitHub White
+      '--text-primary': '#f0f6fc',
       '--text-secondary': '#8b949e',
       '--selection': 'rgba(56, 139, 253, 0.3)',
       '--line-number': '#6e7681',
       '--line-number-active': '#f0f6fc',
+      // GitHub Specifics
+      '--hero-gradient-start': '#58a6ff', // Blue
+      '--hero-gradient-end': '#bc8cff',   // Purple
+      '--success': '#3fb950',
+      '--warning': '#d29922',
+      '--info': '#58a6ff',
     }
   },
   dracula: {
@@ -82,14 +101,126 @@ const THEMES = {
       '--bg-panel': '#21222c',
       '--bg-activity': '#191a21',
       '--border': '#44475a',
-      '--accent': '#ff79c6',
-      '--text-primary': '#ffffff',  // Brightened to pure white
-      '--text-secondary': '#bd93f9', // Using bright purple for secondary
+      '--accent': '#ff79c6', // Pink
+      '--text-primary': '#f8f8f2',
+      '--text-secondary': '#6272a4',
       '--selection': 'rgba(68, 71, 90, 0.5)',
       '--line-number': '#6272a4',
-      '--line-number-active': '#ffffff',
+      '--line-number-active': '#f8f8f2',
+      // Dracula Specifics
+      '--hero-gradient-start': '#ff79c6', // Pink
+      '--hero-gradient-end': '#bd93f9',   // Purple
+      '--success': '#50fa7b',             // Green
+      '--warning': '#ffb86c',             // Orange
+      '--info': '#8be9fd',                // Cyan
     }
   },
+  nord: {
+    name: 'Nord',
+    colors: {
+      '--bg-main': '#2e3440',
+      '--bg-panel': '#3b4252',
+      '--bg-activity': '#2e3440',
+      '--border': '#434c5e',
+      '--accent': '#88c0d0', // Nord Frost
+      '--text-primary': '#eceff4', // Nord Snow Storm
+      '--text-secondary': '#d8dee9',
+      '--selection': 'rgba(136, 192, 208, 0.3)',
+      '--line-number': '#4c566a',
+      '--line-number-active': '#eceff4',
+      // Nord Specifics
+      '--hero-gradient-start': '#88c0d0', // Frost Blue
+      '--hero-gradient-end': '#5e81ac',   // Frost Dark Blue
+      '--success': '#a3be8c',             // Aurora Green
+      '--warning': '#ebcb8b',             // Aurora Yellow
+      '--info': '#81a1c1',                // Frost Blue
+    }
+  },
+  solarizedDark: {
+    name: 'Solarized Dark',
+    colors: {
+      '--bg-main': '#002b36',
+      '--bg-panel': '#073642',
+      '--bg-activity': '#00252e',
+      '--border': '#586e75',
+      '--accent': '#268bd2', // Blue
+      '--text-primary': '#fdf6e3', // Base3
+      '--text-secondary': '#93a1a1', // Base1
+      '--selection': 'rgba(38, 139, 210, 0.3)',
+      '--line-number': '#586e75',
+      '--line-number-active': '#93a1a1',
+      // Solarized Specifics
+      '--hero-gradient-start': '#b58900', // Yellow
+      '--hero-gradient-end': '#2aa198',   // Cyan
+      '--success': '#859900',
+      '--warning': '#cb4b16',
+      '--info': '#2aa198',
+    }
+  },
+  gruvbox: {
+    name: 'Gruvbox Dark',
+    colors: {
+      '--bg-main': '#282828',
+      '--bg-panel': '#3c3836',
+      '--bg-activity': '#1d2021',
+      '--border': '#504945',
+      '--accent': '#fe8019', // Orange
+      '--text-primary': '#ebdbb2',
+      '--text-secondary': '#a89984',
+      '--selection': 'rgba(254, 128, 25, 0.3)',
+      '--line-number': '#7c6f64',
+      '--line-number-active': '#ebdbb2',
+      // Gruvbox Specifics
+      '--hero-gradient-start': '#fb4934', // Red
+      '--hero-gradient-end': '#fabd2f',   // Yellow
+      '--success': '#b8bb26',
+      '--warning': '#fabd2f',
+      '--info': '#83a598',
+    }
+  },
+  synthwave: {
+    name: "Synthwave '84",
+    colors: {
+      '--bg-main': '#262335',
+      '--bg-panel': '#241b2f',
+      '--bg-activity': '#171520', // Deep purple
+      '--border': '#495495', // Purple border
+      '--accent': '#ff71ce', // Neon Pink
+      '--text-primary': '#fffeb6', // Glow Yellow/White
+      '--text-secondary': '#b6b1b1',
+      '--selection': 'rgba(255, 113, 206, 0.4)',
+      '--line-number': '#36345d',
+      '--line-number-active': '#fffeb6',
+      // Synthwave Specifics
+      '--hero-gradient-start': '#ff71ce', // Neon Pink
+      '--hero-gradient-end': '#01cdfe',   // Neon Cyan
+      '--success': '#05ffa1',             // Neon Green
+      '--warning': '#fffb96',             // Neon Yellow
+      '--info': '#01cdfe',
+    }
+  },
+  highContrast: {
+    name: 'High Contrast',
+    colors: {
+      '--bg-main': '#000000',
+      '--bg-panel': '#000000',
+      '--bg-activity': '#000000',
+      '--border': '#FFFFFF', // Stark White Border
+      '--accent': '#FFFF00', // Pure Yellow
+      '--text-primary': '#FFFFFF',
+      '--text-secondary': '#00FF00', // Terminal Green
+      '--selection': 'rgba(255, 255, 255, 0.4)',
+      '--line-number': '#FFFFFF',
+      '--line-number-active': '#FFFF00',
+      // HC Specifics
+      '--hero-gradient-start': '#FFFF00',
+      '--hero-gradient-end': '#FFFFFF',
+      '--success': '#00FF00',
+      '--warning': '#FFFF00',
+      '--info': '#00FFFF',
+    }
+  },
+
   monokai: {
     name: 'Monokai',
     colors: {
@@ -97,12 +228,18 @@ const THEMES = {
       '--bg-panel': '#1e1f1c',
       '--bg-activity': '#171814',
       '--border': '#49483e',
-      '--accent': '#a6e22e',
-      '--text-primary': '#ffffff',  // Brightened
-      '--text-secondary': '#e6db74', // Yellowish secondary
+      '--accent': '#a6e22e', // Green
+      '--text-primary': '#f8f8f2',
+      '--text-secondary': '#75715e',
       '--selection': 'rgba(73, 72, 62, 0.6)',
       '--line-number': '#90908a',
       '--line-number-active': '#f8f8f2',
+      // Monokai Specifics
+      '--hero-gradient-start': '#a6e22e', // Green
+      '--hero-gradient-end': '#fd971f',   // Orange
+      '--success': '#a6e22e',
+      '--warning': '#fd971f',
+      '--info': '#66d9ef',
     }
   },
   // --- LIGHT THEMES ---
@@ -114,18 +251,25 @@ const THEMES = {
       '--bg-activity': '#f0f3f6',
       '--border': '#d0d7de',
       '--accent': '#0969da',
-      '--text-primary': '#1f2328',  // Dark black/grey for readability
+      '--text-primary': '#1f2328',
       '--text-secondary': '#656d76',
       '--selection': 'rgba(9, 105, 218, 0.2)',
       '--line-number': '#8c959f',
       '--line-number-active': '#1f2328',
+      // Light Specifics
+      '--hero-gradient-start': '#0969da',
+      '--hero-gradient-end': '#8250df',
+      '--success': '#1a7f37',
+      '--warning': '#9a6700',
+      '--info': '#0969da',
     }
   }
 };
 const ThemeContext = createContext({
   theme: 'default',
-  setTheme: (theme: string) => { }
+  setTheme: () => { }
 });
+
 
 /* --- FILE CONTENT CONSTANTS --- */
 const FILE_CONTENTS = {
@@ -615,19 +759,27 @@ const ToastContainer = ({ toasts }) => {
       {toasts.map(toast => (
         <div
           key={toast.id}
-          className={`
-            min-w-[200px] max-w-sm bg-[var(--bg-panel)] border border-[var(--border)] border-l-4 p-3 rounded shadow-xl animate-in slide-in-from-right-full fade-in duration-300
-            ${toast.type === 'success' ? 'border-l-emerald-500 text-emerald-100' :
-              toast.type === 'error' ? 'border-l-red-500 text-red-100' :
-                toast.type === 'warning' ? 'border-l-amber-500 text-amber-100' :
-                  'border-l-blue-500 text-blue-100'}
-          `}
+          className="min-w-[200px] max-w-sm bg-[var(--bg-panel)] border border-[var(--border)] border-l-4 p-3 rounded shadow-xl animate-in slide-in-from-right-full fade-in duration-300"
+          style={{
+            borderLeftColor:
+              toast.type === 'success' ? 'var(--success)' :
+                toast.type === 'error' ? '#ef4444' :
+                  toast.type === 'warning' ? 'var(--warning)' :
+                    'var(--info)'
+          }}
         >
           <div className="flex items-center gap-2">
-            {toast.type === 'success' && <CheckCircle size={16} />}
-            {toast.type === 'error' && <AlertCircle size={16} />}
-            {toast.type === 'info' && <Bell size={16} />}
-            <span className="text-xs font-mono">{toast.msg}</span>
+            <span style={{
+              color: toast.type === 'success' ? 'var(--success)' :
+                toast.type === 'error' ? '#ef4444' :
+                  toast.type === 'warning' ? 'var(--warning)' :
+                    'var(--info)'
+            }}>
+              {toast.type === 'success' && <CheckCircle size={16} />}
+              {toast.type === 'error' && <AlertCircle size={16} />}
+              {toast.type === 'info' && <Bell size={16} />}
+            </span>
+            <span className="text-xs font-mono text-[var(--text-primary)]">{toast.msg}</span>
           </div>
         </div>
       ))}
@@ -737,7 +889,6 @@ const CustomScrollbarStyles = () => (
     }
 .dragging * {
   user-select: none !important;
-  cursor: grabbing !important;
 }
 
     /* Firefox */
@@ -747,6 +898,8 @@ const CustomScrollbarStyles = () => (
     }
   `}</style>
 );
+
+/* --- SIDEBAR COMPONENTS --- */
 
 /* --- SIDEBAR COMPONENTS --- */
 
@@ -761,9 +914,28 @@ const FileTreeItem = ({
   isOpen,
   onToggle,
   onClose,
-  showClose
+  showClose,
+  draggableId,
+  onDragStart
 }) => (
   <div
+    onMouseDown={(e) => {
+      if (!draggableId) return;
+      const sx = e.clientX;
+      const sy = e.clientY;
+      const move = (ev) => {
+        if (Math.hypot(ev.clientX - sx, ev.clientY - sy) > 5) {
+          onDragStart?.(ev, draggableId);
+          cleanup();
+        }
+      };
+      const cleanup = () => {
+        window.removeEventListener('mousemove', move);
+        window.removeEventListener('mouseup', cleanup);
+      };
+      window.addEventListener('mousemove', move);
+      window.addEventListener('mouseup', cleanup);
+    }}
     onClick={(e) => {
       if (hasChildren) {
         onToggle();
@@ -955,13 +1127,13 @@ const Sidebar = ({
 
       {/* ACTIVITY BAR */}
       <div className="w-12 flex flex-col items-center py-4 border-r border-[var(--border)] bg-[var(--bg-activity)] gap-6 z-30 relative transition-colors duration-300">
-        <div className={`p-2 rounded-lg cursor-pointer transition-all ${activeView === 'explorer' && isPanelVisible ? 'text-[var(--text-primary)] border-l-2 border-[var(--accent)] bg-[var(--bg-panel)]' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`} onClick={() => handleActivityClick('explorer')} title="Explorer"><FileCode size={20} /></div>
-        <div className={`p-2 rounded-lg cursor-pointer transition-all ${activeView === 'search' && isPanelVisible ? 'text-[var(--text-primary)] border-l-2 border-[var(--accent)] bg-[var(--bg-panel)]' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`} onClick={() => handleActivityClick('search')} title="Search"><Search size={20} /></div>
-        <div className={`p-2 rounded-lg cursor-pointer transition-all ${activeView === 'git' && isPanelVisible ? 'text-[var(--text-primary)] border-l-2 border-[var(--accent)] bg-[var(--bg-panel)]' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`} onClick={() => handleActivityClick('git')} title="Source Control"><GitBranch size={20} /></div>
-        <div className={`p-2 rounded-lg cursor-pointer transition-all ${activeView === 'extensions' && isPanelVisible ? 'text-[var(--text-primary)] border-l-2 border-[var(--accent)] bg-[var(--bg-panel)]' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`} onClick={() => handleActivityClick('extensions')} title="Extensions"><Box size={20} /></div>
+        <div className={`p-2 rounded-lg cursor-pointer transition-all ${activeView === 'explorer' && isPanelVisible ? 'text-[var(--accent)] border-l-2 border-[var(--accent)] bg-[var(--bg-panel)]' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`} onClick={() => handleActivityClick('explorer')} title="Explorer"><FileCode size={20} /></div>
+        <div className={`p-2 rounded-lg cursor-pointer transition-all ${activeView === 'search' && isPanelVisible ? 'text-[var(--accent)] border-l-2 border-[var(--accent)] bg-[var(--bg-panel)]' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`} onClick={() => handleActivityClick('search')} title="Search"><Search size={20} /></div>
+        <div className={`p-2 rounded-lg cursor-pointer transition-all ${activeView === 'git' && isPanelVisible ? 'text-[var(--accent)] border-l-2 border-[var(--accent)] bg-[var(--bg-panel)]' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`} onClick={() => handleActivityClick('git')} title="Source Control"><GitBranch size={20} /></div>
+        <div className={`p-2 rounded-lg cursor-pointer transition-all ${activeView === 'extensions' && isPanelVisible ? 'text-[var(--accent)] border-l-2 border-[var(--accent)] bg-[var(--bg-panel)]' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`} onClick={() => handleActivityClick('extensions')} title="Extensions"><Box size={20} /></div>
         <div className="mt-auto flex flex-col gap-6">
-          <div className={`p-2 rounded-lg cursor-pointer transition-all ${activeView === 'account' && isPanelVisible ? 'text-[var(--text-primary)] border-l-2 border-[var(--accent)] bg-[var(--bg-panel)]' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`} onClick={() => handleActivityClick('account')} title="Account"><User size={20} /></div>
-          <div className={`p-2 rounded-lg cursor-pointer transition-all ${activeView === 'settings' && isPanelVisible ? 'text-[var(--text-primary)] border-l-2 border-[var(--accent)] bg-[var(--bg-panel)]' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`} onClick={() => handleActivityClick('settings')} title="Settings"><Settings size={20} /></div>
+          <div className={`p-2 rounded-lg cursor-pointer transition-all ${activeView === 'account' && isPanelVisible ? 'text-[var(--accent)] border-l-2 border-[var(--accent)] bg-[var(--bg-panel)]' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`} onClick={() => handleActivityClick('account')} title="Account"><User size={20} /></div>
+          <div className={`p-2 rounded-lg cursor-pointer transition-all ${activeView === 'settings' && isPanelVisible ? 'text-[var(--accent)] border-l-2 border-[var(--accent)] bg-[var(--bg-panel)]' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`} onClick={() => handleActivityClick('settings')} title="Settings"><Settings size={20} /></div>
         </div>
       </div>
 
@@ -1038,19 +1210,20 @@ const Sidebar = ({
                 })}
               </div>
 
-              <div className="px-4 mb-2 flex items-center gap-1 text-indigo-400 font-bold text-xs"><ChevronDown size={12} /> <span>PORTFOLIO</span></div>
+              {/* DYNAMIC HEADER COLOR */}
+              <div className="px-4 mb-2 flex items-center gap-1 text-[var(--accent)] font-bold text-xs"><ChevronDown size={12} /> <span>PORTFOLIO</span></div>
 
               {/* SRC Folder */}
               <FileTreeItem
-                depth={0} name="src" icon={expandedFolders['src'] ? FolderOpen : Folder} color="text-indigo-400"
+                depth={0} name="src" icon={expandedFolders['src'] ? FolderOpen : Folder} color="text-[var(--accent)]"
                 hasChildren isOpen={expandedFolders['src']} onToggle={() => toggleFolder('src')}
               />
 
               {expandedFolders['src'] && (
                 <>
-                  {/* Projects Folder */}
+                  {/* Projects Folder - uses Success Color */}
                   <FileTreeItem
-                    depth={1} name="projects" icon={expandedFolders['projects'] ? FolderOpen : Folder} color="text-emerald-400"
+                    depth={1} name="projects" icon={expandedFolders['projects'] ? FolderOpen : Folder} color="text-[var(--success)]"
                     hasChildren isOpen={expandedFolders['projects']} onToggle={() => toggleFolder('projects')}
                   />
                   {expandedFolders['projects'] && PROJECTS_DATA.map(p => {
@@ -1063,6 +1236,17 @@ const Sidebar = ({
                         name={fileName}
                         icon={fileMeta.icon}
                         color={fileMeta.color}
+                        draggableId={p.id}
+                        onDragStart={(e, id) => {
+                          window.dispatchEvent(
+                            new CustomEvent("explorer-drag-start", {
+                              detail: {
+                                id,
+                                file: { id: p.id, title: fileName, type: 'detail', data: p }
+                              }
+                            })
+                          );
+                        }}
                         onClick={() => onOpenFile({
                           id: p.id,
                           title: fileName,
@@ -1073,9 +1257,9 @@ const Sidebar = ({
                     );
                   })}
 
-                  {/* Pages Folder */}
+                  {/* Pages Folder - uses Warning Color */}
                   <FileTreeItem
-                    depth={1} name="pages" icon={expandedFolders['pages'] ? FolderOpen : Folder} color="text-amber-400"
+                    depth={1} name="pages" icon={expandedFolders['pages'] ? FolderOpen : Folder} color="text-[var(--warning)]"
                     hasChildren isOpen={expandedFolders['pages']} onToggle={() => toggleFolder('pages')}
                   />
                   {expandedFolders['pages'] && (
@@ -1092,7 +1276,15 @@ const Sidebar = ({
                             name={f.name}
                             icon={meta.icon}
                             color={meta.color}
-                            onClick={() => onOpenFile({ id: f.name.replace('.', '_'), title: f.name, type: f.type })}
+                            draggableId={f.name}
+                            onDragStart={(e, id) => {
+                              window.dispatchEvent(
+                                new CustomEvent("explorer-drag-start", {
+                                  detail: { id, file: { id: f.name, title: f.name, type: f.type } }
+                                })
+                              );
+                            }}
+                            onClick={() => onOpenFile({ id: f.name, title: f.name, type: f.type })}
                           />
                         )
                       })}
@@ -1102,14 +1294,30 @@ const Sidebar = ({
                         name="projects.json"
                         icon={getFileIcon("projects.json").icon}
                         color={getFileIcon("projects.json").color}
-                        onClick={() => onOpenFile({ id: 'projects_json', title: 'projects.json', type: 'code', content: FILE_CONTENTS.projects_json, lang: 'json' })}
+                        draggableId="projects_json"
+                        onDragStart={(e, id) => {
+                          window.dispatchEvent(
+                            new CustomEvent("explorer-drag-start", {
+                              detail: { id, file: { id: "projects_json", title: "projects.json", type: "code", content: FILE_CONTENTS.projects_json, lang: "json" } }
+                            })
+                          );
+                        }}
+                        onClick={() =>
+                          onOpenFile({
+                            id: "projects_json",
+                            title: "projects.json",
+                            type: "code",
+                            content: FILE_CONTENTS.projects_json,
+                            lang: "json"
+                          })
+                        }
                       />
                     </>
                   )}
 
-                  {/* Components Folder */}
+                  {/* Components Folder - uses Info Color */}
                   <FileTreeItem
-                    depth={1} name="components" icon={expandedFolders['components'] ? FolderOpen : Folder} color="text-emerald-400"
+                    depth={1} name="components" icon={expandedFolders['components'] ? FolderOpen : Folder} color="text-[var(--success)]"
                     hasChildren isOpen={expandedFolders['components']} onToggle={() => toggleFolder('components')}
                   />
                   {expandedFolders['components'] && (
@@ -1119,27 +1327,69 @@ const Sidebar = ({
                         name="Terminal.tsx"
                         icon={getFileIcon("Terminal.tsx").icon}
                         color={getFileIcon("Terminal.tsx").color}
-                        onClick={() => onOpenFile({ id: 'terminal_comp', title: 'Terminal.tsx', type: 'code', content: FILE_CONTENTS.terminal_component, lang: 'typescript' })}
+                        draggableId="terminal_comp"
+                        onDragStart={(e, id) => {
+                          window.dispatchEvent(
+                            new CustomEvent("explorer-drag-start", {
+                              detail: { id, file: { id: "terminal_comp", title: "Terminal.tsx", type: "code", content: FILE_CONTENTS.terminal_component, lang: "typescript" } }
+                            })
+                          );
+                        }}
+                        onClick={() =>
+                          onOpenFile({
+                            id: "terminal_comp",
+                            title: "Terminal.tsx",
+                            type: "code",
+                            content: FILE_CONTENTS.terminal_component,
+                            lang: "typescript"
+                          })
+                        }
                       />
+
                       <FileTreeItem
                         depth={2}
                         name="Window.tsx"
                         icon={getFileIcon("Window.tsx").icon}
                         color={getFileIcon("Window.tsx").color}
-                        onClick={() => onOpenFile({ id: 'window_comp', title: 'Window.tsx', type: 'code', content: FILE_CONTENTS.window_component, lang: 'typescript' })}
+                        draggableId="window_comp"
+                        onDragStart={(e, id) => {
+                          window.dispatchEvent(
+                            new CustomEvent("explorer-drag-start", {
+                              detail: { id, file: { id: "window_comp", title: "Window.tsx", type: "code", content: FILE_CONTENTS.window_component, lang: "typescript" } }
+                            })
+                          );
+                        }}
+                        onClick={() =>
+                          onOpenFile({
+                            id: "window_comp",
+                            title: "Window.tsx",
+                            type: "code",
+                            content: FILE_CONTENTS.window_component,
+                            lang: "typescript"
+                          })
+                        }
                       />
+
                       <FileTreeItem
                         depth={2}
                         name="word_wrap_from_hell.json"
                         icon={getFileIcon("word_wrap_from_hell.json").icon}
                         color={getFileIcon("word_wrap_from_hell.json").color}
+                        draggableId="word_wrap_from_hell"
+                        onDragStart={(e, id) => {
+                          window.dispatchEvent(
+                            new CustomEvent("explorer-drag-start", {
+                              detail: { id, file: { id, title: "components/word_wrap_from_hell.json", type: "code", content: FILE_CONTENTS.word_wrap_from_hell, lang: "json" } }
+                            })
+                          );
+                        }}
                         onClick={() =>
                           onOpenFile({
-                            id: 'word_wrap_from_hell',
-                            title: 'components/word_wrap_from_hell.json',
-                            type: 'code',
+                            id: "word_wrap_from_hell",
+                            title: "components/word_wrap_from_hell.json",
+                            type: "code",
                             content: FILE_CONTENTS.word_wrap_from_hell,
-                            lang: 'json'
+                            lang: "json"
                           })
                         }
                       />
@@ -1149,17 +1399,24 @@ const Sidebar = ({
                         name="minimap_stress_test.json"
                         icon={getFileIcon("minimap_stress_test.json").icon}
                         color={getFileIcon("minimap_stress_test.json").color}
+                        draggableId="minimap_stress_test"
+                        onDragStart={(e, id) => {
+                          window.dispatchEvent(
+                            new CustomEvent("explorer-drag-start", {
+                              detail: { id, file: { id: "minimap_stress_test", title: "components/minimap_stress_test.json", type: "code", content: FILE_CONTENTS.minimap_stress_test, lang: "json" } }
+                            })
+                          );
+                        }}
                         onClick={() =>
                           onOpenFile({
-                            id: 'minimap_stress_test',
-                            title: 'components/minimap_stress_test.json',
-                            type: 'code',
+                            id: "minimap_stress_test",
+                            title: "components/minimap_stress_test.json",
+                            type: "code",
                             content: FILE_CONTENTS.minimap_stress_test,
-                            lang: 'json'
+                            lang: "json"
                           })
                         }
                       />
-
                     </>
                   )}
                 </>
@@ -1169,15 +1426,8 @@ const Sidebar = ({
               {[
                 { name: ".env", type: 'code', content: FILE_CONTENTS.env, lang: 'bash' },
                 { name: ".gitignore", type: 'code', content: FILE_CONTENTS.gitignore, lang: 'bash' },
-                {
-                  name: "package.json",
-                  type: "code",
-                  content: FILE_CONTENTS.package_json,
-                  lang: "json"
-                },
-
-
-                { name: "README.md", type: 'readme' }
+                { name: "package.json", type: "code", content: FILE_CONTENTS.package_json, lang: "json" },
+                { name: "README.md", type: 'readme', content: FILE_CONTENTS.readme }
               ].map(f => {
                 const fileMeta = getFileIcon(f.name);
                 return (
@@ -1187,17 +1437,33 @@ const Sidebar = ({
                     name={f.name}
                     icon={fileMeta.icon}
                     color={fileMeta.color}
-                    onClick={() => onOpenFile({ id: f.name.replace('.', '_'), title: f.name, type: f.type, content: f.content, lang: f.lang })}
+                    draggableId={f.name}
+                    onDragStart={(e, id) => {
+                      window.dispatchEvent(
+                        new CustomEvent("explorer-drag-start", {
+                          detail: { id, file: { id: f.name, title: f.name, type: f.type, content: f.content, lang: f.lang } }
+                        })
+                      );
+                    }}
+                    onClick={() =>
+                      onOpenFile({
+                        id: f.name,
+                        title: f.name,
+                        type: f.type,
+                        content: f.content,
+                        lang: f.lang
+                      })
+                    }
                   />
                 );
               })}
 
-              {/* Recruiter Folder */}
+              {/* Recruiter Folder - uses Info Color */}
               <FileTreeItem
                 depth={0}
                 name="recruiter"
                 icon={expandedFolders['recruiter'] ? FolderOpen : Folder}
-                color="text-emerald-400"
+                color="text-[var(--info)]"
                 hasChildren
                 isOpen={expandedFolders['recruiter']}
                 onToggle={() => toggleFolder('recruiter')}
@@ -1217,7 +1483,23 @@ const Sidebar = ({
                         name={f.name}
                         icon={fileMeta.icon}
                         color={fileMeta.color}
-                        onClick={() => onOpenFile({ id: f.name.replace('.', '_'), title: `recruiter/${f.name}`, type: 'code', content: f.content, lang: f.lang })}
+                        draggableId={`recruiter_${f.name}`}
+                        onDragStart={(e, id) => {
+                          window.dispatchEvent(
+                            new CustomEvent("explorer-drag-start", {
+                              detail: { id, file: { id: `recruiter_${f.name}`, title: `recruiter/${f.name}`, type: "code", content: f.content, lang: f.lang } }
+                            })
+                          );
+                        }}
+                        onClick={() =>
+                          onOpenFile({
+                            id: `recruiter_${f.name}`,
+                            title: `recruiter/${f.name}`,
+                            type: "code",
+                            content: f.content,
+                            lang: f.lang
+                          })
+                        }
                       />
                     );
                   })}
@@ -1237,7 +1519,7 @@ const Sidebar = ({
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search projects..."
-                className="w-full bg-[var(--bg-activity)] border border-[var(--border)] text-[var(--text-primary)] text-xs p-2 pl-8 rounded focus:outline-none focus:border-indigo-500"
+                className="w-full bg-[var(--bg-activity)] border border-[var(--border)] text-[var(--text-primary)] text-xs p-2 pl-8 rounded focus:outline-none focus:border-[var(--accent)]"
               />
               <Search size={12} className="absolute left-2.5 top-2.5 text-slate-500" />
             </div>
@@ -1245,7 +1527,7 @@ const Sidebar = ({
             <div className="flex-1 overflow-y-auto custom-scrollbar">
               {searchQuery && filteredProjects.map(p => (
                 <div key={p.id} onClick={() => onOpenFile({ id: p.id, title: `${p.title}.tsx`, type: 'detail', data: p })} className="group cursor-pointer mb-3 hover:bg-[var(--bg-activity)] p-2 rounded">
-                  <div className="flex items-center gap-2 text-xs text-[var(--text-primary)] group-hover:text-indigo-400 font-mono mb-1">
+                  <div className="flex items-center gap-2 text-xs text-[var(--text-primary)] group-hover:text-[var(--accent)] font-mono mb-1">
                     {(() => {
                       const { icon: Icon, color } = getFileIcon(`${p.title}.tsx`);
                       return <Icon size={12} className={color} />;
@@ -1276,9 +1558,9 @@ const Sidebar = ({
             <div className="space-y-1">
               {stagedFiles.map(file => (
                 <div key={file} className="flex items-center gap-2 py-1 px-2 hover:bg-[var(--bg-activity)] rounded cursor-pointer group">
-                  <FileText size={14} className="text-yellow-500" />
+                  <FileText size={14} className="text-[var(--warning)]" />
                   <span className="text-xs text-[var(--text-secondary)] group-hover:text-[var(--text-primary)]">{file}</span>
-                  <span onClick={() => stageFile(file)} className="text-[10px] text-[var(--text-secondary)] hover:text-green-400 ml-auto flex items-center gap-1">
+                  <span onClick={() => stageFile(file)} className="text-[10px] text-[var(--text-secondary)] hover:text-[var(--success)] ml-auto flex items-center gap-1">
                     <Plus size={10} />
                   </span>
                 </div>
@@ -1286,10 +1568,10 @@ const Sidebar = ({
               {stagedFiles.length === 0 && <div className="text-xs text-[var(--text-secondary)] italic pl-2">All changes staged.</div>}
             </div>
             <div className="mt-6">
-              <input placeholder="Message (Ctrl+Enter)" className="w-full bg-[var(--bg-activity)] border border-[var(--border)] text-[var(--text-primary)] text-xs p-2 rounded focus:outline-none focus:border-indigo-500" />
+              <input placeholder="Message (Ctrl+Enter)" className="w-full bg-[var(--bg-activity)] border border-[var(--border)] text-[var(--text-primary)] text-xs p-2 rounded focus:outline-none focus:border-[var(--accent)]" />
               <button
                 onClick={handleCommit}
-                className="w-full mt-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs py-1.5 rounded flex items-center justify-center gap-2"
+                className="w-full mt-2 bg-[var(--accent)] hover:bg-[var(--accent)]/80 text-white text-xs py-1.5 rounded flex items-center justify-center gap-2"
               >
                 <CheckCircle size={12} /> Commit
               </button>
@@ -1304,7 +1586,7 @@ const Sidebar = ({
             <div className="space-y-3 overflow-y-auto custom-scrollbar pr-1">
               {Object.entries(installedExtensions).map(([name, installed], i) => (
                 <div key={i} className="flex gap-3 hover:bg-[var(--bg-activity)] p-2 rounded cursor-default group">
-                  <div className="w-8 h-8 bg-indigo-900/50 text-indigo-400 flex items-center justify-center rounded shrink-0">
+                  <div className="w-8 h-8 bg-[var(--accent)]/20 text-[var(--accent)] flex items-center justify-center rounded shrink-0">
                     <Box size={16} />
                   </div>
                   <div className="flex-1 min-w-0">
@@ -1314,7 +1596,7 @@ const Sidebar = ({
                     <div className="flex gap-2">
                       <button
                         onClick={() => toggleExtension(name)}
-                        className={`text-[9px] px-1.5 py-0.5 rounded border ${installed ? 'bg-[var(--bg-activity)] border-[var(--border)] text-[var(--text-secondary)]' : 'bg-indigo-600 border-indigo-500 text-white'}`}
+                        className={`text-[9px] px-1.5 py-0.5 rounded border ${installed ? 'bg-[var(--bg-activity)] border-[var(--border)] text-[var(--text-secondary)]' : 'bg-[var(--accent)] border-[var(--accent)] text-white'}`}
                       >
                         {installed ? 'Uninstall' : 'Install'}
                       </button>
@@ -1327,34 +1609,36 @@ const Sidebar = ({
         )}
 
         {/* SETTINGS VIEW */}
+        {/* SETTINGS VIEW */}
         {activeView === 'settings' && (
           <div className="flex-1 flex flex-col p-4 min-w-[15rem]">
             <div className="text-xs font-bold text-[var(--text-secondary)] mb-4 tracking-wider">SETTINGS</div>
-            <div className="space-y-4 mb-6">
-              <div className="space-y-4 mb-6">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-[var(--text-primary)]">Word Wrap</span>
-                  <button onClick={() => toggleSetting("Word Wrap")}>
-                    {editorSettings.wordWrap
-                      ? <ToggleRight size={24} className="text-indigo-400" />
-                      : <ToggleLeft size={24} />}
-                  </button>
-                </div>
 
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-[var(--text-primary)]">Minimap</span>
-                  <button onClick={() => toggleSetting("Minimap")}>
-                    {editorSettings.minimap
-                      ? <ToggleRight size={24} className="text-indigo-400" />
-                      : <ToggleLeft size={24} />}
-                  </button>
-                </div>
+            {/* --- START EDIT: Removed double nesting and reduced mb-6 to mb-2 --- */}
+            <div className="space-y-4 mb-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-[var(--text-primary)]">Word Wrap</span>
+                <button onClick={() => toggleSetting("Word Wrap")}>
+                  {editorSettings.wordWrap
+                    ? <ToggleRight size={24} className="text-[var(--accent)]" />
+                    : <ToggleLeft size={24} />}
+                </button>
               </div>
 
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-[var(--text-primary)]">Minimap</span>
+                <button onClick={() => toggleSetting("Minimap")}>
+                  {editorSettings.minimap
+                    ? <ToggleRight size={24} className="text-[var(--accent)]" />
+                    : <ToggleLeft size={24} />}
+                </button>
+              </div>
             </div>
+            {/* --- END EDIT --- */}
 
             {/* THEME ENGINE SELECTOR */}
             <div className="pt-4 border-t border-[var(--border)]">
+              {/* ... themes map code ... */}
               <div className="text-xs font-bold text-[var(--text-secondary)] mb-3 tracking-wider flex items-center gap-2">
                 <Palette size={12} /> THEME
               </div>
@@ -1388,7 +1672,7 @@ const Sidebar = ({
         {/* ACCOUNT VIEW */}
         {activeView === 'account' && (
           <div className="flex-1 flex flex-col p-6 items-center text-center min-w-[15rem]">
-            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-2xl font-bold text-white mb-4">
+            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[var(--hero-gradient-start)] to-[var(--hero-gradient-end)] flex items-center justify-center text-2xl font-bold text-white mb-4">
               A
             </div>
             <h3 className="text-sm font-bold text-[var(--text-primary)]">Arnav</h3>
@@ -1406,6 +1690,7 @@ const Sidebar = ({
   );
 };
 
+/* --- INTEGRATED TERMINAL --- */
 /* --- INTEGRATED TERMINAL --- */
 const IntegratedTerminal = ({ isOpen, onClose, onOpenFile }) => {
   const [history, setHistory] = useState([
@@ -1429,7 +1714,6 @@ const IntegratedTerminal = ({ isOpen, onClose, onOpenFile }) => {
       return () => clearTimeout(t);
     }
   }, [isProcessing, isOpen]);
-
 
   const handleCommand = async () => {
     const cmd = input.trim();
@@ -1552,7 +1836,7 @@ const IntegratedTerminal = ({ isOpen, onClose, onOpenFile }) => {
         </div>
         <div className="flex items-center gap-4">
           <span className="text-[10px] text-[var(--text-secondary)] font-mono hidden md:inline">Node v20.1.0</span>
-          <button onClick={onClose} className="hover:text-white text-[var(--text-secondary)] transition-colors">
+          <button onClick={onClose} className="hover:text-[var(--text-primary)] text-[var(--text-secondary)] transition-colors">
             <Minimize2 size={14} />
           </button>
           <button onClick={onClose} className="hover:text-red-400 text-[var(--text-secondary)] transition-colors">
@@ -1571,20 +1855,20 @@ const IntegratedTerminal = ({ isOpen, onClose, onOpenFile }) => {
           <div key={i} className="mb-1 whitespace-pre-wrap break-words">
             {line.type === 'user' && (
               <div className="flex gap-2 text-[var(--text-primary)]">
-                <span className="text-emerald-500">➜</span>
-                <span className="text-blue-400">~</span>
+                <span className="text-[var(--success)]">➜</span>
+                <span className="text-[var(--info)]">~</span>
                 <span>{line.content}</span>
               </div>
             )}
             {line.type === 'system' && <div className="text-[var(--text-secondary)] italic">{line.content}</div>}
             {line.type === 'output' && <div className="text-[var(--text-primary)] ml-4">{line.content}</div>}
-            {line.type === 'success' && <div className="text-emerald-400 ml-4">{line.content}</div>}
+            {line.type === 'success' && <div className="text-[var(--success)] ml-4">{line.content}</div>}
             {line.type === 'error' && <div className="text-red-400 ml-4">{line.content}</div>}
           </div>
         ))}
         <div className="flex gap-2 items-center mt-2">
-          <span className="text-emerald-500">➜</span>
-          <span className="text-blue-400">~</span>
+          <span className="text-[var(--success)]">➜</span>
+          <span className="text-[var(--info)]">~</span>
           <div className="relative flex-1">
             <input
               ref={inputRef}
@@ -1617,7 +1901,16 @@ const CommandPalette = ({ isOpen, onClose, onOpenFile }) => {
   const [query, setQuery] = useState("");
   const [selectedIndex, setSelectedIndex] = useState(0);
   const inputRef = useRef(null);
-
+  const itemRefs = useRef([]);
+  // ADD THIS BLOCK
+  useEffect(() => {
+    if (itemRefs.current[selectedIndex]) {
+      itemRefs.current[selectedIndex].scrollIntoView({
+        behavior: 'smooth', // or 'auto' for instant
+        block: 'nearest',
+      });
+    }
+  }, [selectedIndex]);
   // Generate a flat list of all openable items
   const allItems = useMemo(() => {
     const items = [];
@@ -1793,6 +2086,7 @@ const CommandPalette = ({ isOpen, onClose, onOpenFile }) => {
           {filteredItems.map((item, idx) => (
             <div
               key={idx}
+              ref={el => itemRefs.current[idx] = el}
               onClick={() => {
                 if (item.type === 'command') {
                   if (item.action === 'open_terminal') {
@@ -1869,18 +2163,265 @@ const Breadcrumbs = ({ path }) => {
   );
 };
 
+const CanvasContributionMap = () => {
+  const { theme } = useContext(ThemeContext);
+  const canvasRef = useRef(null);
+  const containerRef = useRef(null);
+  const [wordIndex, setWordIndex] = useState(0);
+  const [contributionCount, setContributionCount] = useState(0);
 
+  const wordIndexRef = useRef(0);
+  const frameRef = useRef(null);
+
+  const WORDS = ["HELLO", "BUILDER", "SYSTEMS", "REACT", "NETWORK"];
+  const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+  // Cycle through words
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setWordIndex(prev => (prev + 1) % WORDS.length);
+    }, 4000);
+    return () => clearInterval(interval);
+  }, [WORDS.length]);
+
+  useEffect(() => {
+    wordIndexRef.current = wordIndex;
+  }, [wordIndex]);
+
+  // Persistent random noise background
+  const randomMap = useMemo(() => {
+    return Array.from({ length: 50 * 7 }).map(() => Math.random() > 0.92);
+  }, []);
+
+  // --- THEME ADAPTER ---
+  // This pulls the actual colors defined in your THEMES config
+  const getThemeColors = useCallback(() => {
+    const activeTheme = THEMES[theme] || THEMES.default;
+    return {
+      bg: activeTheme.colors['--bg-activity'],
+      border: activeTheme.colors['--border'],
+      accent: activeTheme.colors['--accent'],
+      textSecondary: activeTheme.colors['--text-secondary'],
+      success: activeTheme.colors['--success'] || activeTheme.colors['--accent']
+    };
+  }, [theme]);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    const container = containerRef.current;
+    if (!canvas || !container) return;
+    const ctx = canvas.getContext('2d');
+
+    const COLS = 50;
+    const ROWS = 7;
+    const GAP = 3;
+    const MIN_BLOCK_SIZE = 10;
+    const LEFT_OFFSET = 32;
+    const TOP_OFFSET = 24;
+    const PADDING = 10;
+
+    let currentBlockSize = MIN_BLOCK_SIZE;
+
+    const updateDimensions = () => {
+      const rect = container.getBoundingClientRect();
+      const availableWidth = rect.width - (PADDING * 2) - LEFT_OFFSET;
+      const totalGapSpace = (COLS - 1) * GAP;
+
+      let size = Math.floor((availableWidth - totalGapSpace) / COLS);
+      size = Math.max(size, MIN_BLOCK_SIZE);
+      currentBlockSize = size;
+
+      const totalWidth = PADDING * 2 + LEFT_OFFSET + COLS * (size + GAP) - GAP;
+      const totalHeight = PADDING * 2 + TOP_OFFSET + ROWS * (size + GAP) - GAP;
+
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = totalWidth * dpr;
+      canvas.height = totalHeight * dpr;
+      canvas.style.width = `${totalWidth}px`;
+      canvas.style.height = `${totalHeight}px`;
+      ctx.scale(dpr, dpr);
+    };
+
+    updateDimensions();
+    window.addEventListener('resize', updateDimensions);
+
+    const ANIMATION_DURATION = 800;
+    let startTime = null;
+    let lastRenderedWordIndex = wordIndexRef.current;
+    let lastPrevWordIndex = wordIndexRef.current === 0 ? WORDS.length - 1 : wordIndexRef.current - 1;
+
+    const checkGrid = (word, c, r) => {
+      const LETTER_WIDTH = 5;
+      const LETTER_GAP = 1;
+      const letterIndex = Math.floor((c - 2) / (LETTER_WIDTH + LETTER_GAP));
+      const localCol = (c - 2) % (LETTER_WIDTH + LETTER_GAP);
+      if (localCol < LETTER_WIDTH && letterIndex >= 0 && letterIndex < word.length) {
+        const char = word[letterIndex];
+        const bitmap = FONT_5x7[char];
+        return bitmap && bitmap[r] && bitmap[r][localCol] === "1";
+      }
+      return false;
+    };
+
+    const renderFrame = (timestamp) => {
+      const currentWordIdx = wordIndexRef.current;
+      const colors = getThemeColors();
+
+      if (currentWordIdx !== lastRenderedWordIndex) {
+        lastPrevWordIndex = lastRenderedWordIndex;
+        lastRenderedWordIndex = currentWordIdx;
+        startTime = timestamp;
+      }
+
+      if (!startTime) startTime = timestamp;
+      const elapsed = timestamp - startTime;
+      const progress = Math.min(elapsed / ANIMATION_DURATION, 1);
+      const ease = progress < 0.5 ? 2 * progress * progress : 1 - Math.pow(-2 * progress + 2, 2) / 2;
+
+      const currentWord = WORDS[lastRenderedWordIndex];
+      const prevWord = WORDS[lastPrevWordIndex];
+
+      const totalW = canvas.width / (window.devicePixelRatio || 1);
+      const totalH = canvas.height / (window.devicePixelRatio || 1);
+
+      ctx.clearRect(0, 0, totalW, totalH);
+
+      // --- DRAW LABELS ---
+      ctx.font = "500 10px font-mono, monospace";
+      ctx.fillStyle = colors.textSecondary;
+      ctx.textBaseline = "middle";
+
+      const days = ["", "Mon", "", "Wed", "", "Fri", ""];
+      days.forEach((day, i) => {
+        if (day) {
+          const y = PADDING + TOP_OFFSET + i * (currentBlockSize + GAP) + (currentBlockSize / 2);
+          ctx.fillText(day, PADDING, y);
+        }
+      });
+
+      let currentMonthIndex = 0;
+      for (let c = 0; c < COLS; c += 4.3) {
+        if (currentMonthIndex < 12) {
+          const x = PADDING + LEFT_OFFSET + c * (currentBlockSize + GAP);
+          ctx.fillText(MONTHS[currentMonthIndex], x, PADDING + 8);
+          currentMonthIndex++;
+        }
+      }
+
+      // --- DRAW GRID ---
+      let activeBlocks = 0;
+
+      for (let c = 0; c < COLS; c++) {
+        for (let r = 0; r < ROWS; r++) {
+          const x = PADDING + LEFT_OFFSET + c * (currentBlockSize + GAP);
+          const y = PADDING + TOP_OFFSET + r * (currentBlockSize + GAP);
+
+          const isPrev = checkGrid(prevWord, c, r);
+          const isNext = checkGrid(currentWord, c, r);
+          const isRandom = randomMap[r * COLS + c];
+
+          // Logic to make words POP based on your previous request
+          let alpha = 0.12;
+          if (isPrev && isNext) alpha = 1.0;
+          else if (isPrev && !isNext) alpha = 1.0 - (ease * 0.88);
+          else if (!isPrev && isNext) alpha = 0.12 + (ease * 0.88);
+          else if (isRandom) alpha = 0.25;
+
+          if (alpha > 0.3) activeBlocks++;
+
+          ctx.save();
+          ctx.globalAlpha = alpha;
+          ctx.beginPath();
+
+          // THEME AWARE SHAPES
+          if (theme === 'monokai' || theme === 'solarizedDark' || theme === 'highContrast') {
+            ctx.rect(x, y, currentBlockSize, currentBlockSize);
+          } else if (theme === 'dracula' || theme === 'synthwave') {
+            ctx.arc(x + currentBlockSize / 2, y + currentBlockSize / 2, currentBlockSize / 2, 0, Math.PI * 2);
+          } else {
+            ctx.roundRect(x, y, currentBlockSize, currentBlockSize, 2);
+          }
+
+          // THEME AWARE COLORS & GLOW
+          if ((isPrev || isNext) && alpha > 0.3) {
+            ctx.fillStyle = colors.accent;
+            if (theme === 'synthwave' || theme === 'dracula') {
+              ctx.shadowColor = colors.accent;
+              ctx.shadowBlur = 12 * alpha;
+            }
+          } else if (isRandom) {
+            ctx.fillStyle = colors.accent;
+          } else {
+            ctx.fillStyle = colors.border;
+          }
+
+          ctx.fill();
+          ctx.restore();
+        }
+      }
+
+      setContributionCount(activeBlocks);
+      frameRef.current = requestAnimationFrame(renderFrame);
+    };
+
+    frameRef.current = requestAnimationFrame(renderFrame);
+
+    return () => {
+      window.removeEventListener('resize', updateDimensions);
+      if (frameRef.current) cancelAnimationFrame(frameRef.current);
+    };
+  }, [theme, randomMap, getThemeColors]);
+
+  // Legend Component using current theme colors
+  const LegendBox = ({ opacity, label }) => {
+    const colors = getThemeColors();
+    const bgStyle = opacity === 0
+      ? { backgroundColor: colors.border, opacity: 0.3 }
+      : { backgroundColor: colors.accent, opacity: opacity };
+
+    return (
+      <div
+        style={{ width: 10, height: 10, borderRadius: 2, ...bgStyle }}
+        className="inline-block"
+        title={label}
+      />
+    );
+  };
+
+  const currentColors = getThemeColors();
+
+  return (
+    <div className="mb-12 border border-[var(--border)] rounded-md bg-[var(--bg-activity)] p-5 max-w-full inline-block transition-colors duration-300">
+      <div className="flex justify-between items-end mb-4 w-full">
+        <h2 className="text-sm md:text-base text-[var(--text-primary)] font-mono font-medium">
+          {contributionCount} contributions in the last year
+        </h2>
+      </div>
+
+      <div ref={containerRef} className="w-full overflow-x-auto custom-scrollbar">
+        <canvas ref={canvasRef} className="block" />
+      </div>
+
+      <div className="flex justify-between items-center mt-4 text-[10px] md:text-xs text-[var(--text-secondary)] font-mono w-full">
+        <div className="hidden sm:block opacity-50">
+          LEARN_MORE: [CONTRIBUTIONS_ALGORITHM]
+        </div>
+        <div className="flex items-center gap-1.5 ml-auto">
+          <span className="mr-1">Less</span>
+          <LegendBox opacity={0} label="0" />
+          <LegendBox opacity={0.3} label="1-3" />
+          <LegendBox opacity={0.6} label="4-9" />
+          <LegendBox opacity={1.0} label="10+" />
+          <span className="ml-1">More</span>
+        </div>
+      </div>
+    </div>
+  );
+};
 /* --- CONTENT RENDERER --- */
 
-const ContentRenderer = ({
-  type,
-  data,
-  title,
-  onOpenFile,
-  content,
-  lang,
-  editorSettings
-}) => {  // Use a ref for the scrollable container to pass to minimap
+const ContentRenderer = ({ type, data, title, onOpenFile, content, lang, editorSettings }) => {
+  const { theme } = useContext(ThemeContext); // Use a ref for the scrollable container to pass to minimap
   const editorScrollRef = useRef(null);
 
   // Logic to get breadcrumb path
@@ -2028,35 +2569,49 @@ const ContentRenderer = ({
       <div className="h-full overflow-y-auto custom-scrollbar">
         <Breadcrumbs path={path} />
         <div className="p-4 md:p-12 max-w-5xl mx-auto animate-in fade-in zoom-in-95 duration-300 pb-20">
+
+          {/* HERO SECTION */}
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
             <div>
               <span className="text-[var(--text-secondary)] font-mono text-sm block mb-2">// Initializing Portfolio System...</span>
               <h1 className="text-3xl md:text-6xl font-bold text-[var(--text-primary)] tracking-tight mb-4">
                 <span className="mr-3">Hello, I'm</span>
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-cyan-400">
+                {/* DYNAMIC THEME GRADIENT */}
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-[var(--hero-gradient-start)] to-[var(--hero-gradient-end)]">
                   <TypingEffect text="Arnav" speed={150} />
                 </span>
-                <span className="ml-1 text-cyan-400 animate-[blink_1s_steps(1)_infinite]">_</span>
+                <span className="ml-1 text-[var(--accent)] animate-[blink_1s_steps(1)_infinite]">_</span>
               </h1>
             </div>
           </div>
+
+          {/* STATUS GRID - DYNAMIC COLORS */}
           <div className="pl-4 md:pl-6 border-l-2 border-[var(--border)] space-y-4 font-mono text-xs md:text-base mb-12">
+
+            {/* 1. Current Role - Changed from --accent to --warning */}
             <div className="flex flex-wrap gap-2 md:gap-4 items-center">
-              <span className="text-purple-400 min-w-[80px] md:min-w-[100px]">current_role:</span>
-              <span className="text-amber-200">"Full Stack Engineer"</span>
+              <span className="text-[var(--warning)] min-w-[80px] md:min-w-[100px]">current_role:</span>
+              <span className="text-[var(--text-primary)]">"Full Stack Engineer"</span>
             </div>
+
+            {/* 2. Location - Changed from --accent to --success */}
             <div className="flex flex-wrap gap-2 md:gap-4 items-center">
-              <span className="text-purple-400 min-w-[80px] md:min-w-[100px]">location:</span>
-              <span className="text-emerald-300">"Remote"</span>
+              <span className="text-[var(--success)] min-w-[80px] md:min-w-[100px]">location:</span>
+              <span className="text-[var(--text-primary)]">"Remote"</span>
             </div>
+
+            {/* 3. Status - Changed from --accent to --info */}
             <div className="flex flex-wrap gap-2 md:gap-4 items-center">
-              <span className="text-purple-400 min-w-[80px] md:min-w-[100px]">status:</span>
-              <span className="text-sky-300">"Building cool things"</span>
+              <span className="text-[var(--info)] min-w-[80px] md:min-w-[100px]">status:</span>
+              <span className="text-[var(--text-primary)]">"Building cool things"</span>
             </div>
+
           </div>
+
+          {/* PINNED PROJECTS */}
           <div className="mb-8">
             <h2 className="text-lg md:text-xl font-bold text-[var(--text-primary)] mb-6 flex items-center gap-2 font-mono">
-              <Zap size={18} className="text-yellow-400" /> Pinned Deployments
+              <Zap size={18} className="text-[var(--warning)]" /> Pinned Deployments
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {featuredProjects.map(p => (
@@ -2070,16 +2625,16 @@ const ContentRenderer = ({
                       data: p
                     })
                   }
-                  className="bg-[var(--bg-panel)] border border-[var(--border)] hover:border-indigo-500/50 rounded-lg p-5 cursor-pointer hover:-translate-y-1 transition-all group shadow-lg"
+                  className="bg-[var(--bg-panel)] border border-[var(--border)] hover:border-[var(--accent)] rounded-lg p-5 cursor-pointer hover:-translate-y-1 transition-all group shadow-lg"
                 >
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
-                      <FileCode size={16} className="text-indigo-400" />
+                      <FileCode size={16} className="text-[var(--accent)]" />
                       <span className="text-[var(--text-primary)] font-mono text-sm font-semibold truncate max-w-[150px]">
                         {p.title}
                       </span>
                     </div>
-                    <ExternalLink size={12} className="text-[var(--text-secondary)] group-hover:text-white" />
+                    <ExternalLink size={12} className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)]" />
                   </div>
                   <p className="text-[var(--text-secondary)] text-xs line-clamp-2 mb-4 h-8">
                     {p.description}
@@ -2088,6 +2643,8 @@ const ContentRenderer = ({
               ))}
             </div>
           </div>
+
+          {/* ACTION BUTTON */}
           <div className="mb-12 flex flex-wrap gap-4">
             <button
               onClick={() =>
@@ -2097,53 +2654,33 @@ const ContentRenderer = ({
                   type: 'projects'
                 })
               }
-              className="group flex items-center gap-3 px-6 py-3 bg-indigo-600/10 border border-indigo-500/50 text-indigo-300 font-mono text-sm rounded-md shadow-[0_0_0_1px_rgba(99,102,241,0.2)] hover:bg-indigo-600/20 hover:border-indigo-400 hover:text-indigo-200 transition-colors"
+              className="group flex items-center gap-3 px-6 py-3 bg-[var(--bg-activity)] border border-[var(--border)] text-[var(--text-secondary)] font-mono text-sm rounded-md hover:bg-[var(--bg-panel)] hover:border-[var(--accent)] hover:text-[var(--accent)] transition-all"
             >
-              <Terminal size={16} className="text-indigo-400 group-hover:text-indigo-300" />
+              <Terminal size={16} className="text-[var(--text-secondary)] group-hover:text-[var(--accent)]" />
               <span className="tracking-wide">./view_all_projects</span>
             </button>
           </div>
+
+          {/* CONTRIBUTION MAP - THEME AWARE */}
+          <CanvasContributionMap theme={theme} />
+          {/* RECENT ACTIVITY */}
           <div className="mb-12">
             <h2 className="text-sm font-bold text-[var(--text-secondary)] mb-4 flex items-center gap-2 font-mono uppercase tracking-wider">
-              <Activity size={14} className="text-emerald-500" /> Contribution Map
-            </h2>
-            <div className="inline-block bg-[var(--bg-activity)] border border-[var(--border)] p-3 rounded-lg max-w-full">
-              <div className="overflow-x-auto overflow-y-hidden">
-                <div className="flex gap-1 min-w-max">
-                  {Array.from({ length: 50 }).map((_, col) => (
-                    <div key={col} className="flex flex-col gap-1">
-                      {Array.from({ length: 7 }).map((_, row) => {
-                        const isText = getDotActive(col - 2, row);
-                        const isRandom = Math.random() > 0.92;
-                        let color = 'bg-[var(--border)]';
-                        if (isText) color = 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.5)]';
-                        else if (isRandom) color = 'bg-emerald-900/50';
-                        return (
-                          <div key={row} className={`w-2.5 h-2.5 rounded-sm ${color} transition-all duration-500`} />
-                        );
-                      })}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="mb-12">
-            <h2 className="text-sm font-bold text-[var(--text-secondary)] mb-4 flex items-center gap-2 font-mono uppercase tracking-wider">
-              <GitBranch size={14} className="text-blue-500" /> Recent Activity
+              <GitBranch size={14} className="text-[var(--info)]" /> Recent Activity
             </h2>
             <div className="space-y-2">
               {recentActivity.map((act, i) => (
-                <div key={i} className="flex items-center justify-between text-sm bg-[var(--bg-activity)]/20 border border-[var(--border)]/50 p-3 rounded hover:border-[var(--border)] transition-colors group">
+                <div key={i} className="flex items-center justify-between text-sm bg-[var(--bg-activity)]/20 border border-[var(--border)]/50 p-3 rounded hover:border-[var(--accent)] hover:bg-[var(--bg-activity)] transition-all group">
                   <div className="flex items-center gap-3">
-                    <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
-                    <span className="text-[var(--text-secondary)] font-mono">{act.action} <span className="text-indigo-300 font-bold group-hover:underline cursor-pointer">{act.target}</span></span>
+                    <div className="w-1.5 h-1.5 rounded-full bg-[var(--info)]" />
+                    <span className="text-[var(--text-secondary)] font-mono">{act.action} <span className="text-[var(--text-primary)] font-bold group-hover:text-[var(--accent)] cursor-pointer decoration-dotted underline-offset-4">{act.target}</span></span>
                   </div>
-                  <span className="text-xs text-[var(--text-secondary)] font-mono">{act.time}</span>
+                  <span className="text-xs text-[var(--text-secondary)] font-mono opacity-70">{act.time}</span>
                 </div>
               ))}
             </div>
           </div>
+
         </div>
       </div>
     );
@@ -2173,11 +2710,11 @@ const ContentRenderer = ({
         <div className="p-4 md:p-12 max-w-7xl mx-auto pb-24">
           <div className="mb-6 flex items-center justify-between border-b border-[var(--border)] pb-4">
             <h2 className="text-xl md:text-2xl font-bold text-[var(--text-primary)] flex items-center gap-2">
-              <Folder size={20} className="text-emerald-400" /> /projects
+              <Folder size={20} className="text-[var(--accent)]" /> /projects
             </h2>
             <button
               onClick={() => setShowFilters(v => !v)}
-              className="text-xs font-mono text-[var(--text-secondary)] hover:text-white flex items-center gap-2"
+              className="text-xs font-mono text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center gap-2 transition-colors"
             >
               <Filter size={14} /> {showFilters ? "hide_filters" : "show_filters"}
             </button>
@@ -2186,6 +2723,7 @@ const ContentRenderer = ({
           <div className="grid grid-cols-1 lg:grid-cols-[260px,1fr] gap-8">
             {showFilters && (
               <div className="space-y-6">
+                {/* TECH STACK FILTERS */}
                 <div className="bg-[var(--bg-activity)] border border-[var(--border)] rounded-lg p-4">
                   <h3 className="text-xs font-bold text-[var(--text-secondary)] uppercase mb-3 font-mono">Tech Stack</h3>
                   <div className="flex flex-wrap gap-2">
@@ -2193,13 +2731,18 @@ const ContentRenderer = ({
                       <button
                         key={t}
                         onClick={() => toggleFilter(t, setTechFilters)}
-                        className={`px-2 py-1 text-[10px] font-mono rounded border transition-all ${techFilters.includes(t) ? "bg-indigo-500/20 border-indigo-400 text-indigo-300" : "bg-[var(--bg-main)] border-[var(--border)] text-[var(--text-secondary)] hover:border-slate-500"}`}
+                        className={`px-2 py-1 text-[10px] font-mono rounded border transition-all 
+                          ${techFilters.includes(t)
+                            ? "bg-[var(--accent)]/20 border-[var(--accent)] text-[var(--accent)]"
+                            : "bg-[var(--bg-main)] border-[var(--border)] text-[var(--text-secondary)] hover:border-[var(--text-primary)]"}`}
                       >
                         {t}
                       </button>
                     ))}
                   </div>
                 </div>
+
+                {/* LANGUAGE FILTERS */}
                 <div className="bg-[var(--bg-activity)] border border-[var(--border)] rounded-lg p-4">
                   <h3 className="text-xs font-bold text-[var(--text-secondary)] uppercase mb-3 font-mono">Languages</h3>
                   <div className="flex flex-wrap gap-2">
@@ -2207,19 +2750,23 @@ const ContentRenderer = ({
                       <button
                         key={l}
                         onClick={() => toggleFilter(l, setLangFilters)}
-                        className={`px-2 py-1 text-[10px] font-mono rounded border transition-all ${langFilters.includes(l) ? "bg-emerald-500/20 border-emerald-400 text-emerald-300" : "bg-[var(--bg-main)] border-[var(--border)] text-[var(--text-secondary)] hover:border-slate-500"}`}
+                        className={`px-2 py-1 text-[10px] font-mono rounded border transition-all 
+                          ${langFilters.includes(l)
+                            ? "bg-[var(--accent)]/20 border-[var(--accent)] text-[var(--accent)]"
+                            : "bg-[var(--bg-main)] border-[var(--border)] text-[var(--text-secondary)] hover:border-[var(--text-primary)]"}`}
                       >
                         {l}
                       </button>
                     ))}
                   </div>
                 </div>
+
                 {(techFilters.length > 0 || langFilters.length > 0) && (
                   <button
                     onClick={() => { setTechFilters([]); setLangFilters([]); }}
-                    className="text-xs font-mono text-[var(--text-secondary)] hover:text-red-400"
+                    className="text-xs font-mono text-[var(--text-secondary)] hover:text-[var(--warning)] flex items-center gap-2"
                   >
-                    clear_all_filters
+                    <Trash2 size={12} /> clear_all_filters
                   </button>
                 )}
               </div>
@@ -2230,7 +2777,7 @@ const ContentRenderer = ({
                 <div
                   key={p.id}
                   onClick={() => onOpenFile({ id: p.id, title: `${p.title}.tsx`, type: "detail", data: p })}
-                  className="group bg-[var(--bg-panel)] border border-[var(--border)] hover:border-indigo-500/40 rounded-lg overflow-hidden cursor-pointer transition-all hover:-translate-y-1 hover:shadow-xl"
+                  className="group bg-[var(--bg-panel)] border border-[var(--border)] hover:border-[var(--accent)] rounded-lg overflow-hidden cursor-pointer transition-all hover:-translate-y-1 hover:shadow-xl"
                 >
                   <div className="h-32 bg-[var(--bg-activity)] relative overflow-hidden">
                     <img
@@ -2240,7 +2787,7 @@ const ContentRenderer = ({
                     />
                   </div>
                   <div className="p-4">
-                    <h3 className="text-[var(--text-primary)] font-bold mb-1 group-hover:text-indigo-400 truncate">{p.title}</h3>
+                    <h3 className="text-[var(--text-primary)] font-bold mb-1 group-hover:text-[var(--accent)] truncate transition-colors">{p.title}</h3>
                     <p className="text-[var(--text-secondary)] text-xs line-clamp-2 mb-3">{p.description}</p>
                     <div className="flex flex-wrap gap-2">{p.tech?.slice(0, 3).map(t => <TechTag key={t} label={t} />)}</div>
                   </div>
@@ -2263,6 +2810,8 @@ const ContentRenderer = ({
         <Breadcrumbs path={path} />
         <div className="p-4 md:p-12 max-w-6xl mx-auto pb-32">
           <div className="grid grid-cols-1 lg:grid-cols-[2fr,1fr] gap-8 min-w-0">
+
+            {/* LEFT COLUMN */}
             <div className="space-y-8 min-w-0">
               <div>
                 <div className="flex items-center gap-3 text-xs md:text-sm font-mono text-[var(--text-secondary)] mb-2">
@@ -2271,44 +2820,54 @@ const ContentRenderer = ({
                   <span className="flex items-center gap-1"><Activity size={12} /> {data.deployHistory?.[0]?.version || 'v1.0.0'}</span>
                 </div>
                 <h1 className="text-2xl md:text-5xl font-bold text-[var(--text-primary)] mb-2 tracking-tight break-words">{data.title}</h1>
-                <p className="text-base md:text-xl text-[var(--text-secondary)] font-light border-l-2 border-emerald-500 pl-4 break-words">{data.subtitle}</p>
+                <p className="text-base md:text-xl text-[var(--text-secondary)] font-light border-l-2 border-[var(--accent)] pl-4 break-words">{data.subtitle}</p>
               </div>
+
+              {/* DESCRIPTION */}
               <div className="bg-[var(--bg-activity)]/30 border border-[var(--border)] rounded-lg p-4 md:p-6">
                 <div className="flex items-center gap-2 mb-4 text-[var(--text-primary)] font-mono text-sm border-b border-[var(--border)] pb-2">
-                  <FileText size={14} className="text-sky-400" /> README.md
+                  <FileText size={14} className="text-[var(--info)]" /> README.md
                 </div>
                 <p className="text-[var(--text-primary)] text-sm leading-relaxed font-mono opacity-90 whitespace-pre-wrap">{data.longDescription}</p>
               </div>
+
+              {/* ARCHITECTURE */}
               {data.architecture && (
                 <div className="bg-[var(--bg-activity)] border border-[var(--border)] rounded-lg p-4 md:p-6 overflow-hidden">
                   <div className="flex items-center gap-2 mb-4 text-[var(--text-primary)] font-mono text-sm">
-                    <Server size={14} className="text-orange-400" /> System Architecture
+                    <Server size={14} className="text-[var(--warning)]" /> System Architecture
                   </div>
                   <div className="overflow-x-auto w-full custom-scrollbar">
                     <pre className="font-mono text-xs md:text-sm text-[var(--text-secondary)] leading-relaxed min-w-max">{data.architecture}</pre>
                   </div>
                 </div>
               )}
+
+              {/* CODE SNIPPET */}
               {data.snippet && (
                 <div className="bg-[var(--bg-panel)] border border-[var(--border)] rounded-lg overflow-hidden min-w-0">
                   <div className="bg-[var(--bg-activity)] px-4 py-2 border-b border-[var(--border)] flex justify-between items-center">
                     <div className="flex items-center gap-2 text-xs font-mono text-[var(--text-secondary)]"><Code size={12} /> core_logic.ts</div>
                     <div className="flex gap-1.5">
-                      <div className="w-2 h-2 rounded-full bg-red-500/20" />
-                      <div className="w-2 h-2 rounded-full bg-yellow-500/20" />
-                      <div className="w-2 h-2 rounded-full bg-green-500/20" />
+                      <div className="w-2.5 h-2.5 rounded-full bg-red-500/20" />
+                      <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/20" />
+                      <div className="w-2.5 h-2.5 rounded-full bg-green-500/20" />
                     </div>
                   </div>
                   <div className="p-4 overflow-x-auto w-full custom-scrollbar">
-                    <pre className="font-mono text-xs md:text-sm text-emerald-300/90 leading-relaxed min-w-max">{data.snippet}</pre>
+                    <pre className="font-mono text-xs md:text-sm text-[var(--success)] leading-relaxed min-w-max">{data.snippet}</pre>
                   </div>
                 </div>
               )}
             </div>
+
+            {/* RIGHT COLUMN */}
             <div className="space-y-6 min-w-0">
               <div className="rounded-lg border border-[var(--border)] shadow-2xl relative group p-4 flex justify-center items-center bg-black/20 overflow-hidden h-[240px] sm:h-auto">
                 <img src={data.image} alt={data.title} className="max-w-full max-h-full object-contain sm:w-auto sm:h-auto sm:object-cover" />
               </div>
+
+              {/* LANGUAGES */}
               <div className="bg-[var(--bg-activity)]/30 border border-[var(--border)] rounded-lg p-5">
                 <h3 className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-widest mb-4 font-mono flex items-center gap-2">Languages</h3>
                 <div className="flex h-3 rounded-full overflow-hidden mb-3">
@@ -2325,12 +2884,14 @@ const ContentRenderer = ({
                   ))}
                 </div>
               </div>
+
+              {/* DEPLOY LOG */}
               <div className="bg-[var(--bg-activity)]/30 border border-[var(--border)] rounded-lg p-5">
                 <h3 className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-widest mb-4 font-mono flex items-center gap-2"><HardDrive size={12} /> Deploy Log</h3>
                 <div className="space-y-3">
                   {data.deployHistory ? data.deployHistory.map((deploy, idx) => (
                     <div key={idx} className={`flex gap-2 ${idx !== 0 ? 'opacity-60 hover:opacity-100 transition-opacity' : ''}`}>
-                      <div className={`w-1.5 h-1.5 rounded-full mt-1.5 ${deploy.status === 'success' ? 'bg-emerald-500' : 'bg-red-500'}`} />
+                      <div className={`w-1.5 h-1.5 rounded-full mt-1.5 ${deploy.status === 'success' ? 'bg-[var(--success)]' : 'bg-red-500'}`} />
                       <div>
                         <div className="text-xs text-[var(--text-primary)] font-mono">{deploy.version} - {deploy.msg}</div>
                         <div className="text-[10px] text-[var(--text-secondary)]">{deploy.time}</div>
@@ -2339,19 +2900,23 @@ const ContentRenderer = ({
                   )) : <div className="text-xs text-[var(--text-secondary)] italic">No deployment history found.</div>}
                 </div>
               </div>
+
+              {/* TECH STACK */}
               <div className="bg-[var(--bg-activity)]/30 border border-[var(--border)] rounded-lg p-6">
                 <h3 className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-widest mb-4 font-mono">Tech Stack</h3>
                 <div className="flex flex-wrap gap-2">{data.tech.map(t => <TechTag key={t} label={t} />)}</div>
               </div>
+
+              {/* LINKS */}
               {data.links && (data.links.github || data.links.live) && (
                 <div className="flex flex-col gap-3">
                   {typeof data.links.github === "string" && data.links.github.trim() !== "" && (
-                    <a href={data.links.github} target="_blank" rel="noopener noreferrer" className="py-3 bg-[var(--bg-activity)] border border-[var(--border)] hover:border-indigo-500 text-[var(--text-primary)] hover:text-indigo-400 rounded flex items-center justify-center gap-2 transition-all font-mono text-sm">
+                    <a href={data.links.github} target="_blank" rel="noopener noreferrer" className="py-3 bg-[var(--bg-activity)] border border-[var(--border)] hover:border-[var(--text-primary)] text-[var(--text-primary)] rounded flex items-center justify-center gap-2 transition-all font-mono text-sm">
                       <Github size={16} /> git checkout
                     </a>
                   )}
                   {typeof data.links.live === "string" && data.links.live.trim() !== "" && (
-                    <a href={data.links.live} target="_blank" rel="noopener noreferrer" className="py-3 bg-indigo-600/10 border border-indigo-500/50 text-indigo-300 hover:bg-indigo-600/20 rounded flex items-center justify-center gap-2 transition-all font-mono text-sm">
+                    <a href={data.links.live} target="_blank" rel="noopener noreferrer" className="py-3 bg-[var(--accent)]/10 border border-[var(--accent)]/50 text-[var(--accent)] hover:bg-[var(--accent)]/20 rounded flex items-center justify-center gap-2 transition-all font-mono text-sm">
                       <Globe size={16} /> view_deployment
                     </a>
                   )}
@@ -2374,14 +2939,14 @@ const ContentRenderer = ({
         <div className="p-4 md:p-12 max-w-4xl mx-auto w-full h-full flex flex-col">
           <div className="flex items-center justify-between mb-6 pb-4 border-b border-[var(--border)]">
             <div className="flex items-center gap-2 text-[var(--text-primary)] font-mono font-bold text-xl">
-              <FileText size={20} className="text-blue-400" />
+              <FileText size={20} className="text-[var(--info)]" />
               <span>README.md</span>
             </div>
             <div className="flex bg-[var(--bg-activity)] rounded-lg p-1 border border-[var(--border)]">
-              <button onClick={() => setIsPreview(true)} className={`flex items-center gap-2 px-3 py-1.5 rounded text-xs font-medium transition-all ${isPreview ? 'bg-[var(--bg-main)] text-white shadow-sm' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}>
+              <button onClick={() => setIsPreview(true)} className={`flex items-center gap-2 px-3 py-1.5 rounded text-xs font-medium transition-all ${isPreview ? 'bg-[var(--bg-main)] text-[var(--accent)] shadow-sm' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}>
                 <Eye size={14} /> Preview
               </button>
-              <button onClick={() => setIsPreview(false)} className={`flex items-center gap-2 px-3 py-1.5 rounded text-xs font-medium transition-all ${!isPreview ? 'bg-[var(--bg-main)] text-white shadow-sm' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}>
+              <button onClick={() => setIsPreview(false)} className={`flex items-center gap-2 px-3 py-1.5 rounded text-xs font-medium transition-all ${!isPreview ? 'bg-[var(--bg-main)] text-[var(--accent)] shadow-sm' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}>
                 <Edit3 size={14} /> Source
               </button>
             </div>
@@ -2392,9 +2957,9 @@ const ContentRenderer = ({
                 <h1 className="flex items-center gap-3 text-3xl font-bold mb-4"><span className="text-4xl">⚙️</span><span>Hi, I’m Arnav</span></h1>
                 <p className="lead text-lg text-[var(--text-secondary)] mb-6">Developer focused on building performant interfaces, low-level tooling, and systems that actually ship.</p>
                 <hr className="border-[var(--border)] my-8" />
-                <h3 className="text-emerald-400 text-xl font-bold mb-4">🧠 What I Work On</h3>
+                <h3 className="text-[var(--success)] text-xl font-bold mb-4">🧠 What I Work On</h3>
                 <p className="mb-6 text-[var(--text-primary)] leading-relaxed">I build full-stack applications with React and Node.js, desktop tools in C++ and Python, and infrastructure-level solutions involving networking, automation, and system internals.</p>
-                <h3 className="text-indigo-400 text-xl font-bold mb-4">🛠 Core Stack</h3>
+                <h3 className="text-[var(--accent)] text-xl font-bold mb-4">🛠 Core Stack</h3>
                 <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3 list-none pl-0 mb-8">
                   <li className="flex items-center gap-2 bg-[var(--bg-activity)]/50 p-2 rounded border border-[var(--border)]"><span className="text-cyan-400">⚛️</span> React / Vite / Tailwind</li>
                   <li className="flex items-center gap-2 bg-[var(--bg-activity)]/50 p-2 rounded border border-[var(--border)]"><span className="text-green-500">🟢</span> Node.js / Express</li>
@@ -2460,6 +3025,7 @@ const App = () => {
     window.addEventListener('open-terminal', handler);
     return () => window.removeEventListener('open-terminal', handler);
   }, []);
+
   useEffect(() => {
     const handler = (e) => {
       const themeKey = e.detail;
@@ -2543,15 +3109,18 @@ const App = () => {
   useEffect(() => {
     if (isDragging) {
       document.body.style.userSelect = 'none';
-      document.body.style.cursor = 'grabbing';
+
+      // Only show grabbing if dragging a TAB. 
+      // If it's a window or resize, keep the standard pointers.
+      if (dragItem.current?.type === 'tab') {
+        document.body.style.cursor = 'grabbing';
+      } else {
+        document.body.style.cursor = 'default';
+      }
     } else {
       document.body.style.userSelect = '';
       document.body.style.cursor = '';
     }
-    return () => {
-      document.body.style.userSelect = '';
-      document.body.style.cursor = '';
-    };
   }, [isDragging]);
   useEffect(() => {
     if (isDragging) {
@@ -2623,6 +3192,30 @@ const App = () => {
       return w;
     }));
   };
+  useEffect(() => {
+    const handler = (e) => {
+      const { id, file } = e.detail;
+
+      draggingTabId.current = id;
+
+      dragItem.current = {
+        type: 'tab',
+        id,
+        startX: 0,
+        startY: 0,
+        initialPos: null,
+        initialSize: null,
+        hasDetached: false
+      };
+
+      setIsDragging(true);
+
+      openFile(file); // ❌ PROBLEM
+    };
+
+    window.addEventListener('explorer-drag-start', handler);
+    return () => window.removeEventListener('explorer-drag-start', handler);
+  }, [openFile]);
 
   const handleContextMenu = (e, type, id) => {
     e.preventDefault();
@@ -2779,50 +3372,85 @@ const App = () => {
     }
 
     // --- WINDOW DRAGGING LOGIC ---
+    // --- WINDOW DRAGGING LOGIC ---
     if (type === 'window') {
       const activeWindow = windows.find(w => w.id === id);
       if (activeWindow && activeWindow.isMaximized) {
-        // Snap out of maximize if dragged
-        if (Math.abs(dx) > 5 || Math.abs(dy) > 5) {
-          const restoredW = activeWindow.prevSize?.w || 600;
-          const newX = e.clientX - (restoredW / 2);
-          const newY = e.clientY;
-          dragItem.current.initialPos = { x: newX, y: newY };
-          dragItem.current.startX = e.clientX;
-          dragItem.current.startY = e.clientY;
-          setWindows(prev => prev.map(w => w.id === id ? { ...w, isMaximized: false, size: w.prevSize || { w: 600, h: 400 }, position: { x: newX, y: newY } } : w));
-        }
+        // ... keep your existing maximize snap-out logic here
+        const restoredW = activeWindow.prevSize?.w || 600;
+        const newX = e.clientX - (restoredW / 2);
+        const newY = e.clientY;
+        dragItem.current.initialPos = { x: newX, y: newY };
+        dragItem.current.startX = e.clientX;
+        dragItem.current.startY = e.clientY;
+        setWindows(prev => prev.map(w => w.id === id ? { ...w, isMaximized: false, size: w.prevSize || { w: 600, h: 400 }, position: { x: newX, y: newY } } : w));
         return;
       }
-      const newX = initialPos.x + dx;
-      const newY = initialPos.y + dy;
+
+      // 1. Calculate raw position
+      let newX = initialPos.x + dx;
+      let newY = initialPos.y + dy;
+
+      // 2. Windows-style Clamping (Partial bounds)
+      const viewportW = window.innerWidth;
+      const viewportH = window.innerHeight;
+      const windowWidth = activeWindow.size.w;
+      const TITLE_BAR_HEIGHT = 32; // Height of your draggable header
+      const VISIBLE_MARGIN = 40;   // How many pixels of the window must stay on screen
+
+      // Horizontal: Allow dragging out until only 'VISIBLE_MARGIN' remains on screen
+      // (Prevents window from disappearing entirely to the left or right)
+      newX = Math.max(VISIBLE_MARGIN - windowWidth, Math.min(newX, viewportW - VISIBLE_MARGIN));
+
+      // Vertical: 
+      // Top: Stop at 0 (Prevents title bar from going under the browser address bar)
+      // Bottom: Allow dragging down until only the title bar is visible
+      newY = Math.max(0, Math.min(newY, viewportH - TITLE_BAR_HEIGHT));
+
       setWindows(prev => prev.map(w => w.id === id ? { ...w, position: { x: newX, y: newY } } : w));
+
       if (e.clientY < 60) setDockHighlight(true); else setDockHighlight(false);
     }
 
     // --- RESIZING LOGIC ---
     if (type === 'resize') {
+      const viewportW = window.innerWidth;
+      const viewportH = window.innerHeight;
+      const TITLE_BAR_HEIGHT = 32;
+
       let newX = initialPos.x;
       let newY = initialPos.y;
       let newW = initialSize.w;
       let newH = initialSize.h;
-      if (dir.includes('e')) newW = Math.max(300, initialSize.w + dx);
-      else if (dir.includes('w')) {
+
+      // Horizontal resizing (East/West)
+      if (dir.includes('e')) {
+        newW = Math.max(300, initialSize.w + dx);
+      } else if (dir.includes('w')) {
         const possibleW = initialSize.w - dx;
         if (possibleW > 300) {
           newX = initialPos.x + dx;
           newW = possibleW;
         }
       }
-      if (dir.includes('s')) newH = Math.max(200, initialSize.h + dy);
-      else if (dir.includes('n')) {
+
+      // Vertical resizing (North/South)
+      if (dir.includes('s')) {
+        newH = Math.max(200, initialSize.h + dy);
+      } else if (dir.includes('n')) {
         const possibleH = initialSize.h - dy;
         if (possibleH > 200) {
-          newY = initialPos.y + dy;
-          newH = possibleH;
+          // Clamp top resize so title bar stays reachable (not above 0)
+          newY = Math.max(0, initialPos.y + dy);
+          newH = initialSize.h + (initialPos.y - newY);
         }
       }
-      setWindows(prev => prev.map(w => w.id === id ? { ...w, position: { x: newX, y: newY }, size: { w: newW, h: newH } } : w));
+
+      setWindows(prev => prev.map(w => w.id === id ? {
+        ...w,
+        position: { x: newX, y: newY },
+        size: { w: newW, h: newH }
+      } : w));
     }
   }, [isDragging, tabs, activeTabId, windows]);
 
@@ -2933,10 +3561,10 @@ const App = () => {
           <div
             ref={(el) => { tabScrollRef.current = el; tabBarRef.current = el; }}
             onWheel={(e) => { if (e.deltaY !== 0) { e.preventDefault(); e.currentTarget.scrollLeft += e.deltaY; } }}
-            className={`h-10 bg-[var(--bg-activity)] border-b border-[var(--border)] flex items-end px-2 gap-1 overflow-x-auto overflow-y-hidden relative transition-colors duration-300 shrink-0 whitespace-nowrap custom-scrollbar ${dockHighlight ? 'bg-indigo-900/20 border-indigo-500/50' : ''}`}
+            className={`h-10 bg-[var(--bg-activity)] border-b border-[var(--border)] flex items-end px-2 gap-1 overflow-x-auto overflow-y-hidden relative transition-colors duration-300 shrink-0 whitespace-nowrap custom-scrollbar ${dockHighlight ? 'bg-[var(--accent)]/10 border-[var(--accent)]' : ''}`}
           >
             {dockHighlight && (
-              <div className="absolute inset-0 flex items-center justify-center pointer-events-none bg-indigo-500/10 text-indigo-300 font-mono text-xs z-50">
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none bg-[var(--bg-main)]/80 text-[var(--accent)] font-mono text-xs z-50">
                 <ArrowLeft size={14} className="rotate-90 mr-2" /> Release to Dock
               </div>
             )}
@@ -3044,10 +3672,10 @@ const App = () => {
           >
             <div
               className="h-8 bg-[var(--bg-activity)] border-b border-[var(--border)]
-             flex justify-between items-center px-2
-             cursor-grab active:cursor-grabbing select-none"
+  flex justify-between items-center px-2
+  cursor-default select-none" // Changed from cursor-grab
               onMouseDown={(e) => {
-                e.preventDefault();        // 🔥 stops selection instantly
+                e.preventDefault();
                 e.stopPropagation();
                 handleMouseDown(e, 'window', win.id);
               }}
@@ -3087,47 +3715,30 @@ const App = () => {
             </div>
             {!win.isMaximized && (
               <>
-                {/* Top-left */}
-                <div
-                  className="absolute top-0 left-0 w-4 h-4 cursor-nw-resize z-50"
-                  onMouseDown={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    handleMouseDown(e, 'resize', win.id, { action: 'resize', dir: 'nw' });
-                  }}
-                />
+                {/* --- Edge Handles --- */}
+                {/* Top */}
+                <div className="absolute top-0 left-4 right-4 h-1 cursor-n-resize z-50"
+                  onMouseDown={(e) => handleMouseDown(e, 'resize', win.id, { action: 'resize', dir: 'n' })} />
+                {/* Bottom */}
+                <div className="absolute bottom-0 left-4 right-4 h-1 cursor-s-resize z-50"
+                  onMouseDown={(e) => handleMouseDown(e, 'resize', win.id, { action: 'resize', dir: 's' })} />
+                {/* Left */}
+                <div className="absolute left-0 top-4 bottom-4 w-1 cursor-w-resize z-50"
+                  onMouseDown={(e) => handleMouseDown(e, 'resize', win.id, { action: 'resize', dir: 'w' })} />
+                {/* Right */}
+                <div className="absolute right-0 top-4 bottom-4 w-1 cursor-e-resize z-50"
+                  onMouseDown={(e) => handleMouseDown(e, 'resize', win.id, { action: 'resize', dir: 'e' })} />
 
-                {/* Top-right */}
-                <div
-                  className="absolute top-0 right-0 w-4 h-4 cursor-ne-resize z-50"
-                  onMouseDown={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    handleMouseDown(e, 'resize', win.id, { action: 'resize', dir: 'ne' });
-                  }}
-                />
-
-                {/* Bottom-left */}
-                <div
-                  className="absolute bottom-0 left-0 w-4 h-4 cursor-sw-resize z-50"
-                  onMouseDown={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    handleMouseDown(e, 'resize', win.id, { action: 'resize', dir: 'sw' });
-                  }}
-                />
-
-                {/* Bottom-right */}
-                <div
-                  className="absolute bottom-0 right-0 w-4 h-4 cursor-se-resize z-50"
-                  onMouseDown={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    handleMouseDown(e, 'resize', win.id, { action: 'resize', dir: 'se' });
-                  }}
-                />
+                {/* --- Corner Handles --- */}
+                <div className="absolute top-0 left-0 w-4 h-4 cursor-nw-resize z-50"
+                  onMouseDown={(e) => handleMouseDown(e, 'resize', win.id, { action: 'resize', dir: 'nw' })} />
+                <div className="absolute top-0 right-0 w-4 h-4 cursor-ne-resize z-50"
+                  onMouseDown={(e) => handleMouseDown(e, 'resize', win.id, { action: 'resize', dir: 'ne' })} />
+                <div className="absolute bottom-0 left-0 w-4 h-4 cursor-sw-resize z-50"
+                  onMouseDown={(e) => handleMouseDown(e, 'resize', win.id, { action: 'resize', dir: 'sw' })} />
+                <div className="absolute bottom-0 right-0 w-4 h-4 cursor-se-resize z-50"
+                  onMouseDown={(e) => handleMouseDown(e, 'resize', win.id, { action: 'resize', dir: 'se' })} />
               </>
-
             )}
           </div>
         ))}
