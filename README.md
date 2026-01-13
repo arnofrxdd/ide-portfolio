@@ -28,7 +28,7 @@ A developer portfolio reimagined as a fully functional IDE. This project is buil
 
 ### 1. Clone & Install
 ```bash
-git clone https://github.com/yourusername/ide-portfolio.git
+git clone https://github.com/arnofrxdd/ide-portfolio.git
 cd ide-portfolio
 npm install
 ```
