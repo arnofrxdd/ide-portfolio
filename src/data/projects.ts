@@ -10,7 +10,7 @@ import { sailPowerMonitoring } from "./projects/sailPower";
 import { momentClock } from "./projects/momentClock";
 import { multiThreadedDownloader } from "./projects/multiThreadedDownloader";
 import { ps3VoiceAssistant } from "./projects/ps3VoiceAssistant";
-import { xrayRealityTunnel } from "./projects/xRayRealityTunnel";
+import { xrayRealityTunnel } from "./projects/xrayRealityTunnel";
 import { arnavVNCOracle } from "./projects/arnavVNCOracle";
 import { serverMonitorDashboard } from "./projects/serverMonitorDashboard";
 
