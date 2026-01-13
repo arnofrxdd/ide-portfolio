@@ -1,88 +1,69 @@
-# VSCode Portfolio Template
+# ide-portfolio
 
-A developer portfolio that looks, feels, and behaves like a modern code editor.
+![Status](https://img.shields.io/badge/status-stable-success) ![License](https://img.shields.io/badge/license-MIT-blue) ![React](https://img.shields.io/badge/react-18-cyan) ![TypeScript](https://img.shields.io/badge/typescript-5-blue)
 
-![VSCode Portfolio Preview](https://raw.githubusercontent.com/arnofrxdd/portfolio/main/portfolio.png)
+A developer portfolio reimagined as a fully functional IDE. This project is built to look, feel, and behave like Visual Studio Code, providing an immersive experience for visitors to explore your work.
 
-This template is designed to mimic the workflow and interaction patterns of Visual Studio Code. It features a custom window management system, an AI-powered terminal, and a high-performance Canvas-based contribution grid.
+![ide-portfolio Preview](https://raw.githubusercontent.com/arnofrxdd/portfolio/main/portfolio.png)
 
----
+## ✨ Features
 
-## Key Features
+*   **Virtual File System**: Browse projects and files just like in a real editor.
+*   **Integrated Terminal**: A functional shell with commands (`ls`, `cat`, `open`) and **Gemini AI integration** for natural language queries.
+*   **Command Palette**: Quick navigation and actions via `Ctrl/Cmd + P`.
+*   **Theme System**: Switch between modern dark themes (Dracula, Monokai, GitHub Dark, etc.).
+*   **Window Management**: Draggable, resizable windows (tabs can be detached!).
+*   **Contribution Map**: A beautiful, canvas-based commit graph visualization.
+*   **Type-Safe**: Built with 100% TypeScript for robustness.
 
-### Canvas Contribution Map
+## 🛠️ Tech Stack
 
-* High Performance: Powered by a custom HTML5 Canvas engine for smooth animations
-* Theme Aware: Automatically adapts colors, glow effects, and block shapes (circles, squares, or rounded) based on the active VS Code theme
-* Interactive: Real-time contribution count calculation and dynamic word cycling
+*   **Core**: React 18, Vite
+*   **Styling**: Tailwind CSS (v4)
+*   **Icons**: Lucide React
+*   **AI**: Google Gemini API (Flash 1.5)
+*   **Effects**: Framer Motion, HTML5 Canvas
 
-### Window Management System
+## 🚀 Getting Started
 
-* Tab Detachment: Drag any tab out of the editor bar to spawn a standalone, draggable window
-* Advanced Resizing: Resize windows from any edge or corner with Windows-style clamping and viewport boundaries
-* State Persistence: Windows maintain scroll positions and z-index focus during multitasking
-
-### AI-Integrated Terminal
-
-* Gemini API: Natural-language interaction powered by Google Gemini 2.5 Flash
-* CLI Simulation: Functional shell supporting `ls`, `cat`, `open`, and `clear` commands
-
----
-
-## Tech Stack
-
-* Core: React 18, Vite
-* Rendering: HTML5 Canvas API
-* Styling: Tailwind CSS
-* Icons: Lucide React
-* AI: Google Gemini API
-
----
-
-## Getting Started
-
-### 1. Clone and Install
-
+### 1. Clone & Install
 ```bash
-git clone https://github.com/arnofrxdd/ide-portfolio.git
+git clone https://github.com/yourusername/ide-portfolio.git
 cd ide-portfolio
 npm install
 ```
 
----
-
 ### 2. Configure Environment
-
-Generate a free Gemini API key from Google AI Studio and create a `.env` file in the project root:
-
+Create a `.env` file in the root directory:
 ```env
-VITE_GEMINI_API_KEY=your_actual_api_key_here
+VITE_GEMINI_API_KEY=your_gemini_api_key_here
 ```
+> Get your key from [Google AI Studio](https://aistudio.google.com/).
 
----
-
-### 3. Run Development Server
-
+### 3. Run Locally
 ```bash
 npm run dev
 ```
 
----
+## ⌨️ Terminal Commands
 
-## Terminal Commands
+| Command | Description |
+| :--- | :--- |
+| `help` | Show available commands |
+| `ls` | List all projects |
+| `cat <project>` | View project details |
+| `open <project>` | Open full project view |
+| `clear` | Clear terminal |
+| `[query]` | Ask AI anything! |
 
-| Command       | Description                           |
-| ------------- | ------------------------------------- |
-| `help`        | Show available commands               |
-| `ls`          | List all projects found in the system |
-| `cat <name>`  | Print a summary of a project          |
-| `open <name>` | Open a project file or window         |
-| `clear`       | Clear the terminal history            |
-| `whoami`      | Display user information              |
-| Any query     | Chat directly with the integrated AI  |
+## 🎨 Customization
 
----
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for a detailed guide on:
+*   Adding new projects
+*   Adding custom files
+*   Creating new commands
+*   Modifying themes
 
-## License
+## 📄 License
 
-MIT License. You are free to use, modify, and distribute this template.
+MIT © [Arnav]
