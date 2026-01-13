@@ -1,47 +1,47 @@
-# ⚡ VSCode Portfolio Template
+# VSCode Portfolio Template
 
-A developer portfolio that looks, feels, and behaves like your favorite IDE.
+A developer portfolio that looks, feels, and behaves like a modern code editor.
 
-Built with **React**, **Tailwind CSS**, and **Vite**, this template features a fully interactive file system, an AI-powered terminal, and a powerful window management system.
+![VSCode Portfolio Preview](https://raw.githubusercontent.com/arnofrxdd/portfolio/main/portfolio.png)
 
----
-
-## ✨ Key Features
-
-### 🪟 Draggable & Resizable Windows
-
-This is **not** a static UI.
-
-* Drag tabs out of the dock to create floating windows
-* Resize from all corners
-* Maximize / restore like a real OS window
-* True multitasking experience
-
-### 🤖 AI‑Integrated Terminal
-
-A functional CLI connected to **Google Gemini API**.
-
-* Ask questions about projects or skills
-* Natural language queries
-* Built‑in commands (`ls`, `cat`, `open`, etc.)
-
-### 📂 Interactive File Explorer
-
-* Folder tree navigation
-* Open `.md`, `.json`, `.tsx` files
-* Project search & filtering
-
-### 🎨 Authentic VSCode Theme
-
-* Pixel‑accurate VSCode‑inspired UI
-* Built entirely with Tailwind CSS
-* Smooth animations & transitions
+This template is designed to mimic the workflow and interaction patterns of Visual Studio Code. It features a custom window management system, an AI-powered terminal, and a high-performance Canvas-based contribution grid.
 
 ---
 
-## 🚀 Getting Started
+## Key Features
 
-### 1️⃣ Clone & Install
+### Canvas Contribution Map
+
+* High Performance: Powered by a custom HTML5 Canvas engine for smooth animations
+* Theme Aware: Automatically adapts colors, glow effects, and block shapes (circles, squares, or rounded) based on the active VS Code theme
+* Interactive: Real-time contribution count calculation and dynamic word cycling
+
+### Window Management System
+
+* Tab Detachment: Drag any tab out of the editor bar to spawn a standalone, draggable window
+* Advanced Resizing: Resize windows from any edge or corner with Windows-style clamping and viewport boundaries
+* State Persistence: Windows maintain scroll positions and z-index focus during multitasking
+
+### AI-Integrated Terminal
+
+* Gemini API: Natural-language interaction powered by Google Gemini 2.5 Flash
+* CLI Simulation: Functional shell supporting `ls`, `cat`, `open`, and `clear` commands
+
+---
+
+## Tech Stack
+
+* Core: React 18, Vite
+* Rendering: HTML5 Canvas API
+* Styling: Tailwind CSS
+* Icons: Lucide React
+* AI: Google Gemini API
+
+---
+
+## Getting Started
+
+### 1. Clone and Install
 
 ```bash
 git clone https://github.com/arnofrxdd/ide-portfolio.git
@@ -51,19 +51,9 @@ npm install
 
 ---
 
-### 2️⃣ Configure Environment (Gemini AI)
+### 2. Configure Environment
 
-To enable AI terminal features, get a **free Gemini API key** from:
-
-👉 [https://aistudio.google.com](https://aistudio.google.com)
-
-Create a `.env` file in the root directory:
-
-```bash
-touch .env
-```
-
-Add your API key:
+Generate a free Gemini API key from Google AI Studio and create a `.env` file in the project root:
 
 ```env
 VITE_GEMINI_API_KEY=your_actual_api_key_here
@@ -71,7 +61,7 @@ VITE_GEMINI_API_KEY=your_actual_api_key_here
 
 ---
 
-### 3️⃣ Run Development Server
+### 3. Run Development Server
 
 ```bash
 npm run dev
@@ -79,120 +69,20 @@ npm run dev
 
 ---
 
-## 🛠️ Customization Tutorial
+## Terminal Commands
 
-### 1️⃣ Adding Your Projects
-
-File:
-
-```bash
-src/data/projects.js
-```
-
-This file drives:
-
-* File Explorer
-* Search
-* Terminal commands
-
-Example:
-
-```js
-export const PROJECTS_DATA = [
-  {
-    id: "my-cool-app",
-    title: "My Cool App",
-    type: "Web App",
-    tech: ["React", "Node.js", "MongoDB"],
-    date: "2024",
-    description: "Short description for cards",
-    longDescription: "Detailed markdown shown in file view",
-  }
-]
-```
+| Command       | Description                           |
+| ------------- | ------------------------------------- |
+| `help`        | Show available commands               |
+| `ls`          | List all projects found in the system |
+| `cat <name>`  | Print a summary of a project          |
+| `open <name>` | Open a project file or window         |
+| `clear`       | Clear the terminal history            |
+| `whoami`      | Display user information              |
+| Any query     | Chat directly with the integrated AI  |
 
 ---
 
-### 2️⃣ Editing Personal Info (Home Screen)
+## License
 
-File:
-
-```bash
-src/App.jsx
-```
-
-Search for:
-
-```js
-type === 'home'
-```
-
-Edit:
-
-* `WORDS` array (typing animation)
-* JSX content for intro text
-
----
-
-### 3️⃣ Modifying README.md Content
-
-Search for:
-
-```js
-type === 'readme'
-```
-
-Edit:
-
-* Markdown preview content
-* Bio, skills, and contact info
-
----
-
-### 4️⃣ Extending the Terminal
-
-Component:
-
-```bash
-IntegratedTerminal.jsx
-```
-
-Add new commands inside `handleCommand`:
-
-```js
-if (command === 'mycommand') {
-  // custom logic
-}
-```
-
----
-
-## ⌨️ Terminal Commands
-
-| Command          | Description             |
-| ---------------- | ----------------------- |
-| `help`           | Show available commands |
-| `ls` / `list`    | List all projects       |
-| `cat <project>`  | Print project summary   |
-| `open <project>` | Open project window     |
-| `clear`          | Clear terminal          |
-| `whoami`         | Show user info          |
-| *(any text)*     | Chat with Gemini AI     |
-
----
-
-## 📦 Tech Stack
-
-* **Framework:** React 18
-* **Build Tool:** Vite
-* **Styling:** Tailwind CSS
-* **Icons:** Lucide React
-* **AI:** Google Gemini API
-
----
-
-## 📄 License
-
-MIT License.
-
-Use it, fork it, remix it, ship it 🚀
+MIT License. You are free to use, modify, and distribute this template.
