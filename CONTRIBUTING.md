@@ -1,4 +1,4 @@
-# Developer Guide: Hacking the Portfolio OS
+# Developer Guide: Hacking the ide-portfolio
 
 Welcome to the internal documentation for "ide-portfolio". This project is designed to be treated like a real operating system or IDE. This guide will help you hack, extend, and customize every part of it.use this codebase as a template for their own "OS-like" websites.
 
