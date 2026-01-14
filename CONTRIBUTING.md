@@ -141,7 +141,7 @@ Want a "Contact Me" page that isn't a code file?
 
 ---
 
-## 4. Customizing the OS
+## 4. Customizing the Editor
 
 ### 4.1 Theming Engine
 We use CSS Variables for instant theme switching.
