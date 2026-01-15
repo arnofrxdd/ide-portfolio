@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import {
-    Brain, BarChart3, ChevronRight, Sparkles,
+    Brain, BarChart3, Sparkles,
     Activity, Code2, Globe, Github, Mail, Linkedin, FileText, X
 } from 'lucide-react';
 import { PROJECTS_DATA } from '../../data/projects';
@@ -242,18 +242,28 @@ export const SecondarySidebar = ({ isOpen, activeTabId, onClose }: SecondarySide
                     </div>
 
                     <div className="p-3 border-t border-[var(--border)] bg-[var(--bg-activity)]/30 mt-auto">
-                        <div className="flex items-center justify-between text-[10px] font-sans text-[var(--text-secondary)] select-none">
-                            <span className="flex items-center gap-1 group cursor-pointer hover:text-[var(--text-primary)]">
-                                {currentProject ? `id: ${currentProject.id}` : 'kernel.stable'} <ChevronRight size={10} className="group-hover:translate-x-0.5 transition-transform" />
-                            </span>
-                            <span className="flex items-center gap-1 text-[var(--success)] font-mono uppercase tracking-[1px] text-[9px]">
-                                <Activity size={8} /> active
-                            </span>
-                        </div>
+                        <StatusFooter />
                     </div>
                 </div>
             )}
         </>
+    );
+};
+
+const StatusFooter = () => {
+    return (
+        <div className="flex items-center justify-between text-[11px] font-sans text-[var(--text-secondary)] select-none">
+            <div className="flex items-center gap-2 cursor-pointer hover:text-[var(--text-primary)]">
+                <div className="flex relative items-center justify-center">
+                    <div className="w-2 h-2 rounded-full bg-[var(--success)]"></div>
+                    <div className="w-2 h-2 rounded-full bg-[var(--success)] absolute animate-ping opacity-50"></div>
+                </div>
+                <span className="font-medium">Open to Work</span>
+            </div>
+            <div className="flex items-center gap-1.5 cursor-pointer hover:text-[var(--text-primary)]">
+                <span>Portfolio v2025.3</span>
+            </div>
+        </div>
     );
 };
 

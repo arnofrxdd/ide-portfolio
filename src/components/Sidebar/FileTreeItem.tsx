@@ -75,8 +75,8 @@ export const FileTreeItem = ({
         className={`
             group flex items-center h-[22px] cursor-pointer select-none relative overflow-hidden
             ${isActive
-                ? 'bg-[#37373d] text-white border-l-0 border-[var(--accent)] outline outline-1 outline-[var(--border)] -outline-offset-1'
-                : 'hover:bg-[#2a2d2e]'}
+                ? 'bg-[var(--selection)]/50 text-[var(--text-primary)] outline outline-1 outline-[var(--accent)]/50 -outline-offset-1'
+                : 'hover:bg-[var(--text-primary)]/5 text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}
         `}
     >
         {isDragOver && (
@@ -110,7 +110,7 @@ export const FileTreeItem = ({
         {/* Content Area */}
         <div className="flex items-center gap-1.5 min-w-0 pr-2">
             <Icon size={16} className={`${color} shrink-0`} />
-            <span className={`text-[13px] truncate flex-1 ${isActive ? 'text-white font-normal' : 'text-[var(--text-secondary)] group-hover:text-[var(--text-primary)]'}`}>
+            <span className="text-[13px] truncate flex-1 font-normal inherit">
                 {name}
             </span>
         </div>

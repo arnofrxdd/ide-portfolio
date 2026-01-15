@@ -168,8 +168,8 @@ export const RealMinimap = ({ content, editorRef }: RealMinimapProps) => {
             className="w-16 bg-[var(--bg-main)] relative hidden md:block select-none overflow-hidden shrink-0 group/minimap hover:bg-[var(--bg-activity)]/30 transition-colors"
         >
             {/* Code Representation */}
-            <div ref={codeContentRef} className="absolute top-0 left-0 w-full opacity-[0.25] pointer-events-none px-1 transition-transform duration-75 will-change-transform">
-                <div className="text-[2px] leading-[3px] text-[var(--text-secondary)] font-mono whitespace-pre-wrap break-all select-none tracking-tighter">
+            <div ref={codeContentRef} className="absolute top-0 left-0 w-full opacity-50 pointer-events-none px-1 transition-transform duration-75 will-change-transform">
+                <div className="text-[2px] leading-[3px] text-[var(--text-primary)] font-mono whitespace-pre-wrap break-all select-none tracking-tighter">
                     {content}
                 </div>
             </div>

@@ -387,7 +387,7 @@ export const Sidebar = ({
                                             type: 'file',
                                             depth: 0,
                                             onClick: () => setActiveTabId(tab.id),
-                                            showClose: tab.id !== 'home',
+                                            showClose: true,
                                             onDragStart: (_e, id) => {
                                                 const tab = tabs.find(t => t.id === id);
                                                 if (tab) {
@@ -399,9 +399,13 @@ export const Sidebar = ({
                                                 }
                                             },
                                             onClose: () => {
-                                                if (tab.id === 'home') return;
-                                                setActiveTabId(prev => prev === tab.id ? 'home' : prev);
-                                                setTabs(prev => prev.filter(t => t.id !== tab.id));
+                                                // if (tab.id === 'home') return;
+                                                const newTabs = tabs.filter(t => t.id !== tab.id);
+                                                setTabs(newTabs);
+                                                if (activeTabId === tab.id) {
+                                                    const nextTab = newTabs[newTabs.length - 1];
+                                                    setActiveTabId(nextTab ? nextTab.id : (null as any));
+                                                }
                                             }
                                         });
                                     })}
