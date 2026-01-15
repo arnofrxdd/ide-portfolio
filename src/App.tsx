@@ -482,7 +482,23 @@ const App = () => {
       newY = Math.max(0, Math.min(newY, viewportH - TITLE_BAR_HEIGHT));
 
       setWindows(prev => prev.map(w => w.id === id ? { ...w, position: { x: newX, y: newY } } : w));
-      if (e.clientY < 60) setDockHighlight(true); else setDockHighlight(false);
+
+      // SHOW DROP INDICATOR IN TAB BAR IF HOVERING
+      let isOverTabBar = false;
+      if (tabBarRef.current) {
+        const barRect = tabBarRef.current.getBoundingClientRect();
+        isOverTabBar = e.clientY >= barRect.top && e.clientY <= barRect.bottom + 30;
+      }
+
+      if (isOverTabBar) {
+        // @ts-ignore
+        const idx = getTabInsertIndexFromX(e.clientX, '');
+        setDropIndex(idx);
+      } else {
+        setDropIndex(null);
+      }
+
+      if (e.clientY < 60 && !isOverTabBar) setDockHighlight(true); else setDockHighlight(false);
     }
 
     if (type === 'resize') {
@@ -652,13 +668,19 @@ const App = () => {
                 </div>
               )}
               {(() => {
-                const draggingIndex = isDragging ? tabs.findIndex(t => t.id === draggingTabId.current) : -1;
+                const draggingIndex = (isDragging && dragItem.current?.type === 'tab') ? tabs.findIndex(t => t.id === draggingTabId.current) : -1;
                 const visualDropIndex = (dropIndex !== null && draggingIndex !== -1 && dropIndex > draggingIndex) ? dropIndex + 1 : dropIndex;
+                const indicatorColor = 'var(--text-primary)'; // Theme-aware: white in dark mode, dark in light mode
+                const indicatorStyle = {
+                  backgroundColor: indicatorColor,
+                  width: '2px', // VS Code uses a 2px indicator
+                  transition: 'none', // ENSURE INSTANT MOVEMENT
+                };
                 return (
                   <>
                     {tabs.map((tab, i) => (
                       <React.Fragment key={tab.id}>
-                        {visualDropIndex === i && <div className="w-0.5 h-6 bg-[var(--accent)] shadow-[0_0_8px_var(--accent)] mx-0 shrink-0 z-50 animate-pulse" />}
+                        {visualDropIndex === i && <div style={indicatorStyle} className="h-6 mx-0 shrink-0 z-50" />}
                         <div
                           key={tab.id}
                           ref={(el) => { if (el) tabRefs.current[tab.id] = el; }}
@@ -670,7 +692,7 @@ const App = () => {
                             ${activeTabId === tab.id
                               ? 'bg-[var(--bg-main)] text-[var(--text-primary)] border-t border-t-[var(--accent)] z-10'
                               : 'bg-[var(--bg-activity)] text-[var(--text-secondary)] hover:bg-[var(--bg-main)]/30'}
-                            ${isDragging && draggingTabId.current === tab.id ? 'opacity-40 grayscale' : 'opacity-100'}
+                            ${isDragging && dragItem.current?.type === 'tab' && draggingTabId.current === tab.id ? 'opacity-30 grayscale' : 'opacity-100'}
                           `}
                         >
                           {(() => {
@@ -688,7 +710,7 @@ const App = () => {
                         </div>
                       </React.Fragment>
                     ))}
-                    {visualDropIndex === tabs.length && <div className="w-0.5 h-6 bg-[var(--accent)] shadow-[0_0_8px_var(--accent)] mx-0 shrink-0 z-50 animate-pulse" />}
+                    {visualDropIndex === tabs.length && <div style={indicatorStyle} className="h-6 mx-0 shrink-0 z-50" />}
                   </>
                 );
               })()}
@@ -902,25 +924,31 @@ const App = () => {
             <div
               style={{
                 position: 'fixed',
-                left: mousePos.x + 12,
-                top: mousePos.y + 12,
+                left: mousePos.x + 10,
+                top: mousePos.y + 10,
                 zIndex: 9999,
-                pointerEvents: 'none'
+                pointerEvents: 'none',
+                // VS Code style dragging tab: utilitaran, no blur, crisp
+                background: 'var(--bg-main)',
+                opacity: 0.85,
+                boxShadow: '0 4px 12px rgba(0,0,0,0.5)',
+                border: '1px solid var(--border)',
+                height: '32px' // Match VS Code tab height
               }}
-              className="flex items-center gap-2 bg-[var(--bg-panel)] border border-[var(--accent)]/50 text-[var(--text-primary)] text-[12px] px-3 py-1.5 shadow-2xl opacity-90 backdrop-blur-md rounded-sm"
+              className="flex items-center gap-2 text-[var(--text-primary)] text-[13px] px-3 py-0 rounded-none border-t-2 border-t-[var(--accent)]"
             >
               {(() => {
                 const { type, id, title } = dragItem.current;
                 let name = title;
-                if (type === 'tab') {
-                  const tab = tabs.find(t => t.id === id);
-                  name = tab?.title || id;
+                if (type === 'tab' || type === 'window') {
+                  const item = tabs.find(t => t.id === id) || windows.find(w => w.id === id);
+                  name = item?.title || id;
                 }
                 const { icon: Icon, color } = getFileIcon(name || '');
                 return (
                   <>
-                    <Icon size={14} className={color} />
-                    <span>{name}</span>
+                    <Icon size={16} className={color} />
+                    <span className="font-sans">{name}</span>
                   </>
                 );
               })()}
@@ -930,22 +958,25 @@ const App = () => {
 
         {/* WINDOW DOCK / TASKBAR FOR MINIMIZED WINDOWS */}
         {windows.some(w => w.isMinimized) && (
-          <div className="fixed bottom-10 right-4 flex flex-col gap-1.5 z-[60]">
+          <div className="fixed bottom-7 right-3 flex flex-col items-end gap-1 z-[60] pointer-events-none animate-in slide-in-from-right-2 duration-200">
+            <div className="text-[9px] font-bold text-[var(--text-secondary)] uppercase tracking-tighter mb-0.5 opacity-40 px-1 pointer-events-none select-none">
+              Running Process
+            </div>
             {windows.filter(w => w.isMinimized).map(win => (
               <div
                 key={win.id}
                 onClick={(e) => toggleMinimize(e, win.id)}
-                className="bg-[var(--bg-panel)]/95 border border-[var(--border)] px-3 py-2 flex items-center gap-3 cursor-pointer hover:bg-[var(--bg-activity)] transition-all shadow-2xl backdrop-blur-sm group animate-in slide-in-from-right duration-300 rounded-sm"
+                className="pointer-events-auto bg-[var(--bg-panel)] border border-[var(--border)] px-3 h-8 flex items-center gap-3 cursor-pointer hover:bg-[var(--bg-activity)] transition-colors shadow-2xl group rounded-none w-52 border-l-2 border-l-[var(--accent)]/30 hover:border-l-[var(--accent)]"
               >
                 {(() => {
                   const { icon: Icon, color } = getFileIcon(win.title);
-                  return <Icon size={14} className={color} />;
+                  return <Icon size={14} className={`${color} opacity-80 group-hover:opacity-100`} />;
                 })()}
-                <div className="flex flex-col">
-                  <span className="text-[10px] font-bold text-[var(--text-primary)] leading-none">{win.title}</span>
-                  <span className="text-[8px] font-mono text-[var(--text-secondary)] opacity-60">Minimized</span>
+                <span className="text-[11px] font-sans text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] truncate flex-1">{win.title}</span>
+                <div className="flex items-center gap-1.5">
+                  <div className="w-1.5 h-1.5 rounded-full bg-[var(--accent)] opacity-20 group-hover:opacity-100 transition-opacity" />
+                  <span className="text-[8px] font-mono text-[var(--text-secondary)] opacity-30 group-hover:opacity-60 hidden sm:block">RESTORE</span>
                 </div>
-                <div className="w-1 h-3 bg-[var(--accent)] opacity-20 group-hover:opacity-100 transition-opacity ml-2 rounded-full" />
               </div>
             ))}
           </div>
