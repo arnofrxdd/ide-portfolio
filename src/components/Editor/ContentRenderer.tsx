@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext, useRef } from 'react';
 import {
     Zap, ExternalLink, Terminal, GitBranch, Filter, LayoutGrid, List,
-    FileText, Github, Globe, Eye, Edit3, FileCode
+    FileText, Github, Globe, Eye, Edit3, FileCode, Linkedin, Twitter
 } from 'lucide-react';
 import { ThemeContext } from '../../context/ThemeContext';
 import { PROJECTS_DATA } from '../../data/projects';
@@ -146,11 +146,11 @@ export const ContentRenderer = ({ type, data, title, onOpenFile, content, editor
                                     <a href="https://github.com/arnofrxdd" target="_blank" rel="noopener noreferrer" className="p-2 bg-[var(--bg-activity)] hover:bg-[var(--accent)]/20 border border-[var(--border)] rounded-sm text-[var(--text-secondary)] hover:text-[var(--accent)] transition-all">
                                         <Github size={20} />
                                     </a>
-                                    <a href="mailto:contact@example.com" className="p-2 bg-[var(--bg-activity)] hover:bg-[var(--accent)]/20 border border-[var(--border)] rounded-sm text-[var(--text-secondary)] hover:text-[var(--accent)] transition-all">
-                                        <FileCode size={20} />
+                                    <a href="https://linkedin.com/in/arnav" target="_blank" rel="noopener noreferrer" className="p-2 bg-[var(--bg-activity)] hover:bg-[var(--accent)]/20 border border-[var(--border)] rounded-sm text-[var(--text-secondary)] hover:text-[var(--accent)] transition-all" title="LinkedIn">
+                                        <Linkedin size={20} />
                                     </a>
-                                    <a href="#" className="p-2 bg-[var(--bg-activity)] hover:bg-[var(--accent)]/20 border border-[var(--border)] rounded-sm text-[var(--text-secondary)] hover:text-[var(--accent)] transition-all">
-                                        <Globe size={20} />
+                                    <a href="https://twitter.com/arnav" target="_blank" rel="noopener noreferrer" className="p-2 bg-[var(--bg-activity)] hover:bg-[var(--accent)]/20 border border-[var(--border)] rounded-sm text-[var(--text-secondary)] hover:text-[var(--accent)] transition-all" title="Twitter / X">
+                                        <Twitter size={20} />
                                     </a>
                                 </div>
                             </div>
