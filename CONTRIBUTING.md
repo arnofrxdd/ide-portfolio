@@ -1,6 +1,6 @@
-# Developer Guide: Hacking the Portfolio OS
+# Developer Guide: Hacking the ide-portfolio
 
-Welcome to the internal documentation for "ide-portfolio". This project is designed to be treated like a real operating system or IDE. This guide will help you hack, extend, and customize every part of it.use this codebase as a template for their own "OS-like" websites.
+Welcome to the internal documentation for "ide-portfolio". This project is designed to be treated like a real operating system or IDE. This guide will help you hack, extend, and customize every part of it.use this codebase as a template for their own "VSCODE-like" websites.
 
 ---
 
@@ -11,7 +11,7 @@ Welcome to the internal documentation for "ide-portfolio". This project is desig
     *   [Adding a Project (The "Database")](#31-adding-a-project)
     *   [Adding Static Files](#32-adding-static-files)
     *   [Adding New Pages/Views](#33-adding-new-system-pages)
-4.  [Customizing the "OS"](#4-customizing-the-os)
+4.  [Customizing the "Editor"](#4-customizing-the-os)
     *   [Theming Engine](#41-theming-engine)
     *   [Command Palette Logic](#42-command-palette-registry)
     *   [Terminal & AI Personas](#43-terminal--ai)
@@ -141,7 +141,7 @@ Want a "Contact Me" page that isn't a code file?
 
 ---
 
-## 4. Customizing the OS
+## 4. Customizing the Editor
 
 ### 4.1 Theming Engine
 We use CSS Variables for instant theme switching.
