@@ -25,8 +25,10 @@ Welcome to the internal documentation for "ide-portfolio". This project is desig
 This application is a **Single Page Application (SPA)** that *mimics* an Operating System window manager and IDE.
 
 ### Core Concepts
-*   **Global State**: `App.tsx` holds the "OS State" — open windows, active tabs, theme, and window Z-indices.
+*   **Global State**: `App.tsx` holds the "OS State" — active tabs, theme, and the `windows` array which manages floating windows and their `isMinimized`/`isMaximized` states.
+*   **Window Manager & Dock**: Floating windows can be dragged, resized, and minimized. Minimized windows are tucked into a **Dock** (bottom-right), allowing for a clean workspace without losing context.
 *   **Content Rendering**: The `ContentRenderer` component acts as the "Window Content". It takes a `type` prop (e.g., 'code', 'project', 'home') and decides what React component to render.
+*   **Narrative Engine (Manifest Audit)**: The `SecondarySidebar` (Right Sidebar) provides a "Manifest Audit"—a portfolio-friendly narrative that automatically analyzes the active tab to highlight your engineering skills.
 *   **Data-Driven UI**: The Sidebar tree, Project Cards, and Command Palette results are all generated from static JSON-like data structures in `src/data/`.
 
 ```
@@ -208,9 +210,27 @@ The `handleCommand` function parses input strings.
     *   The "Router" of the application.
     *   It does *not* use React Router. It conditionally renders based on the `activeTab.type`.
 
+*   **`SecondarySidebar.tsx`**:
+    *   Handles the "Manifest Audit" feature.
+    *   Uses a contextual look-up system to provide professional engineering insights based on the file type or project currently in view.
+
 ---
 
-## 6. Troubleshooting
+## 6. Portfolio-Specific Features
+
+### 6.1 The Manifest Audit
+Located in the Right Sidebar, this is your secret weapon for recruiters. It doesn't just show file info; it sells your skills.
+*   **Logic**: Edit `getManifestAudit()` in `SecondarySidebar.tsx`.
+*   **Purpose**: Use this to explain *why* a certain file exists or what engineering excellence it demonstrates.
+
+### 6.2 Responsive Sidebar Behavior
+The IDE intelligently handles screen sizes:
+*   **Mobile (< 1024px)**: Secondary sidebar starts closed. The Main sidebar collapses more aggressively.
+*   **Desktop**: Layout state is persisted to `localStorage`.
+
+---
+
+## 7. Troubleshooting
 
 *   **Icons Missing?**
     *   Make sure you import them from `lucide-react` in the file where you use them.
