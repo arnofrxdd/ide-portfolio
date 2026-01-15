@@ -1,8 +1,9 @@
 import React, { useState, useRef, useEffect, useContext } from 'react';
 import {
-    Files, Search, GitBranch, Blocks, UserCircle, Settings2,
+    Files, Search, Blocks, UserCircle, Settings2,
     MoreHorizontal as MoreHorizontalIcon, ChevronDown, Folder, FolderOpen,
-    FileText, RefreshCw, Plus, CheckCircle, ToggleRight, ToggleLeft, Palette, FileJson
+    RefreshCw, Plus, CheckCircle, ToggleRight, ToggleLeft, FileJson,
+    Cloud, ShieldCheck, LogOut, User, ChevronRight, CaseSensitive, WholeWord, Regex, RotateCcw, Globe, Trophy, Award, LayoutGrid, Filter, ExternalLink
 } from 'lucide-react';
 import { ThemeContext } from '../../context/ThemeContext';
 import { PROJECTS_DATA } from '../../data/projects';
@@ -38,8 +39,11 @@ export const Sidebar = ({
     isDragging
 }: SidebarProps) => {
 
-    const { theme, setTheme } = useContext(ThemeContext);
-    const [activeView, setActiveView] = useState<'explorer' | 'search' | 'git' | 'extensions' | 'account' | 'settings'>('explorer');
+    const { theme, setTheme, homepageLayout, setHomepageLayout } = useContext(ThemeContext);
+    const [activeView, setActiveView] = useState<'explorer' | 'search' | 'deployments' | 'certifications' | 'account' | 'settings'>('explorer');
+
+
+    const [settingsSearch, setSettingsSearch] = useState('');
     const [isPanelVisible, setIsPanelVisible] = useState(() => {
         const saved = localStorage.getItem('portfolio_sidebar_visible');
         return saved !== null ? JSON.parse(saved) : true;
@@ -110,24 +114,63 @@ export const Sidebar = ({
     }, [isResizing]);
 
     const [searchQuery, setSearchQuery] = useState('');
-    const [stagedFiles, setStagedFiles] = useState(['resume_old.pdf', 'resume_new.pdf']);
-    const [installedExtensions, setInstalledExtensions] = useState<Record<string, boolean>>({
-        "React IntelliSense": true,
-        "TypeScript Importer": true,
-        "Tailwind CSS": true,
-        "Go Tools": false,
-        "Python": false,
-        "Motivation.js": false
-    });
+    const [searchModifiers, setSearchModifiers] = useState({ matchCase: false, wholeWord: false, regex: false });
+    const [searchDetailsVisible, setSearchDetailsVisible] = useState(false);
+    const [searchExpanded, setSearchExpanded] = useState<Record<string, boolean>>({ 'results': true, 'details': false });
+    const [deploymentsExpanded, setDeploymentsExpanded] = useState<Record<string, boolean>>({ 'services': true, 'infrastructure': true });
 
 
-    useEffect(() => {
-        if (window.innerWidth < 768) {
-            setIsPanelVisible(false);
+
+    const certifications = [
+        {
+            name: "AWS Solutions Architect",
+            issuer: "Amazon Web Services",
+            id: "aws-sa",
+            description: "Validation of expertise in designing distributed systems on AWS.",
+            status: "Certified",
+            icon: Cloud
+        },
+        {
+            name: "Meta Front-End Designer",
+            issuer: "Meta / Coursera",
+            id: "meta-fed",
+            description: "Advanced proficiency in React, JS, and responsive UI/UX systems.",
+            status: "Verified",
+            icon: LayoutGrid
+        },
+        {
+            name: "Google Cloud Engineer",
+            issuer: "Google Cloud",
+            id: "google-ace",
+            description: "Associate level certification for cloud infrastructure management.",
+            status: "Certified",
+            icon: Globe
+        },
+        {
+            name: "System Architect Award",
+            issuer: "Tech Expo 2024",
+            id: "award-24",
+            description: "1st Place Winner for innovative distributed terminal architecture.",
+            status: "Awarded",
+            icon: Trophy
         }
-    }, []);
+    ];
 
-    const handleActivityClick = (view: 'explorer' | 'search' | 'git' | 'extensions' | 'account' | 'settings') => {
+    const [certSearch, setCertSearch] = useState('');
+    const filteredCerts = certifications.filter(c =>
+        c.name.toLowerCase().includes(certSearch.toLowerCase()) ||
+        c.issuer.toLowerCase().includes(certSearch.toLowerCase())
+    );
+
+    const handleVerifyCert = (name: string) => {
+        onToast(`Opening verification portal for ${name}...`, 'info');
+        setTimeout(() => {
+            onToast(`Verification Success: ${name} is valid.`, 'success');
+        }, 1500);
+    };
+
+
+    const handleActivityClick = (view: 'explorer' | 'search' | 'deployments' | 'certifications' | 'account' | 'settings') => {
         if (activeView === view) {
             setIsPanelVisible(!isPanelVisible);
         } else {
@@ -136,36 +179,18 @@ export const Sidebar = ({
         }
     };
 
+
+
     const toggleFolder = (folder: string) => {
         setExpandedFolders(prev => ({ ...prev, [folder]: !prev[folder] }));
     };
 
-    const toggleExtension = (name: string) => {
-        if (!installedExtensions[name]) {
-            onToast(`Downloading ${name} package...`, 'info');
-            setTimeout(() => onToast(`${name} installed successfully!`, 'success'), 1500);
-        } else {
-            onToast(`Uninstalling ${name}...`, 'warning');
+    useEffect(() => {
+        if (window.innerWidth < 768) {
+            setIsPanelVisible(false);
         }
-        setInstalledExtensions(prev => ({ ...prev, [name]: !prev[name] }));
-        setTimeout(() => {
-            fireMotivation();
-        }, 300);
-    };
+    }, []);
 
-    const motivationQuotes = [
-        "This worked yesterday. You didn't change anything. Right?",
-        "You've been debugging for 2 hours. Skill issue.",
-        "Senior dev moment detected.",
-        "Trust the process. Or don't.",
-        "It compiles. Ship it."
-    ];
-
-    const fireMotivation = () => {
-        if (!installedExtensions["Motivation.js"]) return;
-        const quote = motivationQuotes[Math.floor(Math.random() * motivationQuotes.length)];
-        onToast(quote, "info");
-    };
 
     const toggleSetting = (key: string) => {
         if (key === "Minimap") {
@@ -188,18 +213,13 @@ export const Sidebar = ({
     };
 
 
-    const stageFile = (file: string) => {
-        setStagedFiles(prev => prev.filter(f => f !== file));
-        onToast(`Staged ${file}`, 'info');
+
+
+    const handleDeploy = (name: string) => {
+        onToast(`Triggering manual deploy for ${name}...`, 'info');
+        setTimeout(() => onToast(`${name} deployment successful!`, 'success'), 2000);
     };
 
-    const handleCommit = () => {
-        if (stagedFiles.length === 0) {
-            onToast("Nothing to commit. Work harder.", "warning");
-            return;
-        }
-        onToast("Commit sent to main... Production deploying.", "success");
-    };
 
     const handleSignOut = () => {
         onToast("Disconnecting from matrix...", "error");
@@ -274,20 +294,20 @@ export const Sidebar = ({
                     <Search size={24} strokeWidth={1.5} />
                 </div>
                 <div
-                    className={`w-full h-12 flex items-center justify-center cursor-pointer transition-all relative ${activeView === 'git' && isPanelVisible ? 'text-[var(--text-primary)]' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}
-                    onClick={() => handleActivityClick('git')}
-                    title="Source Control"
+                    className={`w-full h-12 flex items-center justify-center cursor-pointer transition-all relative ${activeView === 'deployments' && isPanelVisible ? 'text-[var(--text-primary)]' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}
+                    onClick={() => handleActivityClick('deployments')}
+                    title="Deployments"
                 >
-                    {activeView === 'git' && isPanelVisible && <div className="absolute left-0 top-0 bottom-0 w-[2px] bg-[var(--accent)]" />}
-                    <GitBranch size={24} strokeWidth={1.5} />
+                    {activeView === 'deployments' && isPanelVisible && <div className="absolute left-0 top-0 bottom-0 w-[2px] bg-[var(--accent)]" />}
+                    <Globe size={24} strokeWidth={1.5} />
                 </div>
                 <div
-                    className={`w-full h-12 flex items-center justify-center cursor-pointer transition-all relative ${activeView === 'extensions' && isPanelVisible ? 'text-[var(--text-primary)]' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}
-                    onClick={() => handleActivityClick('extensions')}
-                    title="Extensions"
+                    className={`w-full h-12 flex items-center justify-center cursor-pointer transition-all relative ${activeView === 'certifications' && isPanelVisible ? 'text-[var(--text-primary)]' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}
+                    onClick={() => handleActivityClick('certifications')}
+                    title="Certifications"
                 >
-                    {activeView === 'extensions' && isPanelVisible && <div className="absolute left-0 top-0 bottom-0 w-[2px] bg-[var(--accent)]" />}
-                    <Blocks size={24} strokeWidth={1.5} />
+                    {activeView === 'certifications' && isPanelVisible && <div className="absolute left-0 top-0 bottom-0 w-[2px] bg-[var(--accent)]" />}
+                    <Trophy size={24} strokeWidth={1.5} />
                 </div>
 
                 <div className="mt-auto w-full flex flex-col items-center">
@@ -636,7 +656,8 @@ export const Sidebar = ({
                                         { name: ".env", type: 'code', content: FILE_CONTENTS.env, lang: 'bash' },
                                         { name: ".gitignore", type: 'code', content: FILE_CONTENTS.gitignore, lang: 'bash' },
                                         { name: "package.json", type: "code", content: FILE_CONTENTS.package_json, lang: "json" },
-                                        { name: "README.md", type: 'readme', content: FILE_CONTENTS.readme }
+                                        { name: "README.md", type: 'readme', content: FILE_CONTENTS.readme },
+                                        { name: "resume.pdf", type: 'pdf' }
                                     ].map(f => {
                                         const fileMeta = getFileIcon(f.name);
                                         return renderFileTreeItem({
@@ -711,171 +732,509 @@ export const Sidebar = ({
 
                 {/* SEARCH VIEW */}
                 {activeView === 'search' && (
-                    <div className="flex-1 flex flex-col p-4 min-w-0">
-                        <div className="text-xs font-bold text-[var(--text-secondary)] mb-4 tracking-wider">SEARCH</div>
-                        <div className="relative mb-4">
-                            <input
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                placeholder="Search projects..."
-                                className="w-full bg-[var(--bg-activity)] border border-[var(--border)] text-[var(--text-primary)] text-xs p-2 pl-8 focus:outline-none focus:border-[var(--accent)]"
-                            />
-                            <Search size={12} className="absolute left-2.5 top-2.5 text-slate-500" />
+                    <div className="flex-1 flex flex-col min-w-0">
+                        <div className="h-9 px-4 flex items-center justify-between text-[11px] font-bold text-[var(--text-secondary)] tracking-wider">
+                            <span>SEARCH</span>
+                            <div className="flex gap-2">
+                                <RefreshCw size={14} className="hover:text-[var(--text-primary)] cursor-pointer" />
+                                <ChevronRight size={14} className={`hover:text-[var(--text-primary)] cursor-pointer transition-transform ${searchDetailsVisible ? 'rotate-90' : ''}`} onClick={() => setSearchDetailsVisible(!searchDetailsVisible)} />
+                            </div>
+                        </div>
+
+                        <div className="px-4 py-2">
+                            <div className="flex flex-col gap-1">
+                                {/* Search Input Box */}
+                                <div className="relative group">
+                                    <input
+                                        value={searchQuery}
+                                        onChange={(e) => setSearchQuery(e.target.value)}
+                                        placeholder="Search"
+                                        className="w-full bg-[var(--bg-activity)] border border-[var(--border)] text-[var(--text-primary)] text-[13px] py-1 pl-2 pr-[70px] focus:outline-none focus:border-[var(--accent)] rounded-sm"
+                                    />
+                                    <div className="absolute right-1 top-1/2 -translate-y-1/2 flex items-center gap-0.5">
+                                        <button
+                                            onClick={() => setSearchModifiers(m => ({ ...m, matchCase: !m.matchCase }))}
+                                            className={`p-1 rounded-sm hover:bg-[var(--bg-panel)] ${searchModifiers.matchCase ? 'bg-[var(--accent)]/20 text-[var(--accent)] ring-1 ring-[var(--accent)]' : 'text-[var(--text-secondary)]'}`}
+                                            title="Match Case"
+                                        >
+                                            <CaseSensitive size={14} />
+                                        </button>
+                                        <button
+                                            onClick={() => setSearchModifiers(m => ({ ...m, wholeWord: !m.wholeWord }))}
+                                            className={`p-1 rounded-sm hover:bg-[var(--bg-panel)] ${searchModifiers.wholeWord ? 'bg-[var(--accent)]/20 text-[var(--accent)] ring-1 ring-[var(--accent)]' : 'text-[var(--text-secondary)]'}`}
+                                            title="Match Whole Word"
+                                        >
+                                            <WholeWord size={14} />
+                                        </button>
+                                        <button
+                                            onClick={() => setSearchModifiers(m => ({ ...m, regex: !m.regex }))}
+                                            className={`p-1 rounded-sm hover:bg-[var(--bg-panel)] ${searchModifiers.regex ? 'bg-[var(--accent)]/20 text-[var(--accent)] ring-1 ring-[var(--accent)]' : 'text-[var(--text-secondary)]'}`}
+                                            title="Use Regular Expression"
+                                        >
+                                            <Regex size={14} />
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Files to include/exclude (collapsible) */}
+                            {searchDetailsVisible && (
+                                <div className="pl-5 space-y-2 pt-1 animate-in fade-in duration-300">
+                                    <div className="space-y-1">
+                                        <div className="text-[11px] text-[var(--text-secondary)] font-bold">files to include</div>
+                                        <input className="w-full bg-[var(--bg-activity)] border border-[var(--border)] text-[var(--text-primary)] text-[11px] p-1 focus:outline-none focus:border-[var(--accent)]" placeholder="e.g. *.ts, src/**" />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <div className="text-[11px] text-[var(--text-secondary)] font-bold">files to exclude</div>
+                                        <input className="w-full bg-[var(--bg-activity)] border border-[var(--border)] text-[var(--text-primary)] text-[11px] p-1 focus:outline-none focus:border-[var(--accent)]" placeholder="e.g. node_modules/**" />
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Search Results */}
+                        <div className="flex-1 overflow-y-auto custom-scrollbar">
+                            <div
+                                className="h-[22px] flex items-center px-1 bg-[var(--bg-activity)]/30 cursor-pointer border-t border-white/5"
+                                onClick={() => setSearchExpanded(prev => ({ ...prev, 'results': !prev['results'] }))}
+                            >
+                                <ChevronDown
+                                    size={14}
+                                    className={`text-[var(--text-secondary)] transition-transform duration-150 ${searchExpanded.results ? '' : '-rotate-90'}`}
+                                />
+                                <span className="text-[11px] font-bold text-[var(--text-secondary)] ml-1 tracking-tight uppercase">
+                                    {searchQuery ? `${filteredProjects.length} results in ${filteredProjects.length} files` : 'Search Results'}
+                                </span>
+                            </div>
+
+                            {searchExpanded.results && (
+                                <div className="py-1">
+                                    {searchQuery && filteredProjects.map(p => (
+                                        <div key={p.id} className="group cursor-default">
+                                            <div
+                                                onClick={() => onOpenFile({ id: p.id, title: `${p.title}.tsx`, type: 'detail', data: p })}
+                                                className="flex items-center gap-1.5 px-4 py-1 hover:bg-[var(--bg-activity)] cursor-pointer"
+                                            >
+                                                <ChevronDown size={14} className="text-[var(--text-secondary)]" />
+                                                {(() => {
+                                                    const { icon: Icon, color } = getFileIcon(`${p.title}.tsx`);
+                                                    return <Icon size={14} className={color} />;
+                                                })()}
+                                                <span className="text-[13px] text-[var(--text-primary)] truncate">{p.title}.tsx</span>
+                                                <span className="ml-auto text-[10px] bg-[var(--bg-panel)] px-1.5 rounded-full text-[var(--text-secondary)] border border-[var(--border)]">1</span>
+                                            </div>
+
+                                            {/* Preview Match */}
+                                            <div className="pl-12 pr-4 py-0.5 hover:bg-[var(--bg-activity)] cursor-pointer flex items-center gap-2">
+                                                <div className="text-[12px] text-[var(--text-secondary)] font-mono whitespace-nowrap overflow-hidden">
+                                                    <span className="opacity-50">12: </span>
+                                                    <span>export const </span>
+                                                    <span className="bg-[var(--accent)]/30 text-[var(--text-primary)] rounded-sm px-0.5">{p.title}</span>
+                                                    <span> = () =&gt; &#123;</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                    {searchQuery && filteredProjects.length === 0 && (
+                                        <div className="text-[13px] text-[var(--text-secondary)] px-8 py-4 italic">No results found with current filters.</div>
+                                    )}
+                                    {!searchQuery && (
+                                        <div className="flex flex-col items-center justify-center pt-12 text-center px-6">
+                                            <Search size={32} className="text-[var(--text-secondary)] opacity-10 mb-4" />
+                                            <div className="text-[13px] text-[var(--text-secondary)] opacity-50">
+                                                Type to search for projects, components, or documents across your workspace.
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                )}
+
+
+                {/* DEPLOYMENTS VIEW */}
+                {activeView === 'deployments' && (
+                    <div className="flex-1 flex flex-col min-w-0">
+                        <div className="h-9 px-4 flex items-center justify-between text-[11px] font-bold text-[var(--text-secondary)] tracking-wider uppercase">
+                            <span>Deployments</span>
+                            <div className="flex gap-2">
+                                <RefreshCw size={14} className="hover:text-[var(--text-primary)] cursor-pointer" onClick={() => onToast('Refreshing Cloud status...', 'info')} />
+                                <Plus size={14} className="hover:text-[var(--text-primary)] cursor-pointer" />
+                            </div>
                         </div>
 
                         <div className="flex-1 overflow-y-auto custom-scrollbar">
-                            {searchQuery && filteredProjects.map(p => (
-                                <div key={p.id} onClick={() => onOpenFile({ id: p.id, title: `${p.title}.tsx`, type: 'detail', data: p })} className="group cursor-pointer mb-3 hover:bg-[var(--bg-activity)] p-2">
-                                    <div className="flex items-center gap-2 text-xs text-[var(--text-primary)] group-hover:text-[var(--accent)] font-mono mb-1">
-                                        {(() => {
-                                            const { icon: Icon, color } = getFileIcon(`${p.title}.tsx`);
-                                            return <Icon size={12} className={color} />;
-                                        })()}
-                                        {p.title}.tsx
-                                    </div>
-                                    <div className="text-[10px] text-[var(--text-secondary)] pl-5 line-clamp-2">{p.description}</div>
+                            {/* ACTIVE SERVICES SECTION */}
+                            <div
+                                className="h-[22px] flex items-center px-1 bg-[var(--bg-activity)]/30 cursor-pointer border-t border-white/5"
+                                onClick={() => setDeploymentsExpanded(prev => ({ ...prev, services: !prev.services }))}
+                            >
+                                <ChevronDown size={14} className={`text-[var(--text-secondary)] transition-transform duration-150 ${deploymentsExpanded.services ? '' : '-rotate-90'}`} />
+                                <span className="text-[11px] font-bold text-[var(--text-secondary)] ml-1 tracking-tight uppercase">Active Services</span>
+                            </div>
+
+                            {deploymentsExpanded.services && (
+                                <div className="py-1">
+                                    {PROJECTS_DATA.slice(0, 4).map(p => (
+                                        <div key={p.id} className="group relative px-4 py-2 hover:bg-[var(--bg-activity)] cursor-pointer transition-colors border-l-2 border-transparent hover:border-[var(--accent)]">
+                                            <div className="flex items-center justify-between mb-1">
+                                                <div className="flex items-center gap-2">
+                                                    <Cloud size={14} className="text-[var(--accent)]" />
+                                                    <span className="text-[13px] font-bold text-[var(--text-primary)]">{p.title}</span>
+                                                </div>
+                                                <div className="flex items-center gap-1.5 font-mono text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
+                                                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                                                    Online
+                                                </div>
+                                            </div>
+                                            <div className="text-[11px] text-[var(--text-secondary)] opacity-60 ml-6 truncate">production-main • us-east-1</div>
+
+                                            <div className="flex items-center gap-2 ml-6 mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <button
+                                                    onClick={(e) => { e.stopPropagation(); window.open((p.links as any).live || p.links.github, '_blank'); }}
+                                                    className="px-2 py-0.5 bg-[var(--accent)] hover:bg-[var(--accent)]/80 text-white text-[10px] rounded-[2px]"
+                                                >
+                                                    Open App
+                                                </button>
+                                                <button
+                                                    onClick={(e) => { e.stopPropagation(); handleDeploy(p.title); }}
+                                                    className="p-1 hover:bg-[var(--bg-panel)] text-[var(--text-secondary)] hover:text-[var(--accent)] rounded transition-colors"
+                                                    title="Re-deploy"
+                                                >
+                                                    <RotateCcw size={12} />
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
                                 </div>
-                            ))}
-                            {searchQuery && filteredProjects.length === 0 && <div className="text-xs text-[var(--text-secondary)] text-center mt-4">No results found.</div>}
-                            {!searchQuery && <div className="text-xs text-[var(--text-secondary)] text-center mt-10">Type to search across all files and projects.</div>}
+                            )}
+
+                            {/* PERFORMANCE AUDIT SECTION */}
+                            <div
+                                className="h-[22px] flex items-center px-1 bg-[var(--bg-activity)]/30 cursor-pointer border-t border-white/5"
+                                onClick={() => setDeploymentsExpanded(prev => ({ ...prev, infrastructure: !prev.infrastructure }))}
+                            >
+                                <ChevronDown size={14} className={`text-[var(--text-secondary)] transition-transform duration-150 ${deploymentsExpanded.infrastructure ? '' : '-rotate-90'}`} />
+                                <span className="text-[11px] font-bold text-[var(--text-secondary)] ml-1 tracking-tight uppercase">Technical Audit</span>
+                            </div>
+
+                            {deploymentsExpanded.infrastructure && (
+                                <div className="p-4 space-y-4">
+                                    <div className="space-y-3">
+                                        <div className="flex items-center justify-between group">
+                                            <span className="text-[11px] text-[var(--text-secondary)]">Production Health</span>
+                                            <span className="text-[11px] font-bold text-emerald-400">99.8%</span>
+                                        </div>
+                                        <div className="grid grid-cols-4 gap-2">
+                                            {[
+                                                { label: 'Perf', val: 98, color: 'bg-emerald-500' },
+                                                { label: 'Acc', val: 95, color: 'bg-emerald-500' },
+                                                { label: 'SEO', val: 100, color: 'bg-blue-500' },
+                                                { label: 'Best', val: 92, color: 'bg-emerald-500' }
+                                            ].map((score, i) => (
+                                                <div key={i} className="flex flex-col items-center gap-1">
+                                                    <div className="relative w-8 h-8 rounded-full border-2 border-[var(--border)] flex items-center justify-center">
+                                                        <span className="text-[10px] font-bold text-[var(--text-primary)]">{score.val}</span>
+                                                    </div>
+                                                    <span className="text-[8px] uppercase opacity-50">{score.label}</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    <div className="pt-2 border-t border-[var(--border)]/30 space-y-2">
+                                        <div className="text-[10px] font-bold text-[var(--text-secondary)] uppercase opacity-50 mb-1">Production Domains</div>
+                                        <div className="space-y-1.5 text-[11px]">
+                                            <div className="flex items-center justify-between text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors group cursor-pointer">
+                                                <span>portfolio.arnav.dev</span>
+                                                <ExternalLink size={10} className="opacity-0 group-hover:opacity-100" />
+                                            </div>
+                                            <div className="flex items-center justify-between text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors group cursor-pointer">
+                                                <span>mouseshifter.io</span>
+                                                <ExternalLink size={10} className="opacity-0 group-hover:opacity-100" />
+                                            </div>
+                                            <div className="flex items-center justify-between text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors group cursor-pointer">
+                                                <span>api.netbridge.tech</span>
+                                                <ExternalLink size={10} className="opacity-0 group-hover:opacity-100" />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="bg-emerald-500/5 border border-emerald-500/10 rounded p-2 text-[10px] text-[var(--success)] flex items-center gap-2">
+                                        <CheckCircle size={12} />
+                                        <span>All systems pass technical audit</span>
+                                    </div>
+                                </div>
+                            )}
+
                         </div>
                     </div>
                 )}
 
-                {/* GIT VIEW */}
-                {activeView === 'git' && (
-                    <div className="flex-1 flex flex-col p-4 min-w-0">
-                        <div className="flex items-center justify-between mb-4">
-                            <div className="text-xs font-bold text-[var(--text-secondary)] tracking-wider">SOURCE CONTROL</div>
+                {/* CERTIFICATIONS VIEW */}
+                {activeView === 'certifications' && (
+                    <div className="flex-1 flex flex-col min-w-0">
+                        <div className="h-9 px-4 flex items-center justify-between text-[11px] font-bold text-[var(--text-secondary)] tracking-wider uppercase">
+                            <span>Certifications</span>
                             <div className="flex gap-2">
-                                <div className="text-[var(--text-secondary)] hover:text-white cursor-pointer"><RefreshCw size={12} /></div>
+                                <RefreshCw size={14} className="hover:text-[var(--text-primary)] cursor-pointer" />
+                                <Filter size={14} className="hover:text-[var(--text-primary)] cursor-pointer" />
                             </div>
                         </div>
-                        <div className="text-xs text-[var(--text-primary)] font-mono mb-2 flex items-center gap-2">
-                            <ChevronDown size={12} /> <span>Changes</span> <span className="bg-[var(--bg-activity)] px-1.5 rounded-full text-[10px]">{stagedFiles.length}</span>
+
+                        {/* Search Certs */}
+                        <div className="px-4 mb-4">
+                            <div className="flex items-center gap-2 px-2 py-1 bg-[var(--bg-activity)] border border-[var(--border)] rounded-sm focus-within:border-[var(--accent)] transition-colors">
+                                <Search size={12} className="text-[var(--text-secondary)]" />
+                                <input
+                                    type="text"
+                                    placeholder="Search Marketplace"
+                                    value={certSearch}
+                                    onChange={(e) => setCertSearch(e.target.value)}
+                                    className="bg-transparent border-none outline-none text-[11px] text-[var(--text-primary)] w-full font-sans"
+                                />
+                            </div>
                         </div>
-                        <div className="space-y-1">
-                            {stagedFiles.map(file => (
-                                <div key={file} className="flex items-center gap-2 py-1 px-2 hover:bg-[var(--bg-activity)] rounded cursor-pointer group">
-                                    <FileText size={14} className="text-[var(--warning)]" />
-                                    <span className="text-xs text-[var(--text-secondary)] group-hover:text-[var(--text-primary)]">{file}</span>
-                                    <span onClick={() => stageFile(file)} className="text-[10px] text-[var(--text-secondary)] hover:text-[var(--success)] ml-auto flex items-center gap-1">
-                                        <Plus size={10} />
-                                    </span>
-                                </div>
-                            ))}
-                            {stagedFiles.length === 0 && <div className="text-xs text-[var(--text-secondary)] italic pl-2">All changes staged.</div>}
-                        </div>
-                        <div className="mt-6">
-                            <input placeholder="Message (Ctrl+Enter)" className="w-full bg-[var(--bg-activity)] border border-[var(--border)] text-[var(--text-primary)] text-xs p-2 focus:outline-none focus:border-[var(--accent)]" />
-                            <button
-                                onClick={handleCommit}
-                                className="w-full mt-2 bg-[var(--accent)] hover:bg-[var(--accent)]/80 text-white text-xs py-1.5 flex items-center justify-center gap-2"
-                            >
-                                <CheckCircle size={12} /> Commit
-                            </button>
+
+                        <div className="flex-1 overflow-y-auto custom-scrollbar">
+                            {/* SECTION: INSTALLED (CERTIFIED) */}
+                            <div className="h-[22px] flex items-center px-1 bg-[var(--bg-activity)]/30 cursor-pointer border-t border-white/5">
+                                <ChevronDown size={14} className="text-[var(--text-secondary)]" />
+                                <span className="text-[11px] font-bold text-[var(--text-secondary)] ml-1 tracking-tight uppercase">Verified Credentials</span>
+                            </div>
+
+                            <div className="py-2 space-y-1">
+                                {filteredCerts.map((cert) => (
+                                    <div key={cert.id} className="group relative flex gap-3 px-4 py-2 hover:bg-[var(--bg-activity)] cursor-pointer transition-colors border-l-2 border-transparent hover:border-[var(--accent)]">
+                                        <div className="w-10 h-10 bg-[var(--bg-activity)] flex items-center justify-center rounded-sm shrink-0 border border-[var(--border)] shadow-sm">
+                                            <cert.icon size={20} className="text-[var(--accent)] opacity-80" />
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <div className="flex justify-between items-start">
+                                                <div className="text-[13px] font-bold text-[var(--text-primary)] truncate">{cert.name}</div>
+                                                <ShieldCheck size={12} className="text-blue-400 mt-0.5 shrink-0" />
+                                            </div>
+                                            <div className="text-[11px] text-[var(--text-secondary)] truncate">{cert.issuer}</div>
+                                            <div className="text-[10px] text-[var(--text-secondary)] line-clamp-1 opacity-60 leading-tight mt-0.5">{cert.description}</div>
+
+                                            <div className="flex items-center gap-3 mt-2">
+                                                <button
+                                                    onClick={(e) => { e.stopPropagation(); handleVerifyCert(cert.name); }}
+                                                    className="px-2 py-0.5 bg-[var(--accent)] hover:bg-[var(--accent)]/80 text-white text-[10px] rounded-[2px] font-medium transition-colors"
+                                                >
+                                                    Verify
+                                                </button>
+                                                <div className="flex items-center gap-1 text-[10px] text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] opacity-60">
+                                                    <Award size={10} />
+                                                    <span>{cert.status}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                                {filteredCerts.length === 0 && (
+                                    <div className="px-8 py-10 flex flex-col items-center justify-center text-center opacity-40">
+                                        <Trophy size={48} className="mb-4" />
+                                        <div className="text-xs">No certifications found.</div>
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     </div>
                 )}
 
-                {/* EXTENSIONS VIEW */}
-                {activeView === 'extensions' && (
-                    <div className="flex-1 flex flex-col p-4 min-w-0">
-                        <div className="text-xs font-bold text-[var(--text-secondary)] mb-4 tracking-wider">EXTENSIONS</div>
-                        <div className="space-y-3 overflow-y-auto custom-scrollbar pr-1">
-                            {Object.entries(installedExtensions).map(([name, installed], i) => (
-                                <div key={i} className="flex gap-3 hover:bg-[var(--bg-activity)] p-2 rounded cursor-default group">
-                                    <div className="w-8 h-8 bg-[var(--accent)]/20 text-[var(--accent)] flex items-center justify-center rounded shrink-0">
-                                        <Blocks size={16} />
+
+                {/* SETTINGS VIEW */}
+                {activeView === 'settings' && (
+                    <div className="flex-1 flex flex-col min-w-0">
+                        <div className="px-4 py-2 text-xs font-bold text-[var(--text-secondary)] tracking-wider uppercase">Settings</div>
+
+                        {/* Search Input */}
+                        <div className="px-4 mb-4">
+                            <div className="flex items-center gap-2 px-2 py-1 bg-[var(--bg-activity)] border border-[var(--border)] rounded-sm focus-within:border-[var(--accent)] transition-colors">
+                                <Search size={12} className="text-[var(--text-secondary)]" />
+                                <input
+                                    type="text"
+                                    placeholder="Search settings"
+                                    value={settingsSearch}
+                                    onChange={(e) => setSettingsSearch(e.target.value)}
+                                    className="bg-transparent border-none outline-none text-[11px] text-[var(--text-primary)] w-full font-sans"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="flex-1 overflow-y-auto custom-scrollbar px-4 pb-6 space-y-6">
+                            {/* EDITOR CATEGORY */}
+                            {("text editor".includes(settingsSearch.toLowerCase()) || "word wrap".includes(settingsSearch.toLowerCase()) || "minimap".includes(settingsSearch.toLowerCase())) && (
+                                <div>
+                                    <h3 className="text-[10px] font-bold text-[var(--accent)] uppercase mb-3 tracking-tighter">Text Editor</h3>
+                                    <div className="space-y-4">
+                                        {("word wrap".includes(settingsSearch.toLowerCase())) && (
+                                            <div className="flex items-start justify-between gap-4">
+                                                <div className="min-w-0">
+                                                    <div className="text-xs text-[var(--text-primary)] font-medium">Word Wrap</div>
+                                                    <div className="text-[10px] text-[var(--text-secondary)] mt-0.5 leading-tight opacity-70">Controls how lines should wrap.</div>
+                                                </div>
+                                                <button onClick={() => toggleSetting("Word Wrap")} className="shrink-0">
+                                                    {editorSettings.wordWrap
+                                                        ? <ToggleRight size={22} className="text-[var(--accent)]" />
+                                                        : <ToggleLeft size={22} className="text-[var(--text-secondary)] opacity-50" />}
+                                                </button>
+                                            </div>
+                                        )}
+
+                                        {("minimap".includes(settingsSearch.toLowerCase())) && (
+                                            <div className="flex items-start justify-between gap-4">
+                                                <div className="min-w-0">
+                                                    <div className="text-xs text-[var(--text-primary)] font-medium">Minimap</div>
+                                                    <div className="text-[10px] text-[var(--text-secondary)] mt-0.5 leading-tight opacity-70">Shows a high-level overview of the code.</div>
+                                                </div>
+                                                <button onClick={() => toggleSetting("Minimap")} className="shrink-0">
+                                                    {editorSettings.minimap
+                                                        ? <ToggleRight size={22} className="text-[var(--accent)]" />
+                                                        : <ToggleLeft size={22} className="text-[var(--text-secondary)] opacity-50" />}
+                                                </button>
+                                            </div>
+                                        )}
                                     </div>
-                                    <div className="flex-1 min-w-0">
-                                        <div className="flex justify-between items-center mb-1">
-                                            <div className="text-xs font-bold text-[var(--text-primary)] truncate">{name}</div>
+                                </div>
+                            )}
+
+                            {/* WORKBENCH CATEGORY */}
+                            {(
+                                "workbench".includes(settingsSearch.toLowerCase()) ||
+                                "color theme".includes(settingsSearch.toLowerCase()) ||
+                                Object.values(THEMES).some(t => t.name.toLowerCase().includes(settingsSearch.toLowerCase()))
+                            ) && (
+                                    <div>
+                                        <h3 className="text-[10px] font-bold text-[var(--accent)] uppercase mb-3 tracking-tighter">Workbench</h3>
+                                        <div className="space-y-3">
+                                            <div className="text-xs text-[var(--text-primary)] font-medium mb-2">Color Theme</div>
+                                            <div className="grid grid-cols-1 gap-1.5">
+                                                {Object.entries(THEMES)
+                                                    .filter(([_, themeData]) =>
+                                                        "workbench".includes(settingsSearch.toLowerCase()) ||
+                                                        "color theme".includes(settingsSearch.toLowerCase()) ||
+                                                        themeData.name.toLowerCase().includes(settingsSearch.toLowerCase())
+                                                    )
+                                                    .map(([key, themeData]) => (
+                                                        <button
+                                                            key={key}
+                                                            onClick={() => setTheme(key)}
+                                                            className={`flex items-center gap-2.5 px-2 py-1.5 rounded transition-all text-[11px] font-sans border
+                                                            ${theme === key
+                                                                    ? 'bg-[var(--accent)]/10 border-[var(--accent)] text-[var(--accent)]'
+                                                                    : 'bg-[var(--bg-activity)]/30 border-transparent text-[var(--text-secondary)] hover:bg-[var(--bg-activity)]'}
+                                                        `}
+                                                        >
+                                                            <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: themeData.colors['--bg-main'] }}></div>
+                                                            <span className="truncate">{themeData.name}</span>
+                                                            {theme === key && <CheckCircle size={10} className="ml-auto" />}
+                                                        </button>
+                                                    ))
+                                                }
+                                            </div>
                                         </div>
-                                        <div className="flex gap-2">
-                                            <button
-                                                onClick={() => toggleExtension(name)}
-                                                className={`text-[9px] px-1.5 py-0.5 rounded border ${installed ? 'bg-[var(--bg-activity)] border-[var(--border)] text-[var(--text-secondary)]' : 'bg-[var(--accent)] border-[var(--accent)] text-white'}`}
-                                            >
-                                                {installed ? 'Uninstall' : 'Install'}
+                                    </div>
+                                )}
+
+                            {/* PORTFOLIO CATEGORY */}
+                            {("portfolio".includes(settingsSearch.toLowerCase()) || "authentic vscode".includes(settingsSearch.toLowerCase()) || "stylish layout".includes(settingsSearch.toLowerCase())) && (
+                                <div>
+                                    <h3 className="text-[10px] font-bold text-[var(--accent)] uppercase mb-3 tracking-tighter">Portfolio</h3>
+                                    <div className="space-y-4">
+                                        <div className="flex items-start justify-between gap-4">
+                                            <div className="min-w-0">
+                                                <div className="text-xs text-[var(--text-primary)] font-medium">Authentic VS Code Layout</div>
+                                                <div className="text-[10px] text-[var(--text-secondary)] mt-0.5 leading-tight opacity-70">Toggle between high-fidelity VS Code and Stylish home layouts.</div>
+                                            </div>
+                                            <button onClick={() => setHomepageLayout(homepageLayout === 'modern' ? 'vscode' : 'modern')} className="shrink-0">
+                                                {homepageLayout === 'vscode'
+                                                    ? <ToggleRight size={22} className="text-[var(--accent)]" />
+                                                    : <ToggleLeft size={22} className="text-[var(--text-secondary)] opacity-50" />}
                                             </button>
                                         </div>
                                     </div>
                                 </div>
-                            ))}
-                        </div>
-                    </div>
-                )}
+                            )}
 
-                {/* SETTINGS VIEW */}
-                {activeView === 'settings' && (
-                    <div className="flex-1 flex flex-col p-4 min-w-0">
-                        <div className="text-xs font-bold text-[var(--text-secondary)] mb-4 tracking-wider">SETTINGS</div>
-
-                        <div className="space-y-4 mb-2">
-                            <div className="flex items-center justify-between">
-                                <span className="text-xs text-[var(--text-primary)]">Word Wrap</span>
-                                <button onClick={() => toggleSetting("Word Wrap")}>
-                                    {editorSettings.wordWrap
-                                        ? <ToggleRight size={24} className="text-[var(--accent)]" />
-                                        : <ToggleLeft size={24} />}
-                                </button>
-                            </div>
-
-                            <div className="flex items-center justify-between">
-                                <span className="text-xs text-[var(--text-primary)]">Minimap</span>
-                                <button onClick={() => toggleSetting("Minimap")}>
-                                    {editorSettings.minimap
-                                        ? <ToggleRight size={24} className="text-[var(--accent)]" />
-                                        : <ToggleLeft size={24} />}
-                                </button>
-                            </div>
-                        </div>
-
-                        {/* THEME ENGINE SELECTOR */}
-                        <div className="pt-4 border-t border-[var(--border)]">
-                            <div className="text-xs font-bold text-[var(--text-secondary)] mb-3 tracking-wider flex items-center gap-2">
-                                <Palette size={12} /> THEME
-                            </div>
-                            <div className="grid grid-cols-1 gap-2">
-                                {Object.entries(THEMES).map(([key, themeData]) => (
-                                    <button
-                                        key={key}
-                                        onClick={() => setTheme(key)}
-                                        className={`flex items-center gap-3 px-3 py-2 rounded border transition-all text-xs font-sans
-                      ${theme === key
-                                                ? 'bg-[var(--accent)] text-white border-[var(--accent)]'
-                                                : 'bg-[var(--bg-activity)] border-[var(--border)] text-[var(--text-secondary)] hover:border-[var(--text-secondary)]'}
-                    `}
-                                    >
-                                        <div className="w-3 h-3 rounded-full border border-white/20" style={{ backgroundColor: themeData.colors['--bg-main'] }}></div>
-                                        {themeData.name}
-                                        {theme === key && <CheckCircle size={10} className="ml-auto" />}
+                            {/* FOOTER ACTIONS */}
+                            {!settingsSearch && (
+                                <div className="pt-4 border-t border-[var(--border)] space-y-2">
+                                    <button className="w-full flex items-center gap-2.5 px-2 py-1.5 rounded text-[11px] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-activity)] transition-all text-left">
+                                        <FileJson size={14} />
+                                        <span>Open settings.json</span>
                                     </button>
-                                ))}
-                            </div>
-                        </div>
-
-                        <div className="mt-8 pt-4 border-t border-[var(--border)]">
-                            <button className="text-xs text-[var(--text-secondary)] hover:text-white flex items-center gap-2 mb-3">
-                                <FileJson size={14} /> Open settings.json
-                            </button>
+                                    <button className="w-full flex items-center gap-2.5 px-2 py-1.5 rounded text-[11px] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-activity)] transition-all text-left">
+                                        <Blocks size={14} />
+                                        <span>Configure Extensions</span>
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     </div>
                 )}
 
                 {/* ACCOUNT VIEW */}
                 {activeView === 'account' && (
-                    <div className="flex-1 flex flex-col p-6 items-center text-center min-w-[15rem]">
-                        <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[var(--hero-gradient-start)] to-[var(--hero-gradient-end)] flex items-center justify-center text-2xl font-bold text-white mb-4">
-                            A
-                        </div>
-                        <h3 className="text-sm font-bold text-[var(--text-primary)]">Arnav</h3>
-                        <p className="text-xs text-[var(--text-secondary)] mb-6">Full Stack Engineer</p>
+                    <div className="flex-1 flex flex-col p-4 min-w-0">
+                        <div className="text-xs font-bold text-[var(--text-secondary)] mb-4 tracking-wider">ACCOUNTS</div>
 
-                        <div className="w-full space-y-2">
-                            <button onClick={handleEditProfile} className="w-full py-1.5 text-xs bg-[var(--bg-activity)] hover:bg-[var(--bg-panel)] text-[var(--text-primary)] border border-[var(--border)]">Edit Profile</button>
-                            <button onClick={handleSignOut} className="w-full py-1.5 text-xs bg-[var(--bg-activity)] hover:bg-[var(--bg-panel)] text-[var(--text-primary)] border border-[var(--border)]">Sign Out</button>
+                        <div className="space-y-1">
+                            {/* Main Account Row */}
+                            <div className="flex items-center gap-3 p-2 rounded bg-[var(--bg-activity)]/50 border border-[var(--border)] mb-4">
+                                <div className="w-10 h-10 rounded bg-gradient-to-br from-[var(--hero-gradient-start)] to-[var(--hero-gradient-end)] flex items-center justify-center text-sm font-bold text-white shrink-0">
+                                    A
+                                </div>
+                                <div className="min-w-0">
+                                    <div className="text-sm font-bold text-[var(--text-primary)] truncate">Arnav</div>
+                                    <div className="text-[10px] text-[var(--text-secondary)] truncate">arnav@development.env</div>
+                                </div>
+                            </div>
+
+                            {/* Settings Sync Item */}
+                            <div className="flex items-center justify-between p-2 hover:bg-[var(--bg-activity)] rounded group cursor-pointer border border-transparent hover:border-[var(--border)] transition-all mb-2">
+                                <div className="flex items-center gap-2">
+                                    <div className="relative">
+                                        <Cloud size={16} className="text-[var(--accent)]" />
+                                        <div className="absolute -bottom-0.5 -right-0.5 w-1.5 h-1.5 bg-[var(--success)] rounded-full border border-[var(--bg-main)]"></div>
+                                    </div>
+                                    <span className="text-xs text-[var(--text-primary)]">Settings Sync is On</span>
+                                </div>
+                                <div className="w-2 h-2 rounded-full bg-[var(--success)] opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                            </div>
+
+                            <div className="pt-4 border-t border-[var(--border)] space-y-1">
+                                <button
+                                    onClick={handleEditProfile}
+                                    className="w-full flex items-center gap-3 px-2 py-1.5 rounded text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-activity)] transition-all text-left"
+                                >
+                                    <User size={14} />
+                                    <span>Manage Portfolio Profile</span>
+                                </button>
+                                <button
+                                    className="w-full flex items-center gap-3 px-2 py-1.5 rounded text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-activity)] transition-all text-left"
+                                >
+                                    <ShieldCheck size={14} />
+                                    <span>Trust Workspace</span>
+                                </button>
+                                <button
+                                    onClick={handleSignOut}
+                                    className="w-full flex items-center gap-3 px-2 py-1.5 rounded text-xs text-[var(--text-secondary)] hover:bg-[var(--bg-activity)] text-red-400 hover:text-red-300 transition-all text-left"
+                                >
+                                    <LogOut size={14} />
+                                    <span>Sign Out of Portfolio</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div className="mt-auto p-4 bg-[var(--bg-activity)]/20 border border-[var(--border)] rounded-sm">
+                            <h4 className="text-[10px] font-bold text-[var(--text-secondary)] uppercase mb-2">Developer Status</h4>
+                            <div className="flex items-center gap-2 text-[11px] text-[var(--success)] font-medium">
+                                <div className="w-1.5 h-1.5 rounded-full bg-[var(--success)] animate-pulse" />
+                                <span>Verified Architect</span>
+                            </div>
                         </div>
                     </div>
                 )}

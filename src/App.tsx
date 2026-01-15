@@ -80,6 +80,14 @@ const App = () => {
     // @ts-ignore
     return saved && THEMES[saved] ? saved : 'darkModern';
   });
+  const [homepageLayout, setHomepageLayout] = useState<'modern' | 'vscode'>(() => {
+    const saved = localStorage.getItem('portfolio_homepage_layout');
+    return (saved === 'modern' || saved === 'vscode') ? saved as any : 'modern';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('portfolio_homepage_layout', homepageLayout);
+  }, [homepageLayout]);
 
   const [contextMenu, setContextMenu] = useState<{ x: number, y: number, type: string, id: string } | null>(null);
   const [toasts, setToasts] = useState<any[]>([]);
@@ -143,7 +151,7 @@ const App = () => {
       const key = e.detail;
       const currentVal = settingsRef.current[key];
       const newVal = !currentVal;
-      addToast(`Toggled ${key === 'wordWrap' ? 'Word Wrap' : 'Minimap'} ${newVal ? 'On' : 'Off'}`, 'info');
+      addToast(`Toggled ${key === 'wordWrap' ? 'Word Wrap' : 'Minimap'} ${newVal ? 'On' : 'Off'} `, 'info');
       setEditorSettings((prev: any) => ({
         ...prev,
         [key]: newVal
@@ -578,12 +586,17 @@ const App = () => {
   }, [isDragging, handleMouseMove, handleMouseUp]);
 
   return (
-    <ThemeContext.Provider value={{ theme: currentTheme, setTheme: setCurrentTheme }}>
+    <ThemeContext.Provider value={{
+      theme: currentTheme,
+      setTheme: setCurrentTheme,
+      homepageLayout,
+      setHomepageLayout
+    }}>
       <div className="h-screen w-full bg-[var(--bg-main)] text-[var(--text-primary)] font-sans overflow-hidden flex flex-col selection:bg-[var(--selection)] selection:text-white transition-colors duration-300">
         <div className="flex-1 flex min-h-0 relative">
           <CodeRainBackground />
           <CustomScrollbarStyles />
-          <ToastContainer toasts={toasts} />
+          <ToastContainer toasts={toasts} onClose={(id) => setToasts(prev => prev.filter(t => t.id !== id))} />
 
           {contextMenu && (
             <ContextMenu
@@ -686,7 +699,7 @@ const App = () => {
               className="flex-1 bg-[var(--bg-main)] relative overflow-y-auto custom-scrollbar transition-colors duration-300"
             >
               {tabs.map(tab => (
-                <div key={tab.id} className={`h-full w-full ${activeTabId === tab.id ? 'block' : 'hidden'}`}>
+                <div key={tab.id} className={`h - full w - full ${activeTabId === tab.id ? 'block' : 'hidden'} `}>
                   <ContentRenderer
                     type={tab.type}
                     data={tab.data}
@@ -820,9 +833,17 @@ const App = () => {
             <span className="hover:text-white cursor-pointer text-emerald-500 flex items-center gap-1">
               <CheckCircle size={10} /> Prettier
             </span>
-            <span className="hover:text-white cursor-pointer text-blue-400 flex items-center gap-1">
+            <button
+              onClick={() => setToasts([])}
+              className="hover:text-white cursor-pointer text-blue-400 flex items-center gap-1 relative"
+            >
               <Bell size={10} />
-            </span>
+              {toasts.length > 0 && (
+                <span className="absolute -top-1.5 -right-1.5 min-w-[12px] h-[12px] flex items-center justify-center bg-[var(--accent)] text-white text-[8px] rounded-full px-0.5 shadow-sm">
+                  {toasts.length}
+                </span>
+              )}
+            </button>
           </div>
         </div>
 

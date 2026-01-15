@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import {
-    Brain, BarChart3, Sparkles,
-    Activity, Code2, Globe, Github, Mail, Linkedin, FileText, X
+    Activity, Code2, Globe, Github, Mail, Linkedin, FileText, X,
+    ChevronDown, History, ListTree, Link as LinkIcon, Info
 } from 'lucide-react';
 import { PROJECTS_DATA } from '../../data/projects';
 
@@ -10,6 +10,28 @@ interface SecondarySidebarProps {
     activeTabId: string;
     onClose: () => void;
 }
+
+const CollapsibleSection = ({ title, children, defaultOpen = true, icon: Icon }: { title: string, children: React.ReactNode, defaultOpen?: boolean, icon?: any }) => {
+    const [isOpen, setIsOpen] = useState(defaultOpen);
+    return (
+        <div className="border-b border-[var(--border)]/30 overflow-hidden">
+            <div
+                onClick={() => setIsOpen(!isOpen)}
+                className="h-[22px] flex items-center px-1 bg-[var(--bg-activity)]/20 cursor-pointer hover:bg-[var(--bg-activity)]/40 transition-colors"
+            >
+                <ChevronDown
+                    size={14}
+                    className={`text-[var(--text-secondary)] transition-transform duration-150 ${isOpen ? '' : '-rotate-90'}`}
+                />
+                <div className="flex items-center gap-1.5 ml-1">
+                    {Icon && <Icon size={12} className="text-[var(--text-secondary)] opacity-70" />}
+                    <span className="text-[11px] font-bold text-[var(--text-secondary)] tracking-tight uppercase select-none">{title}</span>
+                </div>
+            </div>
+            {isOpen && <div className="p-4">{children}</div>}
+        </div>
+    );
+};
 
 export const SecondarySidebar = ({ isOpen, activeTabId, onClose }: SecondarySidebarProps) => {
     const [aiInsight, setAiInsight] = useState('');
@@ -95,54 +117,30 @@ export const SecondarySidebar = ({ isOpen, activeTabId, onClose }: SecondarySide
                         onMouseDown={startResizing}
                     />
                     {/* Header */}
-                    <div className="h-9 px-4 flex items-center justify-between border-b border-[var(--border)] bg-[var(--bg-activity)]/50">
+                    <div className="h-9 px-4 flex items-center justify-between border-b border-[var(--border)] bg-[var(--bg-activity)]/50 shrink-0">
                         <span className="text-[11px] font-bold text-[var(--text-secondary)] uppercase tracking-wider flex items-center gap-2">
-                            <Sparkles size={12} className="text-[var(--accent)]" />
-                            {currentProject ? 'Project Intel' : 'System Intel'}
+                            {currentProject ? 'Project Details' : 'Portfolio Manifest'}
                         </span>
-                        <button onClick={onClose} className="md:hidden text-[var(--text-secondary)] hover:text-[var(--text-primary)]">
-                            <X size={14} />
-                        </button>
+                        <div className="flex items-center gap-2">
+                            <button onClick={onClose} className="p-1 hover:bg-[var(--bg-activity)] rounded text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors">
+                                <X size={14} />
+                            </button>
+                        </div>
                     </div>
 
-                    <div className="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-6">
-
-                        {/* ANALYSIS SECTION */}
-                        <section>
-                            <div className="flex items-center gap-2 text-[11px] font-bold text-[var(--text-secondary)] uppercase mb-3 select-none">
-                                <Brain size={12} className="text-[var(--info)]" /> Technical Summary
-                            </div>
-                            <div className="bg-[var(--bg-main)] border border-[var(--border)] rounded p-3 relative group overflow-hidden">
-                                <div className="absolute top-0 left-0 w-1 h-full bg-[var(--accent)] opacity-50" />
-                                {loading ? (
-                                    <div className="flex gap-1 items-center justify-center py-2">
-                                        <span className="w-1 h-1 bg-[var(--accent)] rounded-full animate-bounce [animation-delay:-0.3s]" />
-                                        <span className="w-1 h-1 bg-[var(--accent)] rounded-full animate-bounce [animation-delay:-0.15s]" />
-                                        <span className="w-1 h-1 bg-[var(--accent)] rounded-full animate-bounce" />
-                                    </div>
-                                ) : (
-                                    <p className="text-[12px] font-sans leading-relaxed text-[var(--text-primary)] opacity-90">
-                                        {aiInsight}
-                                    </p>
-                                )}
-                            </div>
-                        </section>
-
-                        {/* TECH STACK / STATS */}
-                        <section>
-                            <div className="flex items-center gap-2 text-[11px] font-bold text-[var(--text-secondary)] uppercase mb-2 select-none">
-                                <BarChart3 size={12} className="text-[var(--success)]" /> {currentProject ? 'Build Composition' : 'Core Proficiency'}
-                            </div>
-                            <div className="space-y-3">
+                    <div className="flex-1 overflow-y-auto custom-scrollbar select-none">
+                        {/* 1. OUTLINE / TECH STACK */}
+                        <CollapsibleSection title={currentProject ? "Tech Stack" : "Core Tech"} icon={ListTree}>
+                            <div className="space-y-4">
                                 {(currentProject?.languages || [
                                     { name: 'TypeScript', percent: 95, color: '#3178c6' },
                                     { name: 'React', percent: 92, color: '#61dafb' },
                                     { name: 'Node.js', percent: 88, color: '#339933' },
-                                    { name: 'C++', percent: 85, color: '#00599c' }
+                                    { name: 'Python', percent: 85, color: '#3776ab' }
                                 ]).map((lang: any, i: number) => (
-                                    <div key={i} className="space-y-1">
+                                    <div key={i} className="space-y-1.5">
                                         <div className="flex justify-between text-[11px] font-sans">
-                                            <span className="text-[var(--text-primary)] font-medium">{lang.name}</span>
+                                            <span className="text-[var(--text-primary)] opacity-80">{lang.name}</span>
                                             <span className="text-[var(--text-secondary)] font-mono text-[10px]">{lang.percent}%</span>
                                         </div>
                                         <div className="h-1 bg-[var(--bg-activity)] rounded-full overflow-hidden">
@@ -157,88 +155,97 @@ export const SecondarySidebar = ({ isOpen, activeTabId, onClose }: SecondarySide
                                     </div>
                                 ))}
                             </div>
-                        </section>
+                        </CollapsibleSection>
 
-                        {/* REPOSITORY METADATA */}
-                        <section className="space-y-2">
-                            <div className="flex items-center gap-2 text-[11px] font-bold text-[var(--text-secondary)] uppercase mb-2 select-none">
-                                <Activity size={12} className="text-[var(--warning)]" /> Repository Metadata
-                            </div>
-
-                            <div className="bg-[var(--bg-activity)]/50 border border-[var(--border)] p-3 rounded space-y-3">
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-2">
-                                        <Code2 size={13} className="text-[var(--info)]" />
-                                        <span className="text-[11px] font-sans text-[var(--text-secondary)]">Release</span>
+                        {/* 2. MANIFEST / AUDIT */}
+                        <CollapsibleSection title="Manifest Audit" icon={Info}>
+                            <div className="bg-[var(--bg-activity)]/30 border border-[var(--border)] rounded-sm p-3 relative group">
+                                <div className="absolute top-0 left-0 w-[2px] h-full bg-[var(--accent)] opacity-40" />
+                                {loading ? (
+                                    <div className="flex gap-1 items-center justify-center py-1">
+                                        <span className="w-1 h-1 bg-[var(--accent)] rounded-full animate-bounce [animation-delay:-0.3s]" />
+                                        <span className="w-1 h-1 bg-[var(--accent)] rounded-full animate-bounce [animation-delay:-0.15s]" />
+                                        <span className="w-1 h-1 bg-[var(--accent)] rounded-full animate-bounce" />
                                     </div>
-                                    <span className="text-[11px] font-sans text-[var(--text-primary)]">
-                                        {currentProject?.date || '2025.stable'}
-                                    </span>
-                                </div>
-                                <div className="flex items-center justify-between">
+                                ) : (
+                                    <p className="text-[12px] font-sans leading-relaxed text-[var(--text-secondary)]">
+                                        {aiInsight}
+                                    </p>
+                                )}
+                            </div>
+                        </CollapsibleSection>
+
+                        {/* 3. TIMELINE / METADATA */}
+                        <CollapsibleSection title="Deployment History" icon={History} defaultOpen={false}>
+                            <div className="space-y-3">
+                                <div className="flex items-center justify-between group">
                                     <div className="flex items-center gap-2">
-                                        <Globe size={13} className="text-[var(--success)]" />
+                                        <Code2 size={13} className="text-[var(--text-secondary)] opacity-60" />
                                         <span className="text-[11px] font-sans text-[var(--text-secondary)]">Version</span>
                                     </div>
-                                    <span className="text-[11px] font-sans text-[var(--text-primary)] font-mono">
-                                        {currentProject?.deployHistory?.[0]?.version || 'v4.2.1'}
+                                    <span className="text-[11px] font-sans text-[var(--text-primary)] font-mono opacity-80">
+                                        {currentProject?.deployHistory?.[0]?.version || 'v1.4.2'}
                                     </span>
                                 </div>
-                                <div className="flex items-center justify-between">
+                                <div className="flex items-center justify-between group">
                                     <div className="flex items-center gap-2">
-                                        <Activity size={13} className="text-[var(--accent)]" />
+                                        <Globe size={13} className="text-[var(--text-secondary)] opacity-60" />
                                         <span className="text-[11px] font-sans text-[var(--text-secondary)]">Status</span>
                                     </div>
                                     <span className="text-[11px] font-sans text-[var(--success)] font-bold">
-                                        {currentProject?.deployHistory?.[0]?.status === 'success' ? 'VERIFIED' : 'ACTIVE'}
+                                        {currentProject?.deployHistory?.[0]?.status === 'success' ? 'STABLE' : 'PRODUCTION'}
                                     </span>
                                 </div>
+                                <div className="flex items-center justify-between group">
+                                    <div className="flex items-center gap-2">
+                                        <Activity size={13} className="text-[var(--text-secondary)] opacity-60" />
+                                        <span className="text-[11px] font-sans text-[var(--text-secondary)]">Uptime</span>
+                                    </div>
+                                    <span className="text-[11px] font-sans text-[var(--text-primary)] font-mono opacity-80">99.99%</span>
+                                </div>
                             </div>
-                        </section>
+                        </CollapsibleSection>
 
-                        {/* ACTIONS SECTION */}
-                        <section>
-                            <div className="flex items-center gap-2 text-[11px] font-bold text-[var(--text-secondary)] uppercase mb-2 select-none">
-                                <Mail size={12} className="text-[var(--secondary)]" /> {currentProject ? 'Project Links' : 'Connect'}
-                            </div>
-                            <div className="grid grid-cols-2 gap-2">
+                        {/* 4. SOCIALS / LINKS */}
+                        <CollapsibleSection title="Connect" icon={LinkIcon}>
+                            <div className="grid grid-cols-1 gap-1.5">
                                 {currentProject ? (
                                     <>
                                         {currentProject.links?.github && (
-                                            <a href={currentProject.links.github} target="_blank" rel="noreferrer" className="flex items-center gap-2 bg-[var(--bg-activity)] border border-[var(--border)] p-2 rounded hover:bg-[var(--bg-main)] hover:border-[var(--accent)] transition-all group col-span-2">
-                                                <Github size={12} className="text-[var(--text-secondary)] group-hover:text-[var(--accent)]" />
-                                                <span className="text-[11px] font-sans">View Source Code</span>
+                                            <a href={currentProject.links.github} target="_blank" rel="noreferrer" className="flex items-center gap-2 p-2 hover:bg-[var(--bg-activity)] transition-colors text-[var(--text-secondary)] hover:text-[var(--text-primary)]">
+                                                <Github size={13} />
+                                                <span className="text-[11px] font-sans">Source Code</span>
                                             </a>
                                         )}
                                         {('live' in currentProject.links) && currentProject.links.live && (
-                                            <a href={currentProject.links.live} target="_blank" rel="noreferrer" className="flex items-center gap-2 bg-[var(--bg-activity)] border border-[var(--border)] p-2 rounded hover:bg-[var(--bg-main)] hover:border-[var(--accent)] transition-all group col-span-2">
-                                                <Globe size={12} className="text-[var(--text-secondary)] group-hover:text-[var(--accent)]" />
-                                                <span className="text-[11px] font-sans">Launch Live Demo</span>
+                                            <a href={currentProject.links.live} target="_blank" rel="noreferrer" className="flex items-center gap-2 p-2 hover:bg-[var(--bg-activity)] transition-colors text-[var(--text-secondary)] hover:text-[var(--text-primary)]">
+                                                <Globe size={13} />
+                                                <span className="text-[11px] font-sans">Live Demo</span>
                                             </a>
                                         )}
                                     </>
                                 ) : (
                                     <>
-                                        <a href="https://github.com/arnofrxdd" target="_blank" rel="noreferrer" className="flex items-center gap-2 bg-[var(--bg-activity)] border border-[var(--border)] p-2 rounded hover:bg-[var(--bg-main)] hover:border-[var(--accent)] transition-all group">
-                                            <Github size={12} className="text-[var(--text-secondary)] group-hover:text-[var(--accent)]" />
+                                        <a href="https://github.com/arnofrxdd" target="_blank" rel="noreferrer" className="flex items-center gap-2 p-2 hover:bg-[var(--bg-activity)] transition-colors text-[var(--text-secondary)] hover:text-[var(--text-primary)]">
+                                            <Github size={13} />
                                             <span className="text-[11px] font-sans">GitHub</span>
                                         </a>
-                                        <a href="https://linkedin.com/in/arnofrxdd" target="_blank" rel="noreferrer" className="flex items-center gap-2 bg-[var(--bg-activity)] border border-[var(--border)] p-2 rounded hover:bg-[var(--bg-main)] hover:border-[var(--accent)] transition-all group">
-                                            <Linkedin size={12} className="text-[var(--text-secondary)] group-hover:text-[var(--accent)]" />
+                                        <a href="https://linkedin.com/in/arnofrxdd" target="_blank" rel="noreferrer" className="flex items-center gap-2 p-2 hover:bg-[var(--bg-activity)] transition-colors text-[var(--text-secondary)] hover:text-[var(--text-primary)]">
+                                            <Linkedin size={13} />
                                             <span className="text-[11px] font-sans">LinkedIn</span>
                                         </a>
-                                        <a href="mailto:arnav@example.com" className="flex items-center gap-2 bg-[var(--bg-activity)] border border-[var(--border)] p-2 rounded hover:bg-[var(--bg-main)] hover:border-[var(--accent)] transition-all group">
-                                            <Mail size={12} className="text-[var(--text-secondary)] group-hover:text-[var(--accent)]" />
+                                        <a href="mailto:arnav@example.com" className="flex items-center gap-2 p-2 hover:bg-[var(--bg-activity)] transition-colors text-[var(--text-secondary)] hover:text-[var(--text-primary)]">
+                                            <Mail size={13} />
                                             <span className="text-[11px] font-sans">Email</span>
                                         </a>
-                                        <a href="/resume.pdf" target="_blank" className="flex items-center gap-2 bg-[var(--bg-activity)] border border-[var(--border)] p-2 rounded hover:bg-[var(--bg-main)] hover:border-[var(--accent)] transition-all group">
-                                            <FileText size={12} className="text-[var(--text-secondary)] group-hover:text-[var(--accent)]" />
+                                        <a href="/resume.pdf" target="_blank" className="flex items-center gap-2 p-2 hover:bg-[var(--bg-activity)] transition-colors text-[var(--text-secondary)] hover:text-[var(--text-primary)]">
+                                            <FileText size={13} />
                                             <span className="text-[11px] font-sans">Resume</span>
                                         </a>
                                     </>
                                 )}
                             </div>
-                        </section>
+                        </CollapsibleSection>
                     </div>
 
                     <div className="p-3 border-t border-[var(--border)] bg-[var(--bg-activity)]/30 mt-auto">

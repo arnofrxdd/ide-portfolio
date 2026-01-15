@@ -22,75 +22,106 @@ COFFEE_LEVEL=critical
 SANITY_CHECK=skipped
 `,
   readme: `
-# ide-portfolio
+# Arnav's Portfolio IDE 🚀
 
-![Status](https://img.shields.io/badge/status-stable-success) ![License](https://img.shields.io/badge/license-MIT-blue) ![React](https://img.shields.io/badge/react-18-cyan) ![TypeScript](https://img.shields.io/badge/typescript-5-blue)
+<p align="center">
+  <img src="https://img.shields.io/badge/Version-2.0.0--stable-blue?style=for-the-badge&logo=visual-studio-code" alt="Version" />
+  <img src="https://img.shields.io/badge/Environment-Production--Ready-success?style=for-the-badge&logo=github" alt="Environment" />
+  <img src="https://img.shields.io/badge/Built%20With-React%20%2B%20Vite-61DAFB?style=for-the-badge&logo=react" alt="Built With" />
+</p>
 
-A developer portfolio reimagined as a fully functional IDE. This project is built to look, feel, and behave like Visual Studio Code, providing an immersive experience for visitors to explore your work.
+## 🖥 Overview
 
-![ide-portfolio Preview](https://raw.githubusercontent.com/arnofrxdd/portfolio/main/portfolio.png)
+**Arnav's Portfolio** is not just a website; it's a high-performance, browser-based **Visual Studio Code environment** designed to showcase technical expertise through an immersive developer experience. 
 
-## ✨ Features
+Built with **React 18**, **TypeScript**, and motivated by authentic IDE principles, it features a fully functional file explorer, terminal, settings engine, and even an integrated AI architect.
 
-*   **Virtual File System**: Browse projects and files just like in a real editor.
-*   **Integrated Terminal**: A functional shell with commands (\`ls\`, \`cat\`, \`open\`) and **Gemini AI integration** for natural language queries.
-*   **Command Palette**: Quick navigation and actions via \`Ctrl/Cmd + P\`.
-*   **Theme System**: Switch between modern dark themes (Dracula, Monokai, GitHub Dark, etc.).
-*   **Window Management**: Draggable, resizable windows (tabs can be detached!).
-*   **Contribution Map**: A beautiful, canvas-based commit graph visualization.
-*   **Type-Safe**: Built with 100% TypeScript for robustness.
+---
 
-## 🛠️ Tech Stack
+## ✨ Key Features
 
-*   **Core**: React 18, Vite
-*   **Styling**: Tailwind CSS (v4)
-*   **Icons**: Lucide React
-*   **AI**: Google Gemini API (Flash 1.5)
-*   **Effects**: Framer Motion, HTML5 Canvas
+### 📂 Virtualized File System
+*   **Source Explorer:** Navigate through a structured codebase featuring real projects and configuration files.
+*   **Context Menus:** Right-click support for folder expansion and file actions.
+*   **Tab Management:** Multi-tab interface with persistence and drag-to-reorder functionality.
+
+### ⌨️ Integrated Intelligent Terminal
+*   **Shell Runtime:** Execute commands like \\"ls\\", \\"cat\\", and \\"open\\" to interact with the portfolio data.
+*   **AI Integration:** Powered by Google Gemini (Flash 1.5), allowing natural language queries directly in the terminal buffer.
+*   **Authentic UI:** Pixel-perfect terminal styling with standard tab-switching and history persistence.
+
+### ⚙️ Customizable Workbench
+*   **Theme Engine:** Seamlessly switch between **Dark Modern**, **Dracula**, **Monokai**, and **GitHub Dark**.
+*   **Settings Dashboard:** Fully searchable settings panel to toggle Word Wrap, Minimap, and Layout styles.
+*   **Layout Modes:** Choose between a **Cinematic Stylish** view and an **Authentic VS Code** environment.
+
+### 🧠 System Intelligence
+*   **Secondary Sidebar:** Real-time analysis of the active file or project, displaying a **Technical Summary** and **Build Composition**.
+*   **Manifest Audit:** Low-level metadata extraction including deployment history and repository status.
+
+---
 
 ## 🚀 Getting Started
 
-### 1. Clone & Install
+### Prerequisites
+*   Node.js (v18.x or higher)
+*   NPM or PNPM
+
+### Installation
 \`\`\`bash
+# Clone the repository
 git clone https://github.com/arnofrxdd/ide-portfolio.git
+
+# Navigate to directory
 cd ide-portfolio
+
+# Install dependencies
 npm install
 \`\`\`
 
-### 2. Configure Environment
-Create a \`.env\` file in the root directory:
+### Environment Configuration
+Create a .env file in the root directory to enable AI features:
 \`\`\`env
-VITE_GEMINI_API_KEY=your_gemini_api_key_here
+VITE_GEMINI_API_KEY=your_google_ai_key_here
 \`\`\`
-> Get your key from [Google AI Studio](https://aistudio.google.com/).
 
-### 3. Run Locally
+### Launch Development Server
 \`\`\`bash
 npm run dev
 \`\`\`
 
-## ⌨️ Terminal Commands
+---
 
-| Command | Description |
+## ⌨️ Command Palette & Keyboard Shortcuts
+
+| Shortcut | Action |
 | :--- | :--- |
-| \`help\` | Show available commands |
-| \`ls\` | List all projects |
-| \`cat <project>\` | View project details |
-| \`open <project>\` | Open full project view |
-| \`clear\` | Clear terminal |
-| \`[query]\` | Ask AI anything! |
+| Ctrl/Cmd + P | Open Command Palette (Quick Open) |
+| Ctrl/Cmd + \\\\ | Toggle Secondary Sidebar |
+| Ctrl/Cmd + J | Toggle Integrated Terminal |
+| Alt + Z | Toggle Word Wrap |
 
-## 🎨 Customization
+---
 
-See [CONTRIBUTING.md](./CONTRIBUTING.md) for a detailed guide on:
-*   Adding new projects
-*   Adding custom files
-*   Creating new commands
-*   Modifying themes
+## 🛠 Tech Stack
+
+| Layer | Technology |
+| :--- | :--- |
+| **Framework** | React 18 (Vite Runtime) |
+| **Language** | TypeScript (Strict Mode) |
+| **Styling** | Vanilla CSS + Tailwind v4 |
+| **Icons** | Lucide React |
+| **Animation** | Framer Motion |
+| **Intelligence** | Google Gemini 1.5 Flash |
+
+---
 
 ## 📄 License
+This project is licensed under the MIT License.
 
-MIT © [Arnav]
+<p align="center">
+  Built with ❤️ for the Developer Community
+</p>
 `,
   projects_json: `
 [
@@ -299,6 +330,7 @@ export const FILE_SYSTEM_CONFIG = {
     go: { icon: FileCode2, color: "text-sky-400" },
     cpp: { icon: FileCode2, color: "text-blue-600" },
     c: { icon: FileCode2, color: "text-slate-400" },
+    pdf: { icon: FileText, color: "text-red-400" },
   },
   default: { icon: FileText, color: "text-slate-400" }
 };

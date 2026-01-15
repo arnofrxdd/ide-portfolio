@@ -153,7 +153,7 @@ export const CanvasContributionMap = ({ theme }: { theme: string }) => {
             ctx.clearRect(0, 0, totalW, totalH);
 
             // --- DRAW LABELS ---
-            ctx.font = "500 10px font-mono, monospace";
+            ctx.font = "500 10px sans-serif";
             // @ts-ignore
             ctx.fillStyle = colors.textSecondary;
             ctx.textBaseline = "middle";
@@ -246,7 +246,7 @@ export const CanvasContributionMap = ({ theme }: { theme: string }) => {
     return (
         <div className="mb-12 border border-[var(--border)] rounded-md bg-[var(--bg-activity)] p-5 max-w-full inline-block transition-colors duration-300">
             <div className="flex justify-between items-end mb-4 w-full">
-                <h2 className="text-sm md:text-base text-[var(--text-primary)] font-mono font-medium">
+                <h2 className="text-sm md:text-base text-[var(--text-primary)] font-sans font-medium">
                     {contributionCount} contributions in the last year
                 </h2>
             </div>
@@ -255,9 +255,9 @@ export const CanvasContributionMap = ({ theme }: { theme: string }) => {
                 <canvas ref={canvasRef} className="block" />
             </div>
 
-            <div className="flex justify-between items-center mt-4 text-[10px] md:text-xs text-[var(--text-secondary)] font-mono w-full">
+            <div className="flex justify-between items-center mt-4 text-[10px] md:text-xs text-[var(--text-secondary)] font-sans w-full">
                 <div className="hidden sm:block opacity-50">
-                    LEARN_MORE: [CONTRIBUTIONS_ALGORITHM]
+                    Learn how we calculate contributions.
                 </div>
                 <div className="flex items-center gap-1.5 ml-auto">
                     <span className="mr-1">Less</span>

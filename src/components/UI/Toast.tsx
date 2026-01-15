@@ -1,5 +1,4 @@
-import React from 'react';
-import { CheckCircle, AlertCircle, Bell } from 'lucide-react';
+import { CheckCircle, AlertCircle, X, Info, AlertTriangle } from 'lucide-react';
 
 export interface Toast {
     id: number;
@@ -7,33 +6,66 @@ export interface Toast {
     type: 'success' | 'error' | 'warning' | 'info';
 }
 
-export const ToastContainer = ({ toasts }: { toasts: Toast[] }) => {
+interface ToastContainerProps {
+    toasts: Toast[];
+    onClose: (id: number) => void;
+}
+
+export const ToastContainer = ({ toasts, onClose }: ToastContainerProps) => {
     return (
-        <div className="fixed bottom-12 right-4 z-[60] flex flex-col gap-2 pointer-events-none">
+        <div className="fixed bottom-10 right-4 z-[9999] flex flex-col gap-3 pointer-events-none max-w-[420px] w-full items-end">
             {toasts.map(toast => (
                 <div
                     key={toast.id}
-                    className="min-w-[200px] max-w-sm bg-[var(--bg-panel)] border border-[var(--border)] border-l-4 p-3 rounded shadow-xl animate-in slide-in-from-right-full fade-in duration-300"
-                    style={{
-                        borderLeftColor:
-                            toast.type === 'success' ? 'var(--success)' :
-                                toast.type === 'error' ? '#ef4444' :
-                                    toast.type === 'warning' ? 'var(--warning)' :
-                                        'var(--info)'
-                    }}
+                    className="group pointer-events-auto flex w-full bg-[var(--bg-panel)] backdrop-blur-md border border-[var(--border)] shadow-[0_8px_32px_rgba(0,0,0,0.5)] animate-in slide-in-from-right-12 fade-in duration-300 rounded-sm overflow-hidden ring-1 ring-white/5"
                 >
-                    <div className="flex items-center gap-2">
-                        <span style={{
-                            color: toast.type === 'success' ? 'var(--success)' :
-                                toast.type === 'error' ? '#ef4444' :
-                                    toast.type === 'warning' ? 'var(--warning)' :
-                                        'var(--info)'
-                        }}>
-                            {toast.type === 'success' && <CheckCircle size={16} />}
-                            {toast.type === 'error' && <AlertCircle size={16} />}
-                            {toast.type === 'info' && <Bell size={16} />}
-                        </span>
-                        <span className="text-xs font-mono text-[var(--text-primary)]">{toast.msg}</span>
+                    {/* Status Indicator Bar */}
+                    <div
+                        className="w-1 shrink-0"
+                        style={{
+                            backgroundColor:
+                                toast.type === 'success' ? '#388a34' :
+                                    toast.type === 'error' ? '#f14c4c' :
+                                        toast.type === 'warning' ? '#cca700' :
+                                            '#3794ef'
+                        }}
+                    />
+
+                    <div className="flex-1 flex flex-col p-3.5 pr-2">
+                        <div className="flex items-start gap-3.5">
+                            {/* Icon */}
+                            <div className="mt-0.5 shrink-0" style={{
+                                color: toast.type === 'success' ? '#388a34' :
+                                    toast.type === 'error' ? '#f14c4c' :
+                                        toast.type === 'warning' ? '#cca700' :
+                                            '#3794ef'
+                            }}>
+                                {toast.type === 'success' && <CheckCircle size={20} strokeWidth={2} />}
+                                {toast.type === 'error' && <AlertCircle size={20} strokeWidth={2} />}
+                                {toast.type === 'warning' && <AlertTriangle size={20} strokeWidth={2} />}
+                                {toast.type === 'info' && <Info size={20} strokeWidth={2} />}
+                            </div>
+
+                            {/* Message */}
+                            <div className="flex-1 min-w-0">
+                                <div className="text-[13px] text-[var(--text-primary)] leading-[1.4] whitespace-pre-wrap">
+                                    {toast.msg}
+                                </div>
+                                <div className="mt-1.5 flex items-center gap-2">
+                                    <span className="text-[10px] uppercase tracking-wider text-[var(--text-secondary)] opacity-50 font-bold">
+                                        Source: Portfolio Intelligence
+                                    </span>
+                                </div>
+                            </div>
+
+                            {/* Close Button */}
+                            <button
+                                onClick={() => onClose(toast.id)}
+                                className="p-1 hover:bg-white/10 rounded-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all opacity-0 group-hover:opacity-100"
+                            >
+                                <X size={16} />
+                            </button>
+                        </div>
                     </div>
                 </div>
             ))}

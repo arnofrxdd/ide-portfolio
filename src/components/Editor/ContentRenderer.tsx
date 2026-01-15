@@ -1,18 +1,16 @@
 import React, { useState, useEffect, useContext, useRef } from 'react';
 import {
-    Zap, ExternalLink, Terminal, GitBranch, Folder, Filter, Trash2,
-    Activity, FileText, Server, Code, HardDrive, Github, Globe, Eye, Edit3, FileCode
+    Zap, ExternalLink, Terminal, GitBranch, Filter, LayoutGrid, List,
+    FileText, Github, Globe, Eye, Edit3, FileCode
 } from 'lucide-react';
 import { ThemeContext } from '../../context/ThemeContext';
 import { PROJECTS_DATA } from '../../data/projects';
-import { THEMES } from '../../data/themes';
 // @ts-ignore
 import FONT_5x7 from '../../data/font5x7';
 import { Breadcrumbs } from '../UI/Breadcrumbs';
 import { RealMinimap } from './Minimap';
 import { CanvasContributionMap } from '../Widgets/ContributionMap';
 import { TypingEffect } from '../UI/TypingEffect';
-import { TechTag } from '../UI/TechTag';
 
 interface ContentRendererProps {
     type: string;
@@ -24,9 +22,12 @@ interface ContentRendererProps {
     editorSettings: any;
 }
 
-export const ContentRenderer = ({ type, data, title, onOpenFile, content, lang, editorSettings }: ContentRendererProps) => {
-    const { theme } = useContext(ThemeContext);
+export const ContentRenderer = ({ type, data, title, onOpenFile, content, editorSettings }: ContentRendererProps) => {
+    const { theme, homepageLayout } = useContext(ThemeContext);
     const editorScrollRef = useRef<HTMLDivElement>(null);
+
+    const [activeTab, setActiveTab] = useState('details');
+    const [isPreview, setIsPreview] = useState(true);
 
     // Logic to get breadcrumb path
     const getPath = () => {
@@ -57,6 +58,7 @@ export const ContentRenderer = ({ type, data, title, onOpenFile, content, lang, 
         }
 
         if (type === 'readme') return 'README.md';
+        if (type === 'pdf') return 'RESUME.PDF';
 
         return '';
     };
@@ -112,7 +114,7 @@ export const ContentRenderer = ({ type, data, title, onOpenFile, content, lang, 
                     {editorSettings.minimap && (
                         <RealMinimap
                             content={cleanContent}
-                            editorRef={editorScrollRef}
+                            editorRef={editorScrollRef as React.RefObject<HTMLDivElement>}
                         />
                     )}
                 </div>
@@ -128,6 +130,137 @@ export const ContentRenderer = ({ type, data, title, onOpenFile, content, lang, 
             { action: "Refining", target: "developer experience", time: "constant" },
             { action: "Building", target: "production-ready tools", time: "always" },
         ];
+
+        if (homepageLayout === 'vscode') {
+            return (
+                <div className="h-full flex flex-col bg-[var(--bg-main)]">
+                    <Breadcrumbs path={path} />
+                    <div className="flex-1 overflow-y-auto custom-scrollbar">
+                        <div className="p-8 md:p-12 max-w-5xl mx-auto animate-in fade-in duration-500">
+                            <div className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6">
+                                <div>
+                                    <h1 className="text-4xl text-[var(--text-primary)] font-light mb-2">Arnav's Portfolio</h1>
+                                    <p className="text-lg text-[var(--text-secondary)] opacity-70">Full Stack Engineer & System Architect</p>
+                                </div>
+                                <div className="flex gap-4">
+                                    <a href="https://github.com/arnofrxdd" target="_blank" rel="noopener noreferrer" className="p-2 bg-[var(--bg-activity)] hover:bg-[var(--accent)]/20 border border-[var(--border)] rounded-sm text-[var(--text-secondary)] hover:text-[var(--accent)] transition-all">
+                                        <Github size={20} />
+                                    </a>
+                                    <a href="mailto:contact@example.com" className="p-2 bg-[var(--bg-activity)] hover:bg-[var(--accent)]/20 border border-[var(--border)] rounded-sm text-[var(--text-secondary)] hover:text-[var(--accent)] transition-all">
+                                        <FileCode size={20} />
+                                    </a>
+                                    <a href="#" className="p-2 bg-[var(--bg-activity)] hover:bg-[var(--accent)]/20 border border-[var(--border)] rounded-sm text-[var(--text-secondary)] hover:text-[var(--accent)] transition-all">
+                                        <Globe size={20} />
+                                    </a>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+                                {/* LEFT COLUMN: START */}
+                                <div>
+                                    <h2 className="text-sm font-bold text-[var(--text-primary)] mb-4 tracking-wider uppercase opacity-80">Start</h2>
+                                    <div className="space-y-4">
+                                        <button
+                                            onClick={() => onOpenFile({ id: 'projects_tsx', title: 'projects.tsx', type: 'projects' })}
+                                            className="w-full flex items-center gap-3 text-[var(--accent)] hover:underline text-sm group"
+                                        >
+                                            <LayoutGrid size={18} className="group-hover:scale-110 transition-transform" />
+                                            <span>Explore All Projects</span>
+                                        </button>
+                                        <button
+                                            onClick={() => onOpenFile({ id: 'README.md', title: 'README.md', type: 'readme', content: '' })}
+                                            className="w-full flex items-center gap-3 text-[var(--accent)] hover:underline text-sm group"
+                                        >
+                                            <FileText size={18} className="group-hover:scale-110 transition-transform" />
+                                            <span>Read Portfolio Overview</span>
+                                        </button>
+                                        <button
+                                            onClick={() => window.dispatchEvent(new CustomEvent('open-terminal'))}
+                                            className="w-full flex items-center gap-3 text-[var(--accent)] hover:underline text-sm group"
+                                        >
+                                            <Terminal size={18} className="group-hover:scale-110 transition-transform" />
+                                            <span>Open Integrated Terminal</span>
+                                        </button>
+                                    </div>
+
+                                    <h2 className="text-sm font-bold text-[var(--text-primary)] mt-12 mb-4 tracking-wider uppercase opacity-80">Recent Projects</h2>
+                                    <div className="space-y-1">
+                                        {PROJECTS_DATA.slice(0, 5).map(p => (
+                                            <div
+                                                key={p.id}
+                                                onClick={() => onOpenFile({ id: p.id, title: `${p.title}.tsx`, type: 'detail', data: p })}
+                                                className="group flex items-center justify-between p-2 rounded hover:bg-[var(--bg-activity)] cursor-pointer transition-all"
+                                            >
+                                                <div className="flex items-center gap-3 min-w-0">
+                                                    <FileCode size={16} className="text-[var(--accent)] shrink-0" />
+                                                    <span className="text-sm text-[var(--text-primary)] truncate font-sans">{p.title}</span>
+                                                </div>
+                                                <span className="text-[10px] text-[var(--text-secondary)] opacity-0 group-hover:opacity-60 transition-opacity font-mono whitespace-nowrap ml-4">src/projects</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* RIGHT COLUMN: SKILLS & SPOTLIGHT */}
+                                <div>
+                                    <h2 className="text-sm font-bold text-[var(--text-primary)] mb-4 tracking-wider uppercase opacity-80">Skills & Expertise</h2>
+                                    <div className="flex flex-wrap gap-2 mb-8">
+                                        {['React', 'Next.js', 'Typescript', 'Node.js', 'Go', 'Docker', 'AWS', 'PostgreSQL', 'Python'].map(skill => (
+                                            <span key={skill} className="px-2 py-1 bg-[var(--bg-panel)] border border-[var(--border)] rounded-sm text-xs text-[var(--text-secondary)] hover:border-[var(--accent)] hover:text-[var(--text-primary)] cursor-default transition-all">
+                                                {skill}
+                                            </span>
+                                        ))}
+                                    </div>
+
+                                    <h2 className="text-sm font-bold text-[var(--text-primary)] mb-4 tracking-wider uppercase opacity-80">Featured Walkthrough</h2>
+                                    <div className="space-y-4">
+                                        <div
+                                            onClick={() => {
+                                                const p = PROJECTS_DATA.find(p => p.featured);
+                                                if (p) onOpenFile({ id: p.id, title: `${p.title}.tsx`, type: 'detail', data: p });
+                                            }}
+                                            className="p-4 bg-[var(--bg-panel)] border border-[var(--border)] rounded-sm hover:border-[var(--accent)] transition-all cursor-pointer group"
+                                        >
+                                            <div className="flex items-start gap-4">
+                                                <div className="w-10 h-10 rounded bg-[var(--accent)]/10 flex items-center justify-center text-[var(--accent)] shrink-0">
+                                                    <Zap size={20} />
+                                                </div>
+                                                <div>
+                                                    <h3 className="text-sm font-bold text-[var(--text-primary)] mb-1">Spotlight: {PROJECTS_DATA.find(p => p.featured)?.title || 'Flagship Project'}</h3>
+                                                    <p className="text-xs text-[var(--text-secondary)] leading-relaxed">A deep dive into my most sophisticated work. Click to see the architecture and implementation.</p>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="p-4 bg-[var(--bg-panel)] border border-[var(--border)] rounded-sm hover:border-[var(--accent)] transition-all cursor-pointer group">
+                                            <div className="flex items-start gap-4">
+                                                <div className="w-10 h-10 rounded bg-[var(--success)]/10 flex items-center justify-center text-[var(--success)] shrink-0">
+                                                    <GitBranch size={20} />
+                                                </div>
+                                                <div>
+                                                    <h3 className="text-sm font-bold text-[var(--text-primary)] mb-1">Open Source Contributions</h3>
+                                                    <p className="text-xs text-[var(--text-secondary)] leading-relaxed">Check out how I contribute back to the community and collaborate on scalable systems.</p>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="mt-8 p-4 border border-[var(--border)] border-dashed rounded-sm">
+                                            <div className="flex items-center gap-3 text-xs text-[var(--text-secondary)] mb-2">
+                                                <div className="w-2 h-2 rounded-full bg-[var(--info)] animate-pulse" />
+                                                <span>Currently available for projects</span>
+                                            </div>
+                                            <div className="text-[10px] text-[var(--text-secondary)] font-mono opacity-60">
+                                                Last indexed: {new Date().toLocaleDateString()}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
 
         return (
             <div className="h-full flex flex-col">
@@ -175,7 +308,7 @@ export const ContentRenderer = ({ type, data, title, onOpenFile, content, lang, 
 
                         {/* PINNED PROJECTS */}
                         <div className="mb-8">
-                            <h2 className="text-lg md:text-xl font-bold text-[var(--text-primary)] mb-6 flex items-center gap-2 font-mono">
+                            <h2 className="text-lg md:text-xl font-bold text-[var(--text-primary)] mb-6 flex items-center gap-2 font-sans">
                                 <Zap size={18} className="text-[var(--warning)]" /> Pinned Deployments
                             </h2>
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -195,13 +328,13 @@ export const ContentRenderer = ({ type, data, title, onOpenFile, content, lang, 
                                         <div className="flex items-center justify-between mb-3">
                                             <div className="flex items-center gap-2">
                                                 <FileCode size={16} className="text-[var(--accent)]" />
-                                                <span className="text-[var(--text-primary)] font-mono text-sm font-semibold truncate max-w-[150px]">
+                                                <span className="text-[var(--text-primary)] font-sans text-sm font-semibold truncate max-w-[150px]">
                                                     {p.title}
                                                 </span>
                                             </div>
                                             <ExternalLink size={12} className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)]" />
                                         </div>
-                                        <p className="text-[var(--text-secondary)] text-xs line-clamp-2 mb-4 h-8">
+                                        <p className="text-[var(--text-secondary)] text-xs line-clamp-2 mb-4 h-8 font-sans">
                                             {p.description}
                                         </p>
                                     </div>
@@ -219,10 +352,10 @@ export const ContentRenderer = ({ type, data, title, onOpenFile, content, lang, 
                                         type: 'projects'
                                     })
                                 }
-                                className="group flex items-center gap-3 px-6 py-3 bg-[var(--bg-activity)] border border-[var(--border)] text-[var(--text-secondary)] font-mono text-sm rounded-md hover:bg-[var(--bg-panel)] hover:border-[var(--accent)] hover:text-[var(--accent)] transition-all"
+                                className="group flex items-center gap-3 px-6 py-3 bg-[var(--accent)] text-white rounded-md hover:bg-[var(--accent)]/90 transition-all font-sans text-sm font-medium shadow-md"
                             >
-                                <Terminal size={16} className="text-[var(--text-secondary)] group-hover:text-[var(--accent)]" />
-                                <span className="tracking-wide">./view_all_projects</span>
+                                <Terminal size={16} className="text-white" />
+                                <span className="tracking-wide">Explore All Projects</span>
                             </button>
                         </div>
 
@@ -230,17 +363,17 @@ export const ContentRenderer = ({ type, data, title, onOpenFile, content, lang, 
                         <CanvasContributionMap theme={theme} />
                         {/* RECENT ACTIVITY */}
                         <div className="mb-12">
-                            <h2 className="text-sm font-bold text-[var(--text-secondary)] mb-4 flex items-center gap-2 font-mono uppercase tracking-wider">
+                            <h2 className="text-sm font-bold text-[var(--text-secondary)] mb-4 flex items-center gap-2 font-sans uppercase tracking-wider">
                                 <GitBranch size={14} className="text-[var(--info)]" /> Recent Activity
                             </h2>
                             <div className="space-y-2">
                                 {recentActivity.map((act, i) => (
-                                    <div key={i} className="flex items-center justify-between text-sm bg-[var(--bg-activity)]/20 border border-[var(--border)]/50 p-3 rounded hover:border-[var(--accent)] hover:bg-[var(--bg-activity)] transition-all group">
+                                    <div key={i} className="flex items-center justify-between text-sm bg-[var(--bg-panel)] border border-[var(--border)] p-3 rounded hover:border-[var(--accent)] hover:bg-[var(--bg-activity)] transition-all group">
                                         <div className="flex items-center gap-3">
                                             <div className="w-1.5 h-1.5 rounded-full bg-[var(--info)]" />
-                                            <span className="text-[var(--text-secondary)] font-mono">{act.action} <span className="text-[var(--text-primary)] font-bold group-hover:text-[var(--accent)] cursor-pointer decoration-dotted underline-offset-4">{act.target}</span></span>
+                                            <span className="text-[var(--text-secondary)] font-sans">{act.action} <span className="text-[var(--text-primary)] font-bold group-hover:text-[var(--accent)] cursor-pointer decoration-dotted underline-offset-4">{act.target}</span></span>
                                         </div>
-                                        <span className="text-xs text-[var(--text-secondary)] font-mono opacity-70">{act.time}</span>
+                                        <span className="text-xs text-[var(--text-secondary)] font-sans opacity-70">{act.time}</span>
                                     </div>
                                 ))}
                             </div>
@@ -253,6 +386,14 @@ export const ContentRenderer = ({ type, data, title, onOpenFile, content, lang, 
     }
 
     if (type === 'projects') {
+        const [viewMode, setViewMode] = useState<'grid' | 'list'>(() => {
+            const saved = localStorage.getItem('projects_view_mode');
+            return (saved === 'grid' || saved === 'list') ? saved : 'list';
+        });
+
+        useEffect(() => {
+            localStorage.setItem('projects_view_mode', viewMode);
+        }, [viewMode]);
         const [showFilters, setShowFilters] = useState(false);
         const [techFilters, setTechFilters] = useState<string[]>([]);
         const [langFilters, setLangFilters] = useState<string[]>([]);
@@ -271,99 +412,147 @@ export const ContentRenderer = ({ type, data, title, onOpenFile, content, lang, 
         };
 
         return (
-            <div className="h-full flex flex-col">
+            <div className="h-full flex flex-col bg-[var(--bg-main)]">
                 <Breadcrumbs path={path} />
-                <div className="flex-1 overflow-y-auto custom-scrollbar">
-                    <div className="p-4 md:p-12 max-w-7xl mx-auto pb-24">
-                        <div className="mb-6 flex items-center justify-between border-b border-[var(--border)] pb-4">
-                            <h2 className="text-xl md:text-2xl font-bold text-[var(--text-primary)] flex items-center gap-2">
-                                <Folder size={20} className="text-[var(--accent)]" /> /projects
-                            </h2>
-                            <button
-                                onClick={() => setShowFilters(v => !v)}
-                                className="text-xs font-mono text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center gap-2 transition-colors"
-                            >
-                                <Filter size={14} /> {showFilters ? "hide_filters" : "show_filters"}
-                            </button>
+                <div className="flex-1 overflow-hidden flex flex-col">
+                    <div className="px-4 py-2 md:py-3 border-b border-[var(--border)] bg-[var(--bg-panel)] flex flex-row justify-between items-center shrink-0 min-h-[45px] md:min-h-[50px]">
+                        <div className="flex items-center gap-3">
+                            <div className="text-[var(--text-secondary)] text-[10px] md:text-xs uppercase tracking-widest font-sans font-bold flex items-center gap-2">
+                                <LayoutGrid size={14} className="text-[var(--accent)]" />
+                                <span className="hidden sm:inline">PROJECTS EXPLORER</span>
+                                <span className="sm:hidden">PROJECTS</span>
+                            </div>
                         </div>
 
-                        <div className="grid grid-cols-1 lg:grid-cols-[260px,1fr] gap-8">
-                            {showFilters && (
-                                <div className="space-y-6">
-                                    {/* TECH STACK FILTERS */}
-                                    <div className="bg-[var(--bg-activity)] border border-[var(--border)] rounded-lg p-4">
-                                        <h3 className="text-xs font-bold text-[var(--text-secondary)] uppercase mb-3 font-mono">Tech Stack</h3>
-                                        <div className="flex flex-wrap gap-2">
-                                            {allTech.map(t => (
-                                                <button
-                                                    key={t}
-                                                    onClick={() => toggleFilter(t, setTechFilters)}
-                                                    className={`px-2 py-1 text-[10px] font-mono rounded border transition-all 
-                          ${techFilters.includes(t)
-                                                            ? "bg-[var(--accent)]/20 border-[var(--accent)] text-[var(--accent)]"
-                                                            : "bg-[var(--bg-main)] border-[var(--border)] text-[var(--text-secondary)] hover:border-[var(--text-primary)]"}`}
-                                                >
-                                                    {t}
-                                                </button>
-                                            ))}
-                                        </div>
-                                    </div>
+                        <div className="flex items-center bg-[var(--bg-activity)] rounded-sm p-0.5 border border-[var(--border)]">
+                            <button
+                                onClick={() => setViewMode('list')}
+                                className={`p-1.5 rounded-sm transition-all ${viewMode === 'list' ? 'bg-[var(--bg-main)] text-[var(--accent)] shadow-sm' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}
+                                title="List View"
+                            >
+                                <List size={14} />
+                            </button>
+                            <button
+                                onClick={() => setViewMode('grid')}
+                                className={`p-1.5 rounded-sm transition-all ${viewMode === 'grid' ? 'bg-[var(--bg-main)] text-[var(--accent)] shadow-sm' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}
+                                title="Grid View"
+                            >
+                                <LayoutGrid size={14} />
+                            </button>
+                            <div className="w-[1px] h-3 bg-[var(--border)] mx-1" />
+                            <button
+                                onClick={() => setShowFilters(!showFilters)}
+                                className={`p-1.5 rounded-sm transition-all ${showFilters ? 'bg-[var(--bg-main)] text-[var(--accent)] shadow-sm' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}
+                                title="Filter"
+                            >
+                                <Filter size={14} />
+                            </button>
+                        </div>
+                    </div>
 
-                                    {/* LANGUAGE FILTERS */}
-                                    <div className="bg-[var(--bg-activity)] border border-[var(--border)] rounded-lg p-4">
-                                        <h3 className="text-xs font-bold text-[var(--text-secondary)] uppercase mb-3 font-mono">Languages</h3>
-                                        <div className="flex flex-wrap gap-2">
-                                            {allLanguages.map(l => (
-                                                <button
-                                                    key={l}
-                                                    onClick={() => toggleFilter(l, setLangFilters)}
-                                                    className={`px-2 py-1 text-[10px] font-mono rounded border transition-all 
-                          ${langFilters.includes(l)
-                                                            ? "bg-[var(--accent)]/20 border-[var(--accent)] text-[var(--accent)]"
-                                                            : "bg-[var(--bg-main)] border-[var(--border)] text-[var(--text-secondary)] hover:border-[var(--text-primary)]"}`}
-                                                >
-                                                    {l}
-                                                </button>
-                                            ))}
-                                        </div>
+                    {/* FILTERS PANEL */}
+                    {showFilters && (
+                        <div className="px-4 py-3 border-b border-[var(--border)] bg-[var(--bg-activity)]/20 shrink-0">
+                            <div className="flex flex-col gap-4">
+                                <div>
+                                    <div className="text-[10px] font-bold text-[var(--text-secondary)] uppercase mb-2 font-mono">Filter by Technology</div>
+                                    <div className="flex gap-2 flex-wrap">
+                                        {allTech.map(t => (
+                                            <button key={t} onClick={() => toggleFilter(t, setTechFilters)}
+                                                className={`px-2 py-0.5 text-[10px] border rounded-sm font-mono transition-all ${techFilters.includes(t) ? 'bg-[var(--accent)] border-[var(--accent)] text-white' : 'border-[var(--border)] text-[var(--text-secondary)] hover:border-[var(--text-primary)]'}`}>
+                                                {t}
+                                            </button>
+                                        ))}
                                     </div>
+                                </div>
+                                <div>
+                                    <div className="text-[10px] font-bold text-[var(--text-secondary)] uppercase mb-2 font-mono">Filter by Language</div>
+                                    <div className="flex gap-2 flex-wrap">
+                                        {allLanguages.map(l => (
+                                            <button key={l} onClick={() => toggleFilter(l, setLangFilters)}
+                                                className={`px-2 py-0.5 text-[10px] border rounded-sm font-mono transition-all ${langFilters.includes(l) ? 'bg-[var(--accent)] border-[var(--accent)] text-white' : 'border-[var(--border)] text-[var(--text-secondary)] hover:border-[var(--text-primary)]'}`}>
+                                                {l}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
 
-                                    {(techFilters.length > 0 || langFilters.length > 0) && (
-                                        <button
-                                            onClick={() => { setTechFilters([]); setLangFilters([]); }}
-                                            className="text-xs font-mono text-[var(--text-secondary)] hover:text-[var(--warning)] flex items-center gap-2"
+                    {/* CONTENT AREA */}
+                    <div className="flex-1 overflow-y-auto custom-scrollbar p-4 md:p-8">
+                        <div className="max-w-6xl mx-auto w-full py-4 md:py-8">
+                            {filteredProjects.length === 0 ? (
+                                <div className="text-center text-[var(--text-secondary)] mt-20 font-mono text-sm">No extensions found matching your criteria.</div>
+                            ) : (
+                                <div className={viewMode === 'grid' ? "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6" : "flex flex-col gap-1"}>
+                                    {filteredProjects.map(p => (
+                                        <div
+                                            key={p.id}
+                                            onClick={() => onOpenFile({ id: p.id, title: `${p.title}.tsx`, type: "detail", data: p })}
+                                            className={`
+                                            group border border-transparent hover:bg-[var(--bg-activity)] cursor-pointer transition-all
+                                            ${viewMode === 'grid'
+                                                    ? 'bg-[var(--bg-panel)] border-[var(--border)] flex flex-col h-full rounded-sm hover:border-[var(--accent)]'
+                                                    : 'flex flex-row items-start gap-4 p-2 rounded-sm hover:bg-[var(--bg-activity)]'
+                                                }
+                                        `}
                                         >
-                                            <Trash2 size={12} /> clear_all_filters
-                                        </button>
-                                    )}
+                                            {/* IMAGE / ICON */}
+                                            <div className={viewMode === 'grid' ? "h-32 w-full bg-[var(--bg-activity)] relative overflow-hidden shrink-0" : "w-16 h-16 md:w-24 md:h-24 bg-[var(--bg-activity)] shrink-0 border border-[var(--border)]"}>
+                                                <img
+                                                    src={p.image}
+                                                    alt={p.title}
+                                                    className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity"
+                                                />
+                                            </div>
+
+                                            {/* CONTENT */}
+                                            <div className={`flex-1 min-w-0 ${viewMode === 'grid' ? 'p-3' : 'py-1 flex flex-col justify-between'}`}>
+                                                <div>
+                                                    <div className="flex items-center justify-between mb-1">
+                                                        <div className="flex items-center gap-2">
+                                                            <h3 className="font-bold text-[var(--text-primary)] text-sm md:text-base font-sans group-hover:text-[var(--accent)] transition-colors">
+                                                                {p.title}
+                                                            </h3>
+                                                            {viewMode === 'list' && (
+                                                                <span className="hidden md:inline-flex px-1.5 py-0.5 rounded-sm bg-[var(--bg-main)] text-[10px] text-[var(--text-secondary)] border border-[var(--border)] font-mono">
+                                                                    v1.{p.id.length}.0
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                        {viewMode === 'grid' && p.links && 'live' in p.links && <Globe size={12} className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)]" />}
+                                                    </div>
+
+                                                    <div className="flex items-center gap-2 mb-2">
+                                                        {p.languages?.slice(0, 2).map((lang: any) => (
+                                                            <div key={lang.name} className="flex items-center gap-1 text-[10px] text-[var(--text-secondary)] bg-[var(--bg-activity)] px-1.5 py-0.5 rounded-sm border border-[var(--border)]">
+                                                                <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: lang.color }} />
+                                                                {lang.name}
+                                                            </div>
+                                                        ))}
+                                                    </div>
+
+                                                    <p className="text-xs text-[var(--text-secondary)] line-clamp-2 md:line-clamp-1 mb-2 font-sans opacity-80">
+                                                        {p.description}
+                                                    </p>
+                                                </div>
+
+                                                {viewMode === 'list' && (
+                                                    <div className="flex gap-1 mt-1 flex-wrap">
+                                                        {p.tech?.map((t: string) => (
+                                                            <span key={t} className="text-[10px] px-1.5 py-0.5 bg-[var(--bg-main)] text-[var(--text-secondary)] rounded-sm border border-[var(--border)]">
+                                                                {t}
+                                                            </span>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    ))}
                                 </div>
                             )}
-
-                            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                                {filteredProjects.map(p => (
-                                    <div
-                                        key={p.id}
-                                        onClick={() => onOpenFile({ id: p.id, title: `${p.title}.tsx`, type: "detail", data: p })}
-                                        className="group bg-[var(--bg-panel)] border border-[var(--border)] hover:border-[var(--accent)] rounded-lg overflow-hidden cursor-pointer transition-all hover:-translate-y-1 hover:shadow-xl"
-                                    >
-                                        <div className="h-32 bg-[var(--bg-activity)] relative overflow-hidden">
-                                            <img
-                                                src={p.image}
-                                                alt={p.title}
-                                                className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-all grayscale group-hover:grayscale-0"
-                                            />
-                                        </div>
-                                        <div className="p-4">
-                                            <h3 className="text-[var(--text-primary)] font-bold mb-1 group-hover:text-[var(--accent)] truncate transition-colors">{p.title}</h3>
-                                            <p className="text-[var(--text-secondary)] text-xs line-clamp-2 mb-3">{p.description}</p>
-                                            <div className="flex flex-wrap gap-2">{p.tech?.slice(0, 3).map(t => <TechTag key={t} label={t} />)}</div>
-                                        </div>
-                                    </div>
-                                ))}
-                                {filteredProjects.length === 0 && (
-                                    <div className="col-span-full text-center text-[var(--text-secondary)] font-mono text-sm mt-12">No projects match selected filters.</div>
-                                )}
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -373,126 +562,160 @@ export const ContentRenderer = ({ type, data, title, onOpenFile, content, lang, 
 
     if (type === 'detail' && data) {
         return (
-            <div className="h-full flex flex-col">
+            <div className="h-full flex flex-col bg-[var(--bg-main)]">
                 <Breadcrumbs path={path} />
                 <div className="flex-1 overflow-y-auto custom-scrollbar">
-                    <div className="p-4 md:p-12 max-w-6xl mx-auto pb-32">
-                        <div className="grid grid-cols-1 lg:grid-cols-[2fr,1fr] gap-8 min-w-0">
-
-                            {/* LEFT COLUMN */}
-                            <div className="space-y-8 min-w-0">
-                                <div>
-                                    <div className="flex items-center gap-3 text-xs md:text-sm font-mono text-[var(--text-secondary)] mb-2">
-                                        <span className="flex items-center gap-1"><GitBranch size={12} /> main</span>
-                                        <span className="text-[var(--border)]">|</span>
-                                        <span className="flex items-center gap-1"><Activity size={12} /> {data.deployHistory?.[0]?.version || 'v1.0.0'}</span>
-                                    </div>
-                                    <h1 className="text-2xl md:text-5xl font-bold text-[var(--text-primary)] mb-2 tracking-tight break-words">{data.title}</h1>
-                                    <p className="text-base md:text-xl text-[var(--text-secondary)] font-light border-l-2 border-[var(--accent)] pl-4 break-words">{data.subtitle}</p>
-                                </div>
-
-                                {/* DESCRIPTION (README) - VS CODE AUTHENTIC FONT */}
-                                <div className="bg-[var(--bg-activity)]/30 border border-[var(--border)] rounded-lg p-4 md:p-6">
-                                    <div className="flex items-center gap-2 mb-0.001 text-[var(--text-primary)] font-mono text-sm border-b border-[var(--border)] pb-2">
-                                        <FileText size={14} className="text-[var(--info)]" /> README.md
-                                    </div>
-                                    <p className="text-[var(--text-primary)] text-base font-sans leading-relaxed opacity-90 whitespace-pre-wrap">{data.longDescription}</p>
-                                </div>
-
-                                {/* PROJECT IMAGE MOVED HERE */}
-                                <div className="rounded-lg border border-[var(--border)] shadow-2xl relative group p-4 flex justify-center items-center bg-black/20 overflow-hidden h-[300px] sm:h-auto">
-                                    <img src={data.image} alt={data.title} className="max-w-full max-h-full object-contain sm:w-auto sm:h-auto sm:object-cover" />
-                                </div>
-
-                                {/* ARCHITECTURE */}
-                                {data.architecture && (
-                                    <div className="bg-[var(--bg-activity)] border border-[var(--border)] rounded-lg p-4 md:p-6 overflow-hidden">
-                                        <div className="flex items-center gap-2 mb-4 text-[var(--text-primary)] font-mono text-sm">
-                                            <Server size={14} className="text-[var(--warning)]" /> System Architecture
+                    {/* EXTENSION HEADER */}
+                    <div className="px-4 md:px-12 max-w-5xl mx-auto w-full py-8">
+                        <div className="flex flex-col md:flex-row gap-6 mb-6">
+                            <div className="w-32 h-32 bg-[var(--bg-activity)] border border-[var(--border)] shrink-0 shadow-sm relative overflow-hidden">
+                                <img
+                                    src={data.image}
+                                    alt={data.title}
+                                    className="w-full h-full object-cover"
+                                />
+                            </div>
+                            <div className="flex-1 min-w-0 pt-1">
+                                <h1 className="text-3xl font-sans font-bold text-[var(--text-primary)] mb-2 flex items-center gap-3">
+                                    {data.title}
+                                </h1>
+                                <div className="flex flex-wrap gap-2 mb-4">
+                                    {data.languages?.map((lang: any) => (
+                                        <div key={lang.name} className="flex items-center gap-2 px-2.5 py-1 rounded-sm bg-[var(--bg-activity)] border border-[var(--border)] text-xs text-[var(--text-primary)]">
+                                            <div className="w-2 h-2 rounded-full" style={{ backgroundColor: lang.color }} />
+                                            {lang.name}
+                                            <span className="text-[var(--text-secondary)] scale-90">{lang.percent}%</span>
                                         </div>
-                                        <div className="overflow-x-auto w-full custom-scrollbar">
-                                            <pre className="font-mono text-xs md:text-sm text-[var(--text-secondary)] leading-relaxed min-w-max">{data.architecture}</pre>
+                                    ))}
+                                </div>
+                                <p className="text-base text-[var(--text-primary)] mb-4 font-sans max-w-2xl leading-relaxed">
+                                    {data.description}
+                                </p>
+                                <div className="flex flex-wrap gap-3">
+                                    {data.links?.live && (
+                                        <a href={data.links.live} target="_blank" rel="noopener noreferrer"
+                                            className="px-4 py-1.5 bg-[var(--accent)] hover:bg-[var(--accent)]/90 text-white text-sm font-medium rounded-sm transition-all shadow-sm flex items-center gap-2">
+                                            Run Project <Globe size={14} />
+                                        </a>
+                                    )}
+                                    {data.links?.github && (
+                                        <a href={data.links.github} target="_blank" rel="noopener noreferrer"
+                                            className="px-4 py-1.5 bg-[var(--bg-activity)] hover:bg-[var(--bg-panel)] border border-[var(--border)] text-[var(--text-primary)] text-sm font-medium rounded-sm transition-all flex items-center gap-2">
+                                            <Github size={14} /> Repository
+                                        </a>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* TABS */}
+                        <div className="flex items-center gap-6 border-b border-[var(--border)] mt-1">
+                            <button
+                                onClick={() => setActiveTab('details')}
+                                className={`px-1 py-3 text-sm font-sans border-b-2 font-medium transition-colors ${activeTab === 'details' ? 'border-[var(--accent)] text-[var(--text-primary)]' : 'border-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}
+                            >
+                                Details
+                            </button>
+                            {data.architecture && (
+                                <button
+                                    onClick={() => setActiveTab('architecture')}
+                                    className={`px-1 py-3 text-sm font-sans border-b-2 font-medium transition-colors ${activeTab === 'architecture' ? 'border-[var(--accent)] text-[var(--text-primary)]' : 'border-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}
+                                >
+                                    Architecture
+                                </button>
+                            )}
+                            {data.snippet && (
+                                <button
+                                    onClick={() => setActiveTab('implementation')}
+                                    className={`px-1 py-3 text-sm font-sans border-b-2 font-medium transition-colors ${activeTab === 'implementation' ? 'border-[var(--accent)] text-[var(--text-primary)]' : 'border-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}
+                                >
+                                    Core Implementation
+                                </button>
+                            )}
+                        </div>
+
+                        <div className="grid grid-cols-1 lg:grid-cols-[1fr,300px] gap-8 mt-6">
+                            {/* MAIN CONTENT AREA */}
+                            <div className="min-w-0">
+                                {/* DETAILS TAB */}
+                                {activeTab === 'details' && (
+                                    <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
+                                        <div className="text-[var(--text-primary)] opacity-90 font-sans leading-7 mb-6">
+                                            <p className="whitespace-pre-wrap text-[15px] leading-relaxed mt-0 pt-0">
+                                                {data.longDescription?.trim()}
+                                            </p>
+                                        </div>
+
+                                        {/* Fixed Size Screenshot */}
+                                        <div className="rounded-sm overflow-hidden border border-[var(--border)] bg-[var(--bg-activity)]/20 shadow-xl max-w-2xl w-full">
+                                            <img
+                                                src={data.image}
+                                                alt={`${data.title} Screenshot`}
+                                                className="w-full h-auto object-cover"
+                                            />
                                         </div>
                                     </div>
                                 )}
 
-                                {/* CODE SNIPPET */}
-                                {data.snippet && (
-                                    <div className="bg-[var(--bg-panel)] border border-[var(--border)] rounded-lg overflow-hidden min-w-0">
-                                        <div className="bg-[var(--bg-activity)] px-4 py-2 border-b border-[var(--border)] flex justify-between items-center">
-                                            <div className="flex items-center gap-2 text-xs font-mono text-[var(--text-secondary)]"><Code size={12} /> core_logic.ts</div>
-                                            <div className="flex gap-1.5">
-                                                <div className="w-2.5 h-2.5 rounded-full bg-red-500/20" />
-                                                <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/20" />
-                                                <div className="w-2.5 h-2.5 rounded-full bg-green-500/20" />
-                                            </div>
+                                {/* ARCHITECTURE TAB */}
+                                {activeTab === 'architecture' && data.architecture && (
+                                    <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
+                                        <div className="bg-[var(--bg-activity)]/30 border border-[var(--border)] rounded-sm p-6 overflow-x-auto custom-scrollbar">
+                                            <pre className="font-mono text-xs text-[var(--text-secondary)] leading-relaxed">{data.architecture}</pre>
                                         </div>
-                                        <div className="p-4 overflow-x-auto w-full custom-scrollbar">
-                                            <pre className="font-mono text-xs md:text-sm text-[var(--success)] leading-relaxed min-w-max">{data.snippet}</pre>
+                                    </div>
+                                )}
+
+                                {/* CORE IMPLEMENTATION TAB */}
+                                {activeTab === 'implementation' && data.snippet && (
+                                    <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
+                                        <div className="bg-[var(--bg-panel)] border border-[var(--border)] rounded-sm overflow-hidden shadow-lg">
+                                            <div className="bg-[var(--bg-activity)] px-4 py-2 border-b border-[var(--border)] flex justify-between items-center">
+                                                <span className="text-xs font-mono text-[var(--text-secondary)]">implementation.ts</span>
+                                                <div className="flex gap-1.5">
+                                                    <div className="w-2.5 h-2.5 rounded-full bg-red-500/20" />
+                                                    <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/20" />
+                                                    <div className="w-2.5 h-2.5 rounded-full bg-green-500/20" />
+                                                </div>
+                                            </div>
+                                            <div className="p-6 overflow-x-auto custom-scrollbar">
+                                                <pre className="font-mono text-xs text-[var(--success)] leading-relaxed">{data.snippet}</pre>
+                                            </div>
                                         </div>
                                     </div>
                                 )}
                             </div>
 
-                            {/* RIGHT COLUMN */}
-                            <div className="space-y-6 min-w-0">
-                                {/* IMAGE MOVED TO LEFT COLUMN */}
-
-                                {/* LANGUAGES */}
-                                <div className="bg-[var(--bg-activity)]/30 border border-[var(--border)] rounded-lg p-5">
-                                    <h3 className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-widest mb-4 font-mono flex items-center gap-2">Languages</h3>
-                                    <div className="flex h-3 rounded-full overflow-hidden mb-3">
-                                        {data.languages.map((lang: any, index: number) => (
-                                            <div key={index} style={{ width: `${lang.percent}%`, backgroundColor: lang.color }} className="h-full" />
-                                        ))}
-                                    </div>
-                                    <div className="flex flex-wrap gap-4">
-                                        {data.languages.map((lang: any, index: number) => (
-                                            <div key={index} className="flex items-center gap-2">
-                                                <div className="w-2 h-2 rounded-full" style={{ backgroundColor: lang.color }} />
-                                                <span className="text-xs text-[var(--text-primary)] font-mono">{lang.name} <span className="text-[var(--text-secondary)]">{lang.percent}%</span></span>
-                                            </div>
+                            {/* SIDEBAR */}
+                            <div className="space-y-8 lg:border-l lg:border-[var(--border)] lg:pl-8 mt-8 lg:mt-0 pt-8 lg:pt-0 border-t lg:border-t-0 border-[var(--border)]">
+                                <div>
+                                    <h3 className="text-xs uppercase font-bold text-[var(--text-secondary)] mb-4 tracking-wider font-sans">Technologies</h3>
+                                    <div className="flex flex-wrap gap-2">
+                                        {data.tech?.map((t: string) => (
+                                            <span key={t} className="px-2 py-1 bg-[var(--bg-activity)] text-[var(--text-primary)] text-[11px] rounded-sm border border-[var(--border)] font-sans">{t}</span>
                                         ))}
                                     </div>
                                 </div>
 
-                                {/* DEPLOY LOG */}
-                                <div className="bg-[var(--bg-activity)]/30 border border-[var(--border)] rounded-lg p-5">
-                                    <h3 className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-widest mb-4 font-mono flex items-center gap-2"><HardDrive size={12} /> Deploy Log</h3>
-                                    <div className="space-y-3">
-                                        {data.deployHistory ? data.deployHistory.map((deploy: any, idx: number) => (
-                                            <div key={idx} className={`flex gap-2 ${idx !== 0 ? 'opacity-60 hover:opacity-100 transition-opacity' : ''}`}>
-                                                <div className={`w-1.5 h-1.5 rounded-full mt-1.5 ${deploy.status === 'success' ? 'bg-[var(--success)]' : 'bg-red-500'}`} />
-                                                <div>
-                                                    <div className="text-xs text-[var(--text-primary)] font-mono">{deploy.version} - {deploy.msg}</div>
-                                                    <div className="text-[10px] text-[var(--text-secondary)]">{deploy.time}</div>
-                                                </div>
-                                            </div>
-                                        )) : <div className="text-xs text-[var(--text-secondary)] italic">No deployment history found.</div>}
+
+
+                                <div>
+                                    <h3 className="text-xs uppercase font-bold text-[var(--text-secondary)] mb-4 tracking-wider font-sans">Resources</h3>
+                                    <div className="text-xs space-y-3 text-[var(--text-primary)] font-sans">
+                                        <div className="flex justify-between py-1.5 border-b border-[var(--border)] border-dashed">
+                                            <span>Version</span>
+                                            <span className="text-[var(--text-secondary)] font-mono">{data.deployHistory?.[0]?.version || 'v2.5'}</span>
+                                        </div>
+                                        <div className="flex justify-between py-1.5 border-b border-[var(--border)] border-dashed">
+                                            <span>Last Update</span>
+                                            <span className="text-[var(--text-secondary)]">2 days ago</span>
+                                        </div>
+                                        <div className="flex justify-between py-1.5">
+                                            <span>License</span>
+                                            <span className="text-[var(--text-secondary)] font-mono">MIT</span>
+                                        </div>
                                     </div>
                                 </div>
-
-                                {/* TECH STACK */}
-                                <div className="bg-[var(--bg-activity)]/30 border border-[var(--border)] rounded-lg p-6">
-                                    <h3 className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-widest mb-4 font-mono">Tech Stack</h3>
-                                    <div className="flex flex-wrap gap-2">{data.tech.map((t: string) => <TechTag key={t} label={t} />)}</div>
-                                </div>
-
-                                {/* LINKS */}
-                                {data.links && (data.links.github || data.links.live) && (
-                                    <div className="flex flex-col gap-3">
-                                        {typeof data.links.github === "string" && data.links.github.trim() !== "" && (
-                                            <a href={data.links.github} target="_blank" rel="noopener noreferrer" className="py-3 bg-[var(--bg-activity)] border border-[var(--border)] hover:border-[var(--text-primary)] text-[var(--text-primary)] rounded flex items-center justify-center gap-2 transition-all font-mono text-sm">
-                                                <Github size={16} /> git checkout
-                                            </a>
-                                        )}
-                                        {typeof data.links.live === "string" && data.links.live.trim() !== "" && (
-                                            <a href={data.links.live} target="_blank" rel="noopener noreferrer" className="py-3 bg-[var(--accent)]/10 border border-[var(--accent)]/50 text-[var(--accent)] hover:bg-[var(--accent)]/20 rounded flex items-center justify-center gap-2 transition-all font-mono text-sm">
-                                                <Globe size={16} /> view_deployment
-                                            </a>
-                                        )}
-                                    </div>
-                                )}
                             </div>
                         </div>
                     </div>
@@ -502,7 +725,6 @@ export const ContentRenderer = ({ type, data, title, onOpenFile, content, lang, 
     }
 
     if (type === 'readme') {
-        const [isPreview, setIsPreview] = useState(true);
         return (
             <div className="h-full flex flex-col">
                 <Breadcrumbs path={path} />
@@ -547,6 +769,35 @@ export const ContentRenderer = ({ type, data, title, onOpenFile, content, lang, 
                                 </div>
                             </div>
                         )}
+                    </div>
+                </div>
+            </div>
+        );
+    }
+    if (type === 'pdf') {
+        return (
+            <div className="h-full flex flex-col bg-[var(--bg-main)]">
+                <Breadcrumbs path={path} />
+                <div className="flex-1 overflow-hidden flex flex-col p-4 md:p-8">
+                    <div className="flex items-center justify-between mb-4 pb-2 border-b border-[var(--border)]">
+                        <div className="flex items-center gap-2 text-[var(--text-primary)] font-mono font-bold text-sm">
+                            <FileText size={16} className="text-red-400" />
+                            <span>RESUME.PDF</span>
+                        </div>
+                        <a
+                            href="./resume.pdf"
+                            download
+                            className="flex items-center gap-2 px-3 py-1 bg-[var(--bg-activity)] hover:bg-[var(--accent)] text-[var(--text-primary)] hover:text-white text-[11px] rounded transition-all border border-[var(--border)]"
+                        >
+                            <Zap size={12} /> Download
+                        </a>
+                    </div>
+                    <div className="flex-1 bg-white rounded-sm overflow-hidden shadow-2xl">
+                        <iframe
+                            src="./resume.pdf"
+                            className="w-full h-full border-none"
+                            title="Arnav Resume"
+                        />
                     </div>
                 </div>
             </div>

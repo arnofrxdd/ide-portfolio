@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Terminal, Minimize2, X } from 'lucide-react';
+import { X } from 'lucide-react';
 import { PROJECTS_DATA } from '../../data/projects';
 import { generateGeminiResponse } from '../../services/gemini';
 
@@ -43,19 +43,22 @@ export const IntegratedTerminal = ({ isOpen, onClose, onOpenFile }: TerminalProp
         const command = args[0].toLowerCase();
 
         if (command === 'help') {
-            setTimeout(() => {
-                setHistory(prev => [...prev, {
-                    type: 'output', content:
-                        `Available Commands:
+            setHistory(prev => [...prev, {
+                type: 'output', content:
+                    `Available Commands:
   ls              List all projects
   open <name>     Open project details
-  cat <name>       Print project summary
-  clear            Clear terminal history
-  whoami           Print current user info
-  <query>          Ask Gemini AI anything`
-                }]);
-                setIsProcessing(false);
-            }, 100);
+  cat <name>      Print project summary
+  clear           Clear terminal history
+  pwd             Print working directory
+  whoami          Print current user
+  date            Print current date
+  echo <msg>      Print a message
+  git status      Check git status
+  npm run dev     Start dev server (simulated)
+  <query>         Ask Gemini AI anything`
+            }]);
+            setIsProcessing(false);
             return;
         }
 
@@ -98,6 +101,49 @@ export const IntegratedTerminal = ({ isOpen, onClose, onOpenFile }: TerminalProp
             } else {
                 setHistory(prev => [...prev, { type: 'error', content: `Error: Project '${target}' not found.` }]);
             }
+            setIsProcessing(false);
+            return;
+        }
+
+        // --- NEW COMMANDS ---
+        if (command === 'pwd') {
+            setHistory(prev => [...prev, { type: 'output', content: '/home/visitor/portfolio' }]);
+            setIsProcessing(false);
+            return;
+        }
+
+        if (command === 'whoami') {
+            setHistory(prev => [...prev, { type: 'output', content: 'visitor' }]);
+            setIsProcessing(false);
+            return;
+        }
+
+        if (command === 'date') {
+            setHistory(prev => [...prev, { type: 'output', content: new Date().toString() }]);
+            setIsProcessing(false);
+            return;
+        }
+
+        if (command === 'echo') {
+            setHistory(prev => [...prev, { type: 'output', content: args.slice(1).join(' ') }]);
+            setIsProcessing(false);
+            return;
+        }
+
+        if (command === 'npm' && (args[1] === 'run' || args[1] === 'start')) {
+            setHistory(prev => [...prev, { type: 'output', content: '> portfolio@1.0.0 dev\n> vite\n\n  VITE v4.4.9  ready in 320 ms\n\n  ➜  Local:   http://localhost:5173/\n  ➜  Network: use --host to expose' }]);
+            setIsProcessing(false);
+            return;
+        }
+
+        if (command === 'git' && args[1] === 'status') {
+            setHistory(prev => [...prev, { type: 'output', content: 'On branch main\nYour branch is up to date with \'origin/main\'.\n\nnothing to commit, working tree clean' }]);
+            setIsProcessing(false);
+            return;
+        }
+
+        if (command === 'uname') {
+            setHistory(prev => [...prev, { type: 'output', content: 'Linux portfolio-kernel 6.5.0-generic' }]);
             setIsProcessing(false);
             return;
         }
@@ -148,25 +194,28 @@ export const IntegratedTerminal = ({ isOpen, onClose, onOpenFile }: TerminalProp
     if (!isOpen) return null;
 
     return (
-        <div className="relative h-64 bg-[var(--bg-main)] border-t border-[var(--border)] z-20 flex flex-col transition-all duration-300">
-            <div className="h-8 bg-[var(--bg-activity)] border-b border-[var(--border)] flex justify-between items-center px-4 select-none flex-shrink-0">
-                <div className="flex items-center gap-2 text-[var(--text-secondary)] text-xs font-mono">
-                    <Terminal size={12} />
-                    <span>TERMINAL</span>
+        <div className="relative h-64 bg-[var(--bg-activity)] border-t border-[var(--border)] z-20 flex flex-col transition-all duration-300">
+            <div className="h-8 bg-[var(--bg-activity)] flex justify-between items-center px-4 select-none flex-shrink-0">
+                {/* TABS */}
+                <div className="flex items-center gap-6 h-full">
+                    <span className="text-[11px] font-sans text-[var(--text-secondary)] hover:text-[var(--text-primary)] cursor-pointer py-1 border-b border-transparent hover:border-[var(--text-secondary)] transition-colors">PROBLEMS</span>
+                    <span className="text-[11px] font-sans text-[var(--text-secondary)] hover:text-[var(--text-primary)] cursor-pointer py-1 border-b border-transparent hover:border-[var(--text-secondary)] transition-colors">OUTPUT</span>
+                    <span className="text-[11px] font-sans text-[var(--text-secondary)] hover:text-[var(--text-primary)] cursor-pointer py-1 border-b border-transparent hover:border-[var(--text-secondary)] transition-colors">DEBUG CONSOLE</span>
+                    <span className="text-[11px] font-sans text-[var(--text-primary)] cursor-pointer py-1 border-b border-[var(--accent)] font-medium">TERMINAL</span>
                 </div>
-                <div className="flex items-center gap-4">
-                    <span className="text-[10px] text-[var(--text-secondary)] font-mono hidden md:inline">Node v20.1.0</span>
+
+                {/* ACTIONS */}
+                <div className="flex items-center gap-3">
+                    <span className="text-[10px] text-[var(--text-secondary)] font-mono hidden md:inline mr-2">node ➜ v20.1.0</span>
                     <button onClick={onClose} className="hover:text-[var(--text-primary)] text-[var(--text-secondary)] transition-colors">
-                        <Minimize2 size={14} />
-                    </button>
-                    <button onClick={onClose} className="hover:text-red-400 text-[var(--text-secondary)] transition-colors">
                         <X size={14} />
                     </button>
                 </div>
             </div>
             <div
                 ref={scrollRef}
-                className="flex-1 overflow-y-auto p-4 font-mono text-xs md:text-sm bg-[var(--bg-main)] custom-scrollbar"
+                style={{ fontFamily: "'Consolas', 'Monaco', 'Courier New', monospace" }}
+                className="flex-1 overflow-y-auto p-4 text-xs md:text-sm bg-[var(--bg-activity)] custom-scrollbar"
                 onClick={() => {
                     if (!isProcessing) inputRef.current?.focus();
                 }}
