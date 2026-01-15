@@ -710,7 +710,7 @@ const App = () => {
               className="flex-1 bg-[var(--bg-main)] relative overflow-y-auto custom-scrollbar transition-colors duration-300"
             >
               {tabs.map(tab => (
-                <div key={tab.id} className={`h - full w - full ${activeTabId === tab.id ? 'block' : 'hidden'} `}>
+                <div key={tab.id} className={`h-full w-full ${activeTabId === tab.id ? 'block' : 'hidden'}`}>
                   <ContentRenderer
                     type={tab.type}
                     data={tab.data}

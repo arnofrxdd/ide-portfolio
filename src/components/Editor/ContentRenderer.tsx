@@ -412,10 +412,10 @@ export const ContentRenderer = ({ type, data, title, onOpenFile, content, editor
             <div className="h-full flex flex-col bg-[var(--bg-main)]">
                 <Breadcrumbs path={path} />
                 <div className="flex-1 overflow-hidden flex flex-col">
-                    <div className="px-4 py-2 md:py-3 border-b border-[var(--border)] bg-[var(--bg-panel)] flex flex-row justify-between items-center shrink-0 min-h-[45px] md:min-h-[50px]">
+                    <div className="px-4 py-1.5 md:py-2 border-b border-[var(--border)] bg-[var(--bg-panel)] flex flex-row justify-between items-center shrink-0">
                         <div className="flex items-center gap-3">
                             <div className="text-[var(--text-secondary)] text-[10px] md:text-xs uppercase tracking-widest font-sans font-bold flex items-center gap-2">
-                                <LayoutGrid size={14} className="text-[var(--accent)]" />
+                                <LayoutGrid size={13} className="text-[var(--accent)]" />
                                 <span className="hidden sm:inline">PROJECTS EXPLORER</span>
                                 <span className="sm:hidden">PROJECTS</span>
                             </div>
@@ -434,7 +434,7 @@ export const ContentRenderer = ({ type, data, title, onOpenFile, content, editor
                                 className={`p-1.5 rounded-sm transition-all ${viewMode === 'grid' ? 'bg-[var(--bg-main)] text-[var(--accent)] shadow-sm' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}
                                 title="Grid View"
                             >
-                                <LayoutGrid size={14} />
+                                <LayoutGrid size={13} />
                             </button>
                             <div className="w-[1px] h-3 bg-[var(--border)] mx-1" />
                             <button
@@ -478,8 +478,8 @@ export const ContentRenderer = ({ type, data, title, onOpenFile, content, editor
                     )}
 
                     {/* CONTENT AREA */}
-                    <div className="flex-1 overflow-y-auto custom-scrollbar p-4 md:p-8">
-                        <div className="max-w-6xl mx-auto w-full py-4 md:py-8">
+                    <div className="flex-1 overflow-y-auto custom-scrollbar px-4 md:px-8 pt-0 pb-8">
+                        <div className="max-w-6xl mx-auto w-full pt-1 md:pt-2 pb-4">
                             {filteredProjects.length === 0 ? (
                                 <div className="text-center text-[var(--text-secondary)] mt-20 font-mono text-sm">No extensions found matching your criteria.</div>
                             ) : (
