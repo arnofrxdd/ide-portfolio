@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   X, ArrowLeft, Terminal, GitBranch,
-  AlertCircle, CheckCircle, Bell, GripHorizontal, Minimize2, Square, PanelRight, Code
+  AlertCircle, CheckCircle, Bell, GripHorizontal, Minimize2, Square, PanelRight, Code, Minus
 } from 'lucide-react';
 
 // Data
@@ -241,7 +241,7 @@ const App = () => {
   const openFile = useCallback((file: any) => {
     const existingWindow = windows.find(w => w.id === file.id);
     if (existingWindow) {
-      setWindows(prev => prev.map(w => w.id === file.id ? { ...w, zIndex: 100 } : { ...w, zIndex: 40 }));
+      setWindows(prev => prev.map(w => w.id === file.id ? { ...w, zIndex: 100, isMinimized: false } : { ...w, zIndex: 40 }));
       return;
     }
     const existingTab = tabs.find(t => t.id === file.id);
@@ -252,6 +252,11 @@ const App = () => {
     setTabs(prev => [...prev, file]);
     setActiveTabId(file.id);
   }, [tabs, windows]);
+
+  const toggleMinimize = (e: React.MouseEvent | null, id: string) => {
+    e?.stopPropagation();
+    setWindows(prev => prev.map(w => w.id === id ? { ...w, isMinimized: !w.isMinimized } : w));
+  };
 
   const closeTab = (e: React.MouseEvent | null, id: string) => {
     e?.stopPropagation();
@@ -754,12 +759,22 @@ const App = () => {
           {windows.map(win => (
             <div
               key={win.id}
-              style={{ position: 'absolute', left: win.position.x, top: win.position.y, width: win.size.w, height: win.size.h, zIndex: win.zIndex || 40 }}
+              style={{
+                position: 'absolute',
+                left: win.position.x,
+                top: win.position.y,
+                width: win.size.w,
+                height: win.size.h,
+                zIndex: win.zIndex || 40,
+                // Disable transitions during dragging/resizing for performance
+                transition: isDragging ? 'none' : 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)'
+              }}
               onMouseDown={(e) => handleMouseDown(e, 'focus', win.id)}
-              className="bg-[var(--bg-main)] border border-[var(--border)] rounded-lg shadow-2xl flex flex-col overflow-hidden ring-1 ring-black/50"
+              className={`bg-[var(--bg-main)] border border-[var(--border)] rounded-none shadow-[0_20px_50px_rgba(0,0,0,0.5)] flex flex-col overflow-hidden ring-1 ring-white/5 ${win.isMinimized ? 'hidden' : 'flex'}`}
             >
+              {/* VS CODE AUTHENTIC TITLE BAR */}
               <div
-                className="h-8 bg-[var(--bg-activity)] border-b border-[var(--border)] flex justify-between items-center px-2 cursor-default select-none"
+                className="h-9 bg-[var(--bg-activity)] border-b border-[var(--border)] flex justify-between items-center px-1 cursor-default select-none shrink-0"
                 onMouseDown={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
@@ -767,26 +782,49 @@ const App = () => {
                 }}
                 onDoubleClick={(e) => toggleMaximize(e, win.id)}
               >
-                <div className="flex items-center gap-2 text-xs font-sans text-[var(--text-secondary)]">
-                  <GripHorizontal size={12} />
+                <div className="flex items-center gap-2.5 pl-2 text-[11px] font-sans text-[var(--text-secondary)]">
                   {(() => {
                     const { icon: Icon, color } = getFileIcon(win.title);
-                    return <><Icon size={12} className={color} /><span>{win.title}</span></>;
+                    return (
+                      <div className="flex items-center gap-2">
+                        <Icon size={14} className={color} />
+                        <span className="font-medium text-[var(--text-primary)] opacity-80">{win.title} — {win.type.toUpperCase()}</span>
+                      </div>
+                    );
                   })()}
                 </div>
-                <div className="flex items-center gap-1.5" onMouseDown={(e) => e.stopPropagation()}>
-                  <div className="w-6 h-6 flex items-center justify-center text-[var(--text-secondary)] hover:text-white hover:bg-[var(--bg-panel)]/50 rounded cursor-pointer" onClick={(e) => toggleMaximize(e, win.id)} title={win.isMaximized ? "Restore" : "Maximize"}>
+
+                {/* WINDOW CONTROLS */}
+                <div className="flex items-center h-full" onMouseDown={(e) => e.stopPropagation()}>
+                  <div
+                    className="w-11 h-full flex items-center justify-center text-[var(--text-secondary)] hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+                    onClick={(e) => toggleMinimize(e, win.id)}
+                    title="Minimize"
+                  >
+                    <Minus size={14} />
+                  </div>
+                  <div
+                    className="w-11 h-full flex items-center justify-center text-[var(--text-secondary)] hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+                    onClick={(e) => toggleMaximize(e, win.id)}
+                    title={win.isMaximized ? "Restore" : "Maximize"}
+                  >
                     {win.isMaximized ? <Minimize2 size={13} /> : <Square size={13} />}
                   </div>
-                  <div className="w-6 h-6 flex items-center justify-center text-[var(--text-secondary)] hover:text-white hover:bg-red-500/80 rounded cursor-pointer" onClick={(e) => closeWindow(e, win.id)} title="Close">
-                    <X size={14} />
+                  <div
+                    className="w-11 h-full flex items-center justify-center text-[var(--text-secondary)] hover:bg-[#e81123] hover:text-white transition-colors cursor-pointer"
+                    onClick={(e) => closeWindow(e, win.id)}
+                    title="Close"
+                  >
+                    <X size={16} />
                   </div>
                 </div>
               </div>
+
+              {/* WINDOW CONTENT AREA */}
               <div
                 onScroll={(e) => { scrollPositions.current[win.id] = e.currentTarget.scrollTop; }}
                 ref={(el) => { if (el) el.scrollTop = scrollPositions.current[win.id] ?? 0; }}
-                className="flex-1 bg-[var(--bg-main)] overflow-y-auto p-1 custom-scrollbar"
+                className="flex-1 bg-[var(--bg-main)] overflow-y-auto custom-scrollbar"
               >
                 <ContentRenderer
                   type={win.type}
@@ -798,16 +836,14 @@ const App = () => {
                   editorSettings={editorSettings}
                 />
               </div>
+
+              {/* RESIZE HANDLES */}
               {!win.isMaximized && (
                 <>
-                  <div className="absolute top-0 left-4 right-4 h-1 cursor-n-resize z-50" onMouseDown={(e) => handleMouseDown(e, 'resize', win.id, { action: 'resize', dir: 'n' })} />
-                  <div className="absolute bottom-0 left-4 right-4 h-1 cursor-s-resize z-50" onMouseDown={(e) => handleMouseDown(e, 'resize', win.id, { action: 'resize', dir: 's' })} />
-                  <div className="absolute left-0 top-4 bottom-4 w-1 cursor-w-resize z-50" onMouseDown={(e) => handleMouseDown(e, 'resize', win.id, { action: 'resize', dir: 'w' })} />
-                  <div className="absolute right-0 top-4 bottom-4 w-1 cursor-e-resize z-50" onMouseDown={(e) => handleMouseDown(e, 'resize', win.id, { action: 'resize', dir: 'e' })} />
-                  <div className="absolute top-0 left-0 w-4 h-4 cursor-nw-resize z-50" onMouseDown={(e) => handleMouseDown(e, 'resize', win.id, { action: 'resize', dir: 'nw' })} />
-                  <div className="absolute top-0 right-0 w-4 h-4 cursor-ne-resize z-50" onMouseDown={(e) => handleMouseDown(e, 'resize', win.id, { action: 'resize', dir: 'ne' })} />
-                  <div className="absolute bottom-0 left-0 w-4 h-4 cursor-sw-resize z-50" onMouseDown={(e) => handleMouseDown(e, 'resize', win.id, { action: 'resize', dir: 'sw' })} />
-                  <div className="absolute bottom-0 right-0 w-4 h-4 cursor-se-resize z-50" onMouseDown={(e) => handleMouseDown(e, 'resize', win.id, { action: 'resize', dir: 'se' })} />
+                  <div className="absolute top-0 left-0 right-0 h-1 cursor-n-resize z-50" onMouseDown={(e) => handleMouseDown(e, 'resize', win.id, { action: 'resize', dir: 'n' })} />
+                  <div className="absolute bottom-0 left-0 right-0 h-1 cursor-s-resize z-50" onMouseDown={(e) => handleMouseDown(e, 'resize', win.id, { action: 'resize', dir: 's' })} />
+                  <div className="absolute left-0 top-0 bottom-0 w-1 cursor-w-resize z-50" onMouseDown={(e) => handleMouseDown(e, 'resize', win.id, { action: 'resize', dir: 'w' })} />
+                  <div className="absolute right-0 top-0 bottom-0 w-1 cursor-e-resize z-50" onMouseDown={(e) => handleMouseDown(e, 'resize', win.id, { action: 'resize', dir: 'e' })} />
                 </>
               )}
             </div>
@@ -884,6 +920,29 @@ const App = () => {
             </div>
           )
         }
+
+        {/* WINDOW DOCK / TASKBAR FOR MINIMIZED WINDOWS */}
+        {windows.some(w => w.isMinimized) && (
+          <div className="fixed bottom-10 right-4 flex flex-col gap-1.5 z-[60]">
+            {windows.filter(w => w.isMinimized).map(win => (
+              <div
+                key={win.id}
+                onClick={(e) => toggleMinimize(e, win.id)}
+                className="bg-[var(--bg-panel)]/95 border border-[var(--border)] px-3 py-2 flex items-center gap-3 cursor-pointer hover:bg-[var(--bg-activity)] transition-all shadow-2xl backdrop-blur-sm group animate-in slide-in-from-right duration-300 rounded-sm"
+              >
+                {(() => {
+                  const { icon: Icon, color } = getFileIcon(win.title);
+                  return <Icon size={14} className={color} />;
+                })()}
+                <div className="flex flex-col">
+                  <span className="text-[10px] font-bold text-[var(--text-primary)] leading-none">{win.title}</span>
+                  <span className="text-[8px] font-mono text-[var(--text-secondary)] opacity-60">Minimized</span>
+                </div>
+                <div className="w-1 h-3 bg-[var(--accent)] opacity-20 group-hover:opacity-100 transition-opacity ml-2 rounded-full" />
+              </div>
+            ))}
+          </div>
+        )}
       </div >
     </ThemeContext.Provider >
   );
