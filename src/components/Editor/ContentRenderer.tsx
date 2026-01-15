@@ -775,23 +775,23 @@ export const ContentRenderer = ({ type, data, title, onOpenFile, content, editor
         return (
             <div className="h-full flex flex-col bg-[var(--bg-main)]">
                 <Breadcrumbs path={path} />
-                <div className="flex-1 overflow-hidden flex flex-col p-4 md:p-8">
-                    <div className="flex items-center justify-between mb-4 pb-2 border-b border-[var(--border)]">
-                        <div className="flex items-center gap-2 text-[var(--text-primary)] font-mono font-bold text-sm">
-                            <FileText size={16} className="text-red-400" />
+                <div className="flex-1 flex flex-col min-h-0">
+                    <div className="flex items-center justify-between px-4 py-2 border-b border-[var(--border)] bg-[var(--bg-panel)]/50">
+                        <div className="flex items-center gap-2 text-[var(--text-primary)] font-mono font-bold text-xs">
+                            <FileText size={14} className="text-red-400" />
                             <span>RESUME.PDF</span>
                         </div>
                         <a
                             href="./resume.pdf"
                             download
-                            className="flex items-center gap-2 px-3 py-1 bg-[var(--bg-activity)] hover:bg-[var(--accent)] text-[var(--text-primary)] hover:text-white text-[11px] rounded transition-all border border-[var(--border)]"
+                            className="flex items-center gap-2 px-3 py-1 bg-[var(--bg-activity)] hover:bg-[var(--accent)] text-[var(--text-primary)] hover:text-white text-[10px] rounded-[2px] transition-all border border-[var(--border)]"
                         >
-                            <Zap size={12} /> Download
+                            <Zap size={12} /> Download PDF
                         </a>
                     </div>
-                    <div className="flex-1 bg-white rounded-sm overflow-hidden shadow-2xl">
+                    <div className="flex-1 overflow-hidden">
                         <iframe
-                            src="./resume.pdf"
+                            src="./resume.pdf#view=FitH"
                             className="w-full h-full border-none"
                             title="Arnav Resume"
                         />
