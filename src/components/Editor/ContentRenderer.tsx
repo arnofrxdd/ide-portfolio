@@ -776,23 +776,24 @@ export const ContentRenderer = ({ type, data, title, onOpenFile, content, editor
             <div className="h-full flex flex-col bg-[var(--bg-main)]">
                 <Breadcrumbs path={path} />
                 <div className="flex-1 flex flex-col min-h-0">
-                    <div className="flex items-center justify-between px-4 py-2 border-b border-[var(--border)] bg-[var(--bg-panel)]/50">
-                        <div className="flex items-center gap-2 text-[var(--text-primary)] font-mono font-bold text-xs">
-                            <FileText size={14} className="text-red-400" />
+                    <div className="flex items-center justify-between px-4 py-1.5 border-b border-[var(--border)] bg-[var(--bg-panel)]">
+                        <div className="flex items-center gap-2 text-[var(--accent)] font-mono font-bold text-[11px]">
+                            <FileText size={14} />
                             <span>RESUME.PDF</span>
                         </div>
                         <a
                             href="./resume.pdf"
                             download
-                            className="flex items-center gap-2 px-3 py-1 bg-[var(--bg-activity)] hover:bg-[var(--accent)] text-[var(--text-primary)] hover:text-white text-[10px] rounded-[2px] transition-all border border-[var(--border)]"
+                            className="flex items-center gap-2 px-3 py-1 bg-[var(--accent)] hover:bg-[var(--accent)]/80 text-white text-[10px] rounded-[2px] transition-all"
                         >
                             <Zap size={12} /> Download PDF
                         </a>
                     </div>
-                    <div className="flex-1 overflow-hidden">
+                    <div className="flex-1 bg-[#1e1e1e] overflow-hidden">
                         <iframe
-                            src="./resume.pdf#view=FitH"
+                            src="./resume.pdf#view=Fit"
                             className="w-full h-full border-none"
+                            style={{ minHeight: 'calc(100vh - 120px)' }}
                             title="Arnav Resume"
                         />
                     </div>

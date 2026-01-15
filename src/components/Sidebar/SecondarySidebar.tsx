@@ -88,25 +88,45 @@ export const SecondarySidebar = ({ isOpen, activeTabId, onClose }: SecondarySide
         }
     }, [isResizing]);
 
+    const getManifestAudit = (tabId: string, project: any) => {
+        if (tabId === 'home') {
+            return "WORKSPACE_OVERVIEW: This environment is a fully custom-built IDE engine designed to showcase my expertise in React architecture and immersive UI/UX. It features a virtualized file system, theme engine, and integrated deployment analytics.";
+        }
+
+        if (project) {
+            const techStr = project.tech.slice(0, 3).join(' & ');
+            return `ENGINEERING_SPOTLIGHT: "${project.title}" demonstrates my ability to solve complex technical challenges using ${techStr}. This project highlights my focus on ${project.type.toLowerCase()} architecture and high-performance engineering excellence.`;
+        }
+
+        const ext = tabId.split('.').pop()?.toLowerCase();
+        const baseName = tabId.split('/').pop() || tabId;
+
+        const audits: Record<string, string> = {
+            tsx: `UI_ARCHITECTURE: This component in "${baseName}" reflects my proficiency in building modular, scalable React systems. It focuses on clean state management and high-performance rendering patterns.`,
+            ts: `CORE_LOGIC: A showcase of robust TypeScript implementation in "${baseName}". I use strict typing and modular design to ensure system reliability and long-term maintainability.`,
+            json: `DATA_ORCHESTRATION: This configuration file manages the metadata for the portfolio. It demonstrates my approach to structured data and type-safe project hydration.`,
+            css: `DESIGN_SYSTEM: Part of a custom-built styling architecture. I prioritize CSS variables and themeable tokens to create responsive, pixel-perfect developer interfaces.`,
+            md: `DOCUMENTATION: Clear communication is a priority. This manifest provides the technical roadmap and specifications for the current module, ensuring transparency and ease of collaboration.`,
+            pdf: `CREDENTIAL_VERIFICATION: Accessing my professional resume. This document captures my technical journey, core competencies, and the value I bring to high-performing engineering teams.`,
+            env: `SECURE_ORCHESTRATION: A demonstration of secure environment handling. I maintain strict separation between configuration and code to protect sensitive system tokens.`,
+            txt: `TECHNICAL_HISTORY: Historical markers and legacy logs. Every line represents part of the iterative journey in refining this professional developer environment.`
+        };
+
+        return audits[ext || ''] || `TECHNICAL_ARTIFACT: Analyzing "${baseName}". This module is a critical part of the portfolio's core engine, contributing to the seamless, integrated experience you see here.`;
+    };
+
     useEffect(() => {
         if (!isOpen) return;
 
         setLoading(true);
         const timer = setTimeout(() => {
-            if (activeTabId === 'home') {
-                setAiInsight("Portfolio Root: This dashboard provides a high-level overview of technical deployments, system contributions, and core competencies. Navigation focus: Exploration of complex builds.");
-            } else if (currentProject) {
-                setAiInsight(`Technical Audit: ${currentProject.title}. This ${currentProject.type} demonstrates advanced implementation of ${currentProject.tech[0]} and ${currentProject.tech[1]}. Optimized for performance and scalability.`);
-            } else if (activeTabId.endsWith('.json')) {
-                setAiInsight("JSON Configuration: Source data for project hydration. Ensures strict type-safety and structured metadata across the portfolio engine.");
-            } else {
-                setAiInsight("Viewing System File: Analyzing internal component logic and styling tokens. Active theme context applied to current render buffer.");
-            }
+            setAiInsight(getManifestAudit(activeTabId, currentProject));
             setLoading(false);
         }, 600);
 
         return () => clearTimeout(timer);
     }, [activeTabId, isOpen, currentProject]);
+
 
     return (
         <>
