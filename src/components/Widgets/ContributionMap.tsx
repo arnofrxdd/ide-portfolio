@@ -15,7 +15,7 @@ const LegendBox = ({ opacity, label, theme }: { opacity: number, label: string, 
     };
 
     const bgStyle = opacity === 0
-        ? { backgroundColor: colors.border, opacity: 0.3 }
+        ? { backgroundColor: colors.border, opacity: 0.4 }
         : { backgroundColor: colors.accent, opacity: opacity };
 
     return (
@@ -188,11 +188,11 @@ export const CanvasContributionMap = ({ theme }: { theme: string }) => {
                     const isRandom = randomMap[r * COLS + c];
 
                     // Logic to make words POP based on your previous request
-                    let alpha = 0.12;
+                    let alpha = 0.2;
                     if (isPrev && isNext) alpha = 1.0;
-                    else if (isPrev && !isNext) alpha = 1.0 - (ease * 0.88);
-                    else if (!isPrev && isNext) alpha = 0.12 + (ease * 0.88);
-                    else if (isRandom) alpha = 0.25;
+                    else if (isPrev && !isNext) alpha = 1.0 - (ease * 0.82);
+                    else if (!isPrev && isNext) alpha = 0.2 + (ease * 0.8);
+                    else if (isRandom) alpha = 0.35;
 
                     if (alpha > 0.3) activeBlocks++;
 
@@ -262,7 +262,7 @@ export const CanvasContributionMap = ({ theme }: { theme: string }) => {
                 <div className="flex items-center gap-1.5 ml-auto">
                     <span className="mr-1">Less</span>
                     <LegendBox opacity={0} label="0" theme={theme} />
-                    <LegendBox opacity={0.3} label="1-3" theme={theme} />
+                    <LegendBox opacity={0.45} label="1-3" theme={theme} />
                     <LegendBox opacity={0.6} label="4-9" theme={theme} />
                     <LegendBox opacity={1.0} label="10+" theme={theme} />
                     <span className="ml-1">More</span>

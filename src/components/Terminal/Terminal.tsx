@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Terminal, Minimize2, X } from 'lucide-react';
 import { PROJECTS_DATA } from '../../data/projects';
 import { generateGeminiResponse } from '../../services/gemini';
@@ -148,7 +148,7 @@ export const IntegratedTerminal = ({ isOpen, onClose, onOpenFile }: TerminalProp
     if (!isOpen) return null;
 
     return (
-        <div className="fixed bottom-0 left-0 right-0 h-[40vh] md:h-80 bg-[var(--bg-main)] border-t border-[var(--border)] z-50 flex flex-col shadow-[0_-5px_20px_rgba(0,0,0,0.5)] animate-in slide-in-from-bottom-full duration-300">
+        <div className="relative h-64 bg-[var(--bg-main)] border-t border-[var(--border)] z-20 flex flex-col transition-all duration-300">
             <div className="h-8 bg-[var(--bg-activity)] border-b border-[var(--border)] flex justify-between items-center px-4 select-none flex-shrink-0">
                 <div className="flex items-center gap-2 text-[var(--text-secondary)] text-xs font-mono">
                     <Terminal size={12} />
@@ -166,7 +166,7 @@ export const IntegratedTerminal = ({ isOpen, onClose, onOpenFile }: TerminalProp
             </div>
             <div
                 ref={scrollRef}
-                className="flex-1 overflow-y-auto p-4 font-mono text-xs md:text-sm bg-[var(--bg-main)] scrollbar-thin scrollbar-thumb-slate-700 custom-scrollbar"
+                className="flex-1 overflow-y-auto p-4 font-mono text-xs md:text-sm bg-[var(--bg-main)] custom-scrollbar"
                 onClick={() => {
                     if (!isProcessing) inputRef.current?.focus();
                 }}

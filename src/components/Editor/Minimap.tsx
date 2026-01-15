@@ -165,11 +165,11 @@ export const RealMinimap = ({ content, editorRef }: RealMinimapProps) => {
         <div
             ref={minimapRef}
             onMouseDown={handleMouseDown}
-            className="w-24 bg-[var(--bg-main)] border-l border-[var(--border)] relative hidden md:block select-none overflow-hidden shrink-0"
+            className="w-16 bg-[var(--bg-main)] relative hidden md:block select-none overflow-hidden shrink-0 group/minimap hover:bg-[var(--bg-activity)]/30 transition-colors"
         >
             {/* Code Representation */}
-            <div ref={codeContentRef} className="absolute top-0 left-0 w-full opacity-60 pointer-events-none p-1 transition-transform duration-75 will-change-transform">
-                <div className="text-[2px] leading-[4px] text-[var(--text-secondary)] font-mono whitespace-pre-wrap break-all select-none">
+            <div ref={codeContentRef} className="absolute top-0 left-0 w-full opacity-[0.25] pointer-events-none px-1 transition-transform duration-75 will-change-transform">
+                <div className="text-[2px] leading-[3px] text-[var(--text-secondary)] font-mono whitespace-pre-wrap break-all select-none tracking-tighter">
                     {content}
                 </div>
             </div>
@@ -177,7 +177,7 @@ export const RealMinimap = ({ content, editorRef }: RealMinimapProps) => {
             {/* Viewport Slider Overlay */}
             <div
                 style={{ top: viewport.top, height: viewport.height }}
-                className="absolute left-0 w-full bg-[var(--text-secondary)]/10 hover:bg-[var(--text-secondary)]/20 transition-colors border-y border-[var(--selection)] shadow-[0_0_10px_rgba(0,0,0,0.1)] backdrop-blur-[0.5px] cursor-grab active:cursor-grabbing"
+                className="absolute left-0 w-full bg-white/[0.05] group-hover/minimap:bg-white/[0.1] hover:!bg-white/[0.15] transition-colors cursor-grab active:cursor-grabbing"
             />
         </div>
     );

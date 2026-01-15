@@ -68,7 +68,7 @@ export const ContentRenderer = ({ type, data, title, onOpenFile, content, lang, 
         const lines = cleanContent ? cleanContent.split('\n') : [];
 
         return (
-            <div className="h-full flex flex-col bg-[var(--bg-panel)]">
+            <div className="h-full flex flex-col bg-[var(--bg-main)]">
                 <Breadcrumbs path={path} />
 
                 <div className="flex-1 overflow-hidden flex relative">
@@ -83,14 +83,14 @@ export const ContentRenderer = ({ type, data, title, onOpenFile, content, lang, 
                                 <div key={i} className="flex flex-row hover:bg-[var(--bg-activity)]/30 w-full">
 
                                     {/* Line Number */}
-                                    <div className="w-12 shrink-0 text-right pr-4 text-[var(--line-number)] font-mono text-sm select-none opacity-50 leading-relaxed">
+                                    <div className="w-12 shrink-0 text-right pr-4 text-[var(--line-number)] font-mono text-sm select-none opacity-40 leading-[1.5]">
                                         {i + 1}
                                     </div>
 
                                     {/* Code Content */}
                                     <div
                                         className={`
-                      flex-1 pl-2 font-mono text-sm text-[var(--text-primary)] leading-relaxed min-w-0 pr-4
+                      flex-1 pl-2 font-mono text-sm text-[var(--text-primary)] leading-[1.5] min-w-0 pr-4
                       ${editorSettings.wordWrap
                                                 ? "whitespace-pre-wrap break-words break-all"
                                                 : "whitespace-pre"
@@ -130,121 +130,123 @@ export const ContentRenderer = ({ type, data, title, onOpenFile, content, lang, 
         ];
 
         return (
-            <div className="h-full overflow-y-auto custom-scrollbar">
+            <div className="h-full flex flex-col">
                 <Breadcrumbs path={path} />
-                <div className="p-4 md:p-12 max-w-5xl mx-auto animate-in fade-in zoom-in-95 duration-300 pb-20">
+                <div className="flex-1 overflow-y-auto custom-scrollbar">
+                    <div className="p-4 md:p-12 max-w-5xl mx-auto animate-in fade-in zoom-in-95 duration-300 pb-20">
 
-                    {/* HERO SECTION */}
-                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
-                        <div>
-                            <span className="text-[var(--text-secondary)] font-mono text-sm block mb-2">// Initializing Portfolio System...</span>
-                            <h1 className="text-3xl md:text-6xl font-bold text-[var(--text-primary)] tracking-tight mb-4">
-                                <span className="mr-3">Hello, I'm</span>
-                                {/* DYNAMIC THEME GRADIENT */}
-                                <span className="text-transparent bg-clip-text bg-gradient-to-r from-[var(--hero-gradient-start)] to-[var(--hero-gradient-end)]">
-                                    <TypingEffect text="Arnav" speed={150} />
-                                </span>
-                                <span className="ml-1 text-[var(--accent)] animate-[blink_1s_steps(1)_infinite]">_</span>
-                            </h1>
-                        </div>
-                    </div>
-
-                    {/* STATUS GRID - DYNAMIC COLORS */}
-                    <div className="pl-4 md:pl-6 border-l-2 border-[var(--border)] space-y-4 font-mono text-xs md:text-base mb-12">
-
-                        {/* 1. Current Role */}
-                        <div className="flex flex-wrap gap-2 md:gap-4 items-center">
-                            <span className="text-[var(--warning)] min-w-[80px] md:min-w-[100px]">current_role:</span>
-                            <span className="text-[var(--text-primary)]">"Full Stack Engineer"</span>
+                        {/* HERO SECTION */}
+                        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
+                            <div>
+                                <span className="text-[var(--text-secondary)] font-mono text-sm block mb-2">// Initializing Portfolio System...</span>
+                                <h1 className="text-3xl md:text-6xl font-bold text-[var(--text-primary)] tracking-tight mb-4">
+                                    <span className="mr-3">Hello, I'm</span>
+                                    {/* DYNAMIC THEME GRADIENT */}
+                                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-[var(--hero-gradient-start)] to-[var(--hero-gradient-end)]">
+                                        <TypingEffect text="Arnav" speed={150} />
+                                    </span>
+                                    <span className="ml-1 text-[var(--accent)] animate-[blink_1s_steps(1)_infinite]">_</span>
+                                </h1>
+                            </div>
                         </div>
 
-                        {/* 2. Location */}
-                        <div className="flex flex-wrap gap-2 md:gap-4 items-center">
-                            <span className="text-[var(--success)] min-w-[80px] md:min-w-[100px]">location:</span>
-                            <span className="text-[var(--text-primary)]">"Remote"</span>
+                        {/* STATUS GRID - DYNAMIC COLORS */}
+                        <div className="pl-4 md:pl-6 border-l-2 border-[var(--border)] space-y-4 font-mono text-xs md:text-base mb-12">
+
+                            {/* 1. Current Role */}
+                            <div className="flex flex-wrap gap-2 md:gap-4 items-center">
+                                <span className="text-[var(--warning)] min-w-[80px] md:min-w-[100px]">current_role:</span>
+                                <span className="text-[var(--text-primary)]">"Full Stack Engineer"</span>
+                            </div>
+
+                            {/* 2. Location */}
+                            <div className="flex flex-wrap gap-2 md:gap-4 items-center">
+                                <span className="text-[var(--success)] min-w-[80px] md:min-w-[100px]">location:</span>
+                                <span className="text-[var(--text-primary)]">"Remote"</span>
+                            </div>
+
+                            {/* 3. Status */}
+                            <div className="flex flex-wrap gap-2 md:gap-4 items-center">
+                                <span className="text-[var(--info)] min-w-[80px] md:min-w-[100px]">status:</span>
+                                <span className="text-[var(--text-primary)]">"Building cool things"</span>
+                            </div>
+
                         </div>
 
-                        {/* 3. Status */}
-                        <div className="flex flex-wrap gap-2 md:gap-4 items-center">
-                            <span className="text-[var(--info)] min-w-[80px] md:min-w-[100px]">status:</span>
-                            <span className="text-[var(--text-primary)]">"Building cool things"</span>
-                        </div>
-
-                    </div>
-
-                    {/* PINNED PROJECTS */}
-                    <div className="mb-8">
-                        <h2 className="text-lg md:text-xl font-bold text-[var(--text-primary)] mb-6 flex items-center gap-2 font-mono">
-                            <Zap size={18} className="text-[var(--warning)]" /> Pinned Deployments
-                        </h2>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {featuredProjects.map(p => (
-                                <div
-                                    key={p.id}
-                                    onClick={() =>
-                                        onOpenFile({
-                                            id: p.id,
-                                            title: `${p.title}.tsx`,
-                                            type: 'detail',
-                                            data: p
-                                        })
-                                    }
-                                    className="bg-[var(--bg-panel)] border border-[var(--border)] hover:border-[var(--accent)] rounded-lg p-5 cursor-pointer hover:-translate-y-1 transition-all group shadow-lg"
-                                >
-                                    <div className="flex items-center justify-between mb-3">
-                                        <div className="flex items-center gap-2">
-                                            <FileCode size={16} className="text-[var(--accent)]" />
-                                            <span className="text-[var(--text-primary)] font-mono text-sm font-semibold truncate max-w-[150px]">
-                                                {p.title}
-                                            </span>
+                        {/* PINNED PROJECTS */}
+                        <div className="mb-8">
+                            <h2 className="text-lg md:text-xl font-bold text-[var(--text-primary)] mb-6 flex items-center gap-2 font-mono">
+                                <Zap size={18} className="text-[var(--warning)]" /> Pinned Deployments
+                            </h2>
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                {featuredProjects.map(p => (
+                                    <div
+                                        key={p.id}
+                                        onClick={() =>
+                                            onOpenFile({
+                                                id: p.id,
+                                                title: `${p.title}.tsx`,
+                                                type: 'detail',
+                                                data: p
+                                            })
+                                        }
+                                        className="bg-[var(--bg-panel)] border border-[var(--border)] hover:border-[var(--accent)] rounded-lg p-5 cursor-pointer hover:-translate-y-1 transition-all group shadow-lg"
+                                    >
+                                        <div className="flex items-center justify-between mb-3">
+                                            <div className="flex items-center gap-2">
+                                                <FileCode size={16} className="text-[var(--accent)]" />
+                                                <span className="text-[var(--text-primary)] font-mono text-sm font-semibold truncate max-w-[150px]">
+                                                    {p.title}
+                                                </span>
+                                            </div>
+                                            <ExternalLink size={12} className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)]" />
                                         </div>
-                                        <ExternalLink size={12} className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)]" />
+                                        <p className="text-[var(--text-secondary)] text-xs line-clamp-2 mb-4 h-8">
+                                            {p.description}
+                                        </p>
                                     </div>
-                                    <p className="text-[var(--text-secondary)] text-xs line-clamp-2 mb-4 h-8">
-                                        {p.description}
-                                    </p>
-                                </div>
-                            ))}
+                                ))}
+                            </div>
                         </div>
-                    </div>
 
-                    {/* ACTION BUTTON */}
-                    <div className="mb-12 flex flex-wrap gap-4">
-                        <button
-                            onClick={() =>
-                                onOpenFile({
-                                    id: 'projects_tsx',
-                                    title: 'projects.tsx',
-                                    type: 'projects'
-                                })
-                            }
-                            className="group flex items-center gap-3 px-6 py-3 bg-[var(--bg-activity)] border border-[var(--border)] text-[var(--text-secondary)] font-mono text-sm rounded-md hover:bg-[var(--bg-panel)] hover:border-[var(--accent)] hover:text-[var(--accent)] transition-all"
-                        >
-                            <Terminal size={16} className="text-[var(--text-secondary)] group-hover:text-[var(--accent)]" />
-                            <span className="tracking-wide">./view_all_projects</span>
-                        </button>
-                    </div>
+                        {/* ACTION BUTTON */}
+                        <div className="mb-12 flex flex-wrap gap-4">
+                            <button
+                                onClick={() =>
+                                    onOpenFile({
+                                        id: 'projects_tsx',
+                                        title: 'projects.tsx',
+                                        type: 'projects'
+                                    })
+                                }
+                                className="group flex items-center gap-3 px-6 py-3 bg-[var(--bg-activity)] border border-[var(--border)] text-[var(--text-secondary)] font-mono text-sm rounded-md hover:bg-[var(--bg-panel)] hover:border-[var(--accent)] hover:text-[var(--accent)] transition-all"
+                            >
+                                <Terminal size={16} className="text-[var(--text-secondary)] group-hover:text-[var(--accent)]" />
+                                <span className="tracking-wide">./view_all_projects</span>
+                            </button>
+                        </div>
 
-                    {/* CONTRIBUTION MAP - THEME AWARE */}
-                    <CanvasContributionMap theme={theme} />
-                    {/* RECENT ACTIVITY */}
-                    <div className="mb-12">
-                        <h2 className="text-sm font-bold text-[var(--text-secondary)] mb-4 flex items-center gap-2 font-mono uppercase tracking-wider">
-                            <GitBranch size={14} className="text-[var(--info)]" /> Recent Activity
-                        </h2>
-                        <div className="space-y-2">
-                            {recentActivity.map((act, i) => (
-                                <div key={i} className="flex items-center justify-between text-sm bg-[var(--bg-activity)]/20 border border-[var(--border)]/50 p-3 rounded hover:border-[var(--accent)] hover:bg-[var(--bg-activity)] transition-all group">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-1.5 h-1.5 rounded-full bg-[var(--info)]" />
-                                        <span className="text-[var(--text-secondary)] font-mono">{act.action} <span className="text-[var(--text-primary)] font-bold group-hover:text-[var(--accent)] cursor-pointer decoration-dotted underline-offset-4">{act.target}</span></span>
+                        {/* CONTRIBUTION MAP - THEME AWARE */}
+                        <CanvasContributionMap theme={theme} />
+                        {/* RECENT ACTIVITY */}
+                        <div className="mb-12">
+                            <h2 className="text-sm font-bold text-[var(--text-secondary)] mb-4 flex items-center gap-2 font-mono uppercase tracking-wider">
+                                <GitBranch size={14} className="text-[var(--info)]" /> Recent Activity
+                            </h2>
+                            <div className="space-y-2">
+                                {recentActivity.map((act, i) => (
+                                    <div key={i} className="flex items-center justify-between text-sm bg-[var(--bg-activity)]/20 border border-[var(--border)]/50 p-3 rounded hover:border-[var(--accent)] hover:bg-[var(--bg-activity)] transition-all group">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-1.5 h-1.5 rounded-full bg-[var(--info)]" />
+                                            <span className="text-[var(--text-secondary)] font-mono">{act.action} <span className="text-[var(--text-primary)] font-bold group-hover:text-[var(--accent)] cursor-pointer decoration-dotted underline-offset-4">{act.target}</span></span>
+                                        </div>
+                                        <span className="text-xs text-[var(--text-secondary)] font-mono opacity-70">{act.time}</span>
                                     </div>
-                                    <span className="text-xs text-[var(--text-secondary)] font-mono opacity-70">{act.time}</span>
-                                </div>
-                            ))}
+                                ))}
+                            </div>
                         </div>
-                    </div>
 
+                    </div>
                 </div>
             </div>
         );
@@ -269,97 +271,99 @@ export const ContentRenderer = ({ type, data, title, onOpenFile, content, lang, 
         };
 
         return (
-            <div className="h-full overflow-y-auto custom-scrollbar">
+            <div className="h-full flex flex-col">
                 <Breadcrumbs path={path} />
-                <div className="p-4 md:p-12 max-w-7xl mx-auto pb-24">
-                    <div className="mb-6 flex items-center justify-between border-b border-[var(--border)] pb-4">
-                        <h2 className="text-xl md:text-2xl font-bold text-[var(--text-primary)] flex items-center gap-2">
-                            <Folder size={20} className="text-[var(--accent)]" /> /projects
-                        </h2>
-                        <button
-                            onClick={() => setShowFilters(v => !v)}
-                            className="text-xs font-mono text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center gap-2 transition-colors"
-                        >
-                            <Filter size={14} /> {showFilters ? "hide_filters" : "show_filters"}
-                        </button>
-                    </div>
+                <div className="flex-1 overflow-y-auto custom-scrollbar">
+                    <div className="p-4 md:p-12 max-w-7xl mx-auto pb-24">
+                        <div className="mb-6 flex items-center justify-between border-b border-[var(--border)] pb-4">
+                            <h2 className="text-xl md:text-2xl font-bold text-[var(--text-primary)] flex items-center gap-2">
+                                <Folder size={20} className="text-[var(--accent)]" /> /projects
+                            </h2>
+                            <button
+                                onClick={() => setShowFilters(v => !v)}
+                                className="text-xs font-mono text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center gap-2 transition-colors"
+                            >
+                                <Filter size={14} /> {showFilters ? "hide_filters" : "show_filters"}
+                            </button>
+                        </div>
 
-                    <div className="grid grid-cols-1 lg:grid-cols-[260px,1fr] gap-8">
-                        {showFilters && (
-                            <div className="space-y-6">
-                                {/* TECH STACK FILTERS */}
-                                <div className="bg-[var(--bg-activity)] border border-[var(--border)] rounded-lg p-4">
-                                    <h3 className="text-xs font-bold text-[var(--text-secondary)] uppercase mb-3 font-mono">Tech Stack</h3>
-                                    <div className="flex flex-wrap gap-2">
-                                        {allTech.map(t => (
-                                            <button
-                                                key={t}
-                                                onClick={() => toggleFilter(t, setTechFilters)}
-                                                className={`px-2 py-1 text-[10px] font-mono rounded border transition-all 
+                        <div className="grid grid-cols-1 lg:grid-cols-[260px,1fr] gap-8">
+                            {showFilters && (
+                                <div className="space-y-6">
+                                    {/* TECH STACK FILTERS */}
+                                    <div className="bg-[var(--bg-activity)] border border-[var(--border)] rounded-lg p-4">
+                                        <h3 className="text-xs font-bold text-[var(--text-secondary)] uppercase mb-3 font-mono">Tech Stack</h3>
+                                        <div className="flex flex-wrap gap-2">
+                                            {allTech.map(t => (
+                                                <button
+                                                    key={t}
+                                                    onClick={() => toggleFilter(t, setTechFilters)}
+                                                    className={`px-2 py-1 text-[10px] font-mono rounded border transition-all 
                           ${techFilters.includes(t)
-                                                        ? "bg-[var(--accent)]/20 border-[var(--accent)] text-[var(--accent)]"
-                                                        : "bg-[var(--bg-main)] border-[var(--border)] text-[var(--text-secondary)] hover:border-[var(--text-primary)]"}`}
-                                            >
-                                                {t}
-                                            </button>
-                                        ))}
+                                                            ? "bg-[var(--accent)]/20 border-[var(--accent)] text-[var(--accent)]"
+                                                            : "bg-[var(--bg-main)] border-[var(--border)] text-[var(--text-secondary)] hover:border-[var(--text-primary)]"}`}
+                                                >
+                                                    {t}
+                                                </button>
+                                            ))}
+                                        </div>
                                     </div>
-                                </div>
 
-                                {/* LANGUAGE FILTERS */}
-                                <div className="bg-[var(--bg-activity)] border border-[var(--border)] rounded-lg p-4">
-                                    <h3 className="text-xs font-bold text-[var(--text-secondary)] uppercase mb-3 font-mono">Languages</h3>
-                                    <div className="flex flex-wrap gap-2">
-                                        {allLanguages.map(l => (
-                                            <button
-                                                key={l}
-                                                onClick={() => toggleFilter(l, setLangFilters)}
-                                                className={`px-2 py-1 text-[10px] font-mono rounded border transition-all 
+                                    {/* LANGUAGE FILTERS */}
+                                    <div className="bg-[var(--bg-activity)] border border-[var(--border)] rounded-lg p-4">
+                                        <h3 className="text-xs font-bold text-[var(--text-secondary)] uppercase mb-3 font-mono">Languages</h3>
+                                        <div className="flex flex-wrap gap-2">
+                                            {allLanguages.map(l => (
+                                                <button
+                                                    key={l}
+                                                    onClick={() => toggleFilter(l, setLangFilters)}
+                                                    className={`px-2 py-1 text-[10px] font-mono rounded border transition-all 
                           ${langFilters.includes(l)
-                                                        ? "bg-[var(--accent)]/20 border-[var(--accent)] text-[var(--accent)]"
-                                                        : "bg-[var(--bg-main)] border-[var(--border)] text-[var(--text-secondary)] hover:border-[var(--text-primary)]"}`}
-                                            >
-                                                {l}
-                                            </button>
-                                        ))}
+                                                            ? "bg-[var(--accent)]/20 border-[var(--accent)] text-[var(--accent)]"
+                                                            : "bg-[var(--bg-main)] border-[var(--border)] text-[var(--text-secondary)] hover:border-[var(--text-primary)]"}`}
+                                                >
+                                                    {l}
+                                                </button>
+                                            ))}
+                                        </div>
                                     </div>
-                                </div>
 
-                                {(techFilters.length > 0 || langFilters.length > 0) && (
-                                    <button
-                                        onClick={() => { setTechFilters([]); setLangFilters([]); }}
-                                        className="text-xs font-mono text-[var(--text-secondary)] hover:text-[var(--warning)] flex items-center gap-2"
+                                    {(techFilters.length > 0 || langFilters.length > 0) && (
+                                        <button
+                                            onClick={() => { setTechFilters([]); setLangFilters([]); }}
+                                            className="text-xs font-mono text-[var(--text-secondary)] hover:text-[var(--warning)] flex items-center gap-2"
+                                        >
+                                            <Trash2 size={12} /> clear_all_filters
+                                        </button>
+                                    )}
+                                </div>
+                            )}
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                                {filteredProjects.map(p => (
+                                    <div
+                                        key={p.id}
+                                        onClick={() => onOpenFile({ id: p.id, title: `${p.title}.tsx`, type: "detail", data: p })}
+                                        className="group bg-[var(--bg-panel)] border border-[var(--border)] hover:border-[var(--accent)] rounded-lg overflow-hidden cursor-pointer transition-all hover:-translate-y-1 hover:shadow-xl"
                                     >
-                                        <Trash2 size={12} /> clear_all_filters
-                                    </button>
+                                        <div className="h-32 bg-[var(--bg-activity)] relative overflow-hidden">
+                                            <img
+                                                src={p.image}
+                                                alt={p.title}
+                                                className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-all grayscale group-hover:grayscale-0"
+                                            />
+                                        </div>
+                                        <div className="p-4">
+                                            <h3 className="text-[var(--text-primary)] font-bold mb-1 group-hover:text-[var(--accent)] truncate transition-colors">{p.title}</h3>
+                                            <p className="text-[var(--text-secondary)] text-xs line-clamp-2 mb-3">{p.description}</p>
+                                            <div className="flex flex-wrap gap-2">{p.tech?.slice(0, 3).map(t => <TechTag key={t} label={t} />)}</div>
+                                        </div>
+                                    </div>
+                                ))}
+                                {filteredProjects.length === 0 && (
+                                    <div className="col-span-full text-center text-[var(--text-secondary)] font-mono text-sm mt-12">No projects match selected filters.</div>
                                 )}
                             </div>
-                        )}
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                            {filteredProjects.map(p => (
-                                <div
-                                    key={p.id}
-                                    onClick={() => onOpenFile({ id: p.id, title: `${p.title}.tsx`, type: "detail", data: p })}
-                                    className="group bg-[var(--bg-panel)] border border-[var(--border)] hover:border-[var(--accent)] rounded-lg overflow-hidden cursor-pointer transition-all hover:-translate-y-1 hover:shadow-xl"
-                                >
-                                    <div className="h-32 bg-[var(--bg-activity)] relative overflow-hidden">
-                                        <img
-                                            src={p.image}
-                                            alt={p.title}
-                                            className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-all grayscale group-hover:grayscale-0"
-                                        />
-                                    </div>
-                                    <div className="p-4">
-                                        <h3 className="text-[var(--text-primary)] font-bold mb-1 group-hover:text-[var(--accent)] truncate transition-colors">{p.title}</h3>
-                                        <p className="text-[var(--text-secondary)] text-xs line-clamp-2 mb-3">{p.description}</p>
-                                        <div className="flex flex-wrap gap-2">{p.tech?.slice(0, 3).map(t => <TechTag key={t} label={t} />)}</div>
-                                    </div>
-                                </div>
-                            ))}
-                            {filteredProjects.length === 0 && (
-                                <div className="col-span-full text-center text-[var(--text-secondary)] font-mono text-sm mt-12">No projects match selected filters.</div>
-                            )}
                         </div>
                     </div>
                 </div>
@@ -369,122 +373,127 @@ export const ContentRenderer = ({ type, data, title, onOpenFile, content, lang, 
 
     if (type === 'detail' && data) {
         return (
-            <div className="h-full overflow-y-auto custom-scrollbar">
+            <div className="h-full flex flex-col">
                 <Breadcrumbs path={path} />
-                <div className="p-4 md:p-12 max-w-6xl mx-auto pb-32">
-                    <div className="grid grid-cols-1 lg:grid-cols-[2fr,1fr] gap-8 min-w-0">
+                <div className="flex-1 overflow-y-auto custom-scrollbar">
+                    <div className="p-4 md:p-12 max-w-6xl mx-auto pb-32">
+                        <div className="grid grid-cols-1 lg:grid-cols-[2fr,1fr] gap-8 min-w-0">
 
-                        {/* LEFT COLUMN */}
-                        <div className="space-y-8 min-w-0">
-                            <div>
-                                <div className="flex items-center gap-3 text-xs md:text-sm font-mono text-[var(--text-secondary)] mb-2">
-                                    <span className="flex items-center gap-1"><GitBranch size={12} /> main</span>
-                                    <span className="text-[var(--border)]">|</span>
-                                    <span className="flex items-center gap-1"><Activity size={12} /> {data.deployHistory?.[0]?.version || 'v1.0.0'}</span>
-                                </div>
-                                <h1 className="text-2xl md:text-5xl font-bold text-[var(--text-primary)] mb-2 tracking-tight break-words">{data.title}</h1>
-                                <p className="text-base md:text-xl text-[var(--text-secondary)] font-light border-l-2 border-[var(--accent)] pl-4 break-words">{data.subtitle}</p>
-                            </div>
-
-                            {/* DESCRIPTION */}
-                            <div className="bg-[var(--bg-activity)]/30 border border-[var(--border)] rounded-lg p-4 md:p-6">
-                                <div className="flex items-center gap-2 mb-4 text-[var(--text-primary)] font-mono text-sm border-b border-[var(--border)] pb-2">
-                                    <FileText size={14} className="text-[var(--info)]" /> README.md
-                                </div>
-                                <p className="text-[var(--text-primary)] text-sm leading-relaxed font-mono opacity-90 whitespace-pre-wrap">{data.longDescription}</p>
-                            </div>
-
-                            {/* ARCHITECTURE */}
-                            {data.architecture && (
-                                <div className="bg-[var(--bg-activity)] border border-[var(--border)] rounded-lg p-4 md:p-6 overflow-hidden">
-                                    <div className="flex items-center gap-2 mb-4 text-[var(--text-primary)] font-mono text-sm">
-                                        <Server size={14} className="text-[var(--warning)]" /> System Architecture
+                            {/* LEFT COLUMN */}
+                            <div className="space-y-8 min-w-0">
+                                <div>
+                                    <div className="flex items-center gap-3 text-xs md:text-sm font-mono text-[var(--text-secondary)] mb-2">
+                                        <span className="flex items-center gap-1"><GitBranch size={12} /> main</span>
+                                        <span className="text-[var(--border)]">|</span>
+                                        <span className="flex items-center gap-1"><Activity size={12} /> {data.deployHistory?.[0]?.version || 'v1.0.0'}</span>
                                     </div>
-                                    <div className="overflow-x-auto w-full custom-scrollbar">
-                                        <pre className="font-mono text-xs md:text-sm text-[var(--text-secondary)] leading-relaxed min-w-max">{data.architecture}</pre>
-                                    </div>
+                                    <h1 className="text-2xl md:text-5xl font-bold text-[var(--text-primary)] mb-2 tracking-tight break-words">{data.title}</h1>
+                                    <p className="text-base md:text-xl text-[var(--text-secondary)] font-light border-l-2 border-[var(--accent)] pl-4 break-words">{data.subtitle}</p>
                                 </div>
-                            )}
 
-                            {/* CODE SNIPPET */}
-                            {data.snippet && (
-                                <div className="bg-[var(--bg-panel)] border border-[var(--border)] rounded-lg overflow-hidden min-w-0">
-                                    <div className="bg-[var(--bg-activity)] px-4 py-2 border-b border-[var(--border)] flex justify-between items-center">
-                                        <div className="flex items-center gap-2 text-xs font-mono text-[var(--text-secondary)]"><Code size={12} /> core_logic.ts</div>
-                                        <div className="flex gap-1.5">
-                                            <div className="w-2.5 h-2.5 rounded-full bg-red-500/20" />
-                                            <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/20" />
-                                            <div className="w-2.5 h-2.5 rounded-full bg-green-500/20" />
+                                {/* DESCRIPTION (README) - VS CODE AUTHENTIC FONT */}
+                                <div className="bg-[var(--bg-activity)]/30 border border-[var(--border)] rounded-lg p-4 md:p-6">
+                                    <div className="flex items-center gap-2 mb-0.001 text-[var(--text-primary)] font-mono text-sm border-b border-[var(--border)] pb-2">
+                                        <FileText size={14} className="text-[var(--info)]" /> README.md
+                                    </div>
+                                    <p className="text-[var(--text-primary)] text-base font-sans leading-relaxed opacity-90 whitespace-pre-wrap">{data.longDescription}</p>
+                                </div>
+
+                                {/* PROJECT IMAGE MOVED HERE */}
+                                <div className="rounded-lg border border-[var(--border)] shadow-2xl relative group p-4 flex justify-center items-center bg-black/20 overflow-hidden h-[300px] sm:h-auto">
+                                    <img src={data.image} alt={data.title} className="max-w-full max-h-full object-contain sm:w-auto sm:h-auto sm:object-cover" />
+                                </div>
+
+                                {/* ARCHITECTURE */}
+                                {data.architecture && (
+                                    <div className="bg-[var(--bg-activity)] border border-[var(--border)] rounded-lg p-4 md:p-6 overflow-hidden">
+                                        <div className="flex items-center gap-2 mb-4 text-[var(--text-primary)] font-mono text-sm">
+                                            <Server size={14} className="text-[var(--warning)]" /> System Architecture
+                                        </div>
+                                        <div className="overflow-x-auto w-full custom-scrollbar">
+                                            <pre className="font-mono text-xs md:text-sm text-[var(--text-secondary)] leading-relaxed min-w-max">{data.architecture}</pre>
                                         </div>
                                     </div>
-                                    <div className="p-4 overflow-x-auto w-full custom-scrollbar">
-                                        <pre className="font-mono text-xs md:text-sm text-[var(--success)] leading-relaxed min-w-max">{data.snippet}</pre>
-                                    </div>
-                                </div>
-                            )}
-                        </div>
+                                )}
 
-                        {/* RIGHT COLUMN */}
-                        <div className="space-y-6 min-w-0">
-                            <div className="rounded-lg border border-[var(--border)] shadow-2xl relative group p-4 flex justify-center items-center bg-black/20 overflow-hidden h-[240px] sm:h-auto">
-                                <img src={data.image} alt={data.title} className="max-w-full max-h-full object-contain sm:w-auto sm:h-auto sm:object-cover" />
-                            </div>
-
-                            {/* LANGUAGES */}
-                            <div className="bg-[var(--bg-activity)]/30 border border-[var(--border)] rounded-lg p-5">
-                                <h3 className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-widest mb-4 font-mono flex items-center gap-2">Languages</h3>
-                                <div className="flex h-3 rounded-full overflow-hidden mb-3">
-                                    {data.languages.map((lang: any, index: number) => (
-                                        <div key={index} style={{ width: `${lang.percent}%`, backgroundColor: lang.color }} className="h-full" />
-                                    ))}
-                                </div>
-                                <div className="flex flex-wrap gap-4">
-                                    {data.languages.map((lang: any, index: number) => (
-                                        <div key={index} className="flex items-center gap-2">
-                                            <div className="w-2 h-2 rounded-full" style={{ backgroundColor: lang.color }} />
-                                            <span className="text-xs text-[var(--text-primary)] font-mono">{lang.name} <span className="text-[var(--text-secondary)]">{lang.percent}%</span></span>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-
-                            {/* DEPLOY LOG */}
-                            <div className="bg-[var(--bg-activity)]/30 border border-[var(--border)] rounded-lg p-5">
-                                <h3 className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-widest mb-4 font-mono flex items-center gap-2"><HardDrive size={12} /> Deploy Log</h3>
-                                <div className="space-y-3">
-                                    {data.deployHistory ? data.deployHistory.map((deploy: any, idx: number) => (
-                                        <div key={idx} className={`flex gap-2 ${idx !== 0 ? 'opacity-60 hover:opacity-100 transition-opacity' : ''}`}>
-                                            <div className={`w-1.5 h-1.5 rounded-full mt-1.5 ${deploy.status === 'success' ? 'bg-[var(--success)]' : 'bg-red-500'}`} />
-                                            <div>
-                                                <div className="text-xs text-[var(--text-primary)] font-mono">{deploy.version} - {deploy.msg}</div>
-                                                <div className="text-[10px] text-[var(--text-secondary)]">{deploy.time}</div>
+                                {/* CODE SNIPPET */}
+                                {data.snippet && (
+                                    <div className="bg-[var(--bg-panel)] border border-[var(--border)] rounded-lg overflow-hidden min-w-0">
+                                        <div className="bg-[var(--bg-activity)] px-4 py-2 border-b border-[var(--border)] flex justify-between items-center">
+                                            <div className="flex items-center gap-2 text-xs font-mono text-[var(--text-secondary)]"><Code size={12} /> core_logic.ts</div>
+                                            <div className="flex gap-1.5">
+                                                <div className="w-2.5 h-2.5 rounded-full bg-red-500/20" />
+                                                <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/20" />
+                                                <div className="w-2.5 h-2.5 rounded-full bg-green-500/20" />
                                             </div>
                                         </div>
-                                    )) : <div className="text-xs text-[var(--text-secondary)] italic">No deployment history found.</div>}
-                                </div>
+                                        <div className="p-4 overflow-x-auto w-full custom-scrollbar">
+                                            <pre className="font-mono text-xs md:text-sm text-[var(--success)] leading-relaxed min-w-max">{data.snippet}</pre>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
 
-                            {/* TECH STACK */}
-                            <div className="bg-[var(--bg-activity)]/30 border border-[var(--border)] rounded-lg p-6">
-                                <h3 className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-widest mb-4 font-mono">Tech Stack</h3>
-                                <div className="flex flex-wrap gap-2">{data.tech.map((t: string) => <TechTag key={t} label={t} />)}</div>
-                            </div>
+                            {/* RIGHT COLUMN */}
+                            <div className="space-y-6 min-w-0">
+                                {/* IMAGE MOVED TO LEFT COLUMN */}
 
-                            {/* LINKS */}
-                            {data.links && (data.links.github || data.links.live) && (
-                                <div className="flex flex-col gap-3">
-                                    {typeof data.links.github === "string" && data.links.github.trim() !== "" && (
-                                        <a href={data.links.github} target="_blank" rel="noopener noreferrer" className="py-3 bg-[var(--bg-activity)] border border-[var(--border)] hover:border-[var(--text-primary)] text-[var(--text-primary)] rounded flex items-center justify-center gap-2 transition-all font-mono text-sm">
-                                            <Github size={16} /> git checkout
-                                        </a>
-                                    )}
-                                    {typeof data.links.live === "string" && data.links.live.trim() !== "" && (
-                                        <a href={data.links.live} target="_blank" rel="noopener noreferrer" className="py-3 bg-[var(--accent)]/10 border border-[var(--accent)]/50 text-[var(--accent)] hover:bg-[var(--accent)]/20 rounded flex items-center justify-center gap-2 transition-all font-mono text-sm">
-                                            <Globe size={16} /> view_deployment
-                                        </a>
-                                    )}
+                                {/* LANGUAGES */}
+                                <div className="bg-[var(--bg-activity)]/30 border border-[var(--border)] rounded-lg p-5">
+                                    <h3 className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-widest mb-4 font-mono flex items-center gap-2">Languages</h3>
+                                    <div className="flex h-3 rounded-full overflow-hidden mb-3">
+                                        {data.languages.map((lang: any, index: number) => (
+                                            <div key={index} style={{ width: `${lang.percent}%`, backgroundColor: lang.color }} className="h-full" />
+                                        ))}
+                                    </div>
+                                    <div className="flex flex-wrap gap-4">
+                                        {data.languages.map((lang: any, index: number) => (
+                                            <div key={index} className="flex items-center gap-2">
+                                                <div className="w-2 h-2 rounded-full" style={{ backgroundColor: lang.color }} />
+                                                <span className="text-xs text-[var(--text-primary)] font-mono">{lang.name} <span className="text-[var(--text-secondary)]">{lang.percent}%</span></span>
+                                            </div>
+                                        ))}
+                                    </div>
                                 </div>
-                            )}
+
+                                {/* DEPLOY LOG */}
+                                <div className="bg-[var(--bg-activity)]/30 border border-[var(--border)] rounded-lg p-5">
+                                    <h3 className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-widest mb-4 font-mono flex items-center gap-2"><HardDrive size={12} /> Deploy Log</h3>
+                                    <div className="space-y-3">
+                                        {data.deployHistory ? data.deployHistory.map((deploy: any, idx: number) => (
+                                            <div key={idx} className={`flex gap-2 ${idx !== 0 ? 'opacity-60 hover:opacity-100 transition-opacity' : ''}`}>
+                                                <div className={`w-1.5 h-1.5 rounded-full mt-1.5 ${deploy.status === 'success' ? 'bg-[var(--success)]' : 'bg-red-500'}`} />
+                                                <div>
+                                                    <div className="text-xs text-[var(--text-primary)] font-mono">{deploy.version} - {deploy.msg}</div>
+                                                    <div className="text-[10px] text-[var(--text-secondary)]">{deploy.time}</div>
+                                                </div>
+                                            </div>
+                                        )) : <div className="text-xs text-[var(--text-secondary)] italic">No deployment history found.</div>}
+                                    </div>
+                                </div>
+
+                                {/* TECH STACK */}
+                                <div className="bg-[var(--bg-activity)]/30 border border-[var(--border)] rounded-lg p-6">
+                                    <h3 className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-widest mb-4 font-mono">Tech Stack</h3>
+                                    <div className="flex flex-wrap gap-2">{data.tech.map((t: string) => <TechTag key={t} label={t} />)}</div>
+                                </div>
+
+                                {/* LINKS */}
+                                {data.links && (data.links.github || data.links.live) && (
+                                    <div className="flex flex-col gap-3">
+                                        {typeof data.links.github === "string" && data.links.github.trim() !== "" && (
+                                            <a href={data.links.github} target="_blank" rel="noopener noreferrer" className="py-3 bg-[var(--bg-activity)] border border-[var(--border)] hover:border-[var(--text-primary)] text-[var(--text-primary)] rounded flex items-center justify-center gap-2 transition-all font-mono text-sm">
+                                                <Github size={16} /> git checkout
+                                            </a>
+                                        )}
+                                        {typeof data.links.live === "string" && data.links.live.trim() !== "" && (
+                                            <a href={data.links.live} target="_blank" rel="noopener noreferrer" className="py-3 bg-[var(--accent)]/10 border border-[var(--accent)]/50 text-[var(--accent)] hover:bg-[var(--accent)]/20 rounded flex items-center justify-center gap-2 transition-all font-mono text-sm">
+                                                <Globe size={16} /> view_deployment
+                                            </a>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     </div>
                 </div>

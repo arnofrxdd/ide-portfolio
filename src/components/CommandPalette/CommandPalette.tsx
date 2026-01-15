@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import {
-    Search as SearchIcon, Terminal, FileCode, Lock, GitBranch, Box, FileText,
-    FileJson, Palette, ToggleLeft, ToggleRight
+    Terminal, FileCode, Lock, GitBranch, Box, FileText,
+    FileJson, Palette, ToggleLeft
 } from 'lucide-react';
 import { PROJECTS_DATA } from '../../data/projects';
 import { THEMES } from '../../data/themes';
@@ -178,71 +178,90 @@ export const CommandPalette = ({ isOpen, onClose, onOpenFile }: CommandPalettePr
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-[100] bg-black/50 flex justify-center pt-[10vh]" onClick={onClose}>
+        <div className="fixed inset-0 z-[100] bg-black/20 flex justify-center items-start pt-[80px]" onClick={onClose}>
             <div
-                className="w-[600px] max-w-[90vw] bg-[var(--bg-panel)] border border-[var(--border)] shadow-2xl rounded-lg overflow-hidden flex flex-col h-[400px]"
+                className="w-[600px] max-w-[90vw] bg-[var(--bg-panel)] border border-[var(--border)] shadow-2xl overflow-hidden flex flex-col h-[400px] animate-in fade-in slide-in-from-top-4 duration-150"
                 onClick={e => e.stopPropagation()}
             >
-                <div className="p-3 border-b border-[var(--border)] flex items-center gap-3">
-                    <SearchIcon size={16} className="text-[var(--text-secondary)]" />
+                <div className="p-1 border-b border-[var(--border)] flex items-center gap-1 bg-[var(--bg-panel)]">
+                    <div className="pl-2 text-[var(--text-secondary)] font-mono text-sm select-none">
+                        {query.startsWith('>') ? '' : '>'}
+                    </div>
                     <input
                         ref={inputRef}
-                        className="flex-1 bg-transparent border-none outline-none text-[var(--text-primary)] text-sm font-mono placeholder-[var(--text-secondary)]"
-                        placeholder="Search files by name..."
+                        className="flex-1 bg-transparent border-none outline-none text-[var(--text-primary)] text-sm font-sans placeholder-[var(--text-secondary)] py-2 px-1"
+                        placeholder="Type a command or file name..."
                         value={query}
                         onChange={e => setQuery(e.target.value)}
                         onKeyDown={handleKeyDown}
                     />
-                    <div className="text-[10px] bg-[var(--bg-activity)] text-[var(--text-secondary)] px-1.5 py-0.5 rounded border border-[var(--border)]">ESC</div>
+                    <div className="flex items-center gap-2 pr-3">
+                        <div className="text-[10px] text-[var(--text-secondary)] opacity-50 font-mono">
+                            {filteredItems.length} results
+                        </div>
+                    </div>
                 </div>
-                <div className="flex-1 overflow-y-auto custom-scrollbar p-1">
+                <div className="flex-1 overflow-y-auto custom-scrollbar">
                     {filteredItems.length === 0 && (
                         <div className="text-center text-[var(--text-secondary)] text-xs mt-4">No matching results</div>
                     )}
-                    {filteredItems.map((item, idx) => (
-                        <div
-                            key={idx}
-                            ref={el => { itemRefs.current[idx] = el; }}
-                            onClick={() => {
-                                if (item.type === 'command') {
-                                    if (item.action === 'open_terminal') {
-                                        window.dispatchEvent(new CustomEvent('open-terminal'));
-                                        onClose();
-                                        return;
+                    <div className="flex flex-col">
+                        {filteredItems.map((item, idx) => (
+                            <div
+                                key={idx}
+                                ref={el => { itemRefs.current[idx] = el; }}
+                                onClick={() => {
+                                    if (item.type === 'command') {
+                                        if (item.action === 'open_terminal') {
+                                            window.dispatchEvent(new CustomEvent('open-terminal'));
+                                            onClose();
+                                            return;
+                                        }
+
+                                        if (item.action === 'set_theme') {
+                                            window.dispatchEvent(
+                                                new CustomEvent('set-theme', { detail: item.themeKey })
+                                            );
+                                            onClose();
+                                            return;
+                                        }
+                                        if (item.action === 'toggle_setting') {
+                                            window.dispatchEvent(
+                                                new CustomEvent('toggle-setting', { detail: item.settingKey })
+                                            );
+                                            onClose();
+                                            return;
+                                        }
                                     }
 
-                                    if (item.action === 'set_theme') {
-                                        window.dispatchEvent(
-                                            new CustomEvent('set-theme', { detail: item.themeKey })
-                                        );
-                                        onClose();
-                                        return;
-                                    }
-                                    if (item.action === 'toggle_setting') {
-                                        window.dispatchEvent(
-                                            new CustomEvent('toggle-setting', { detail: item.settingKey })
-                                        );
-                                        onClose();
-                                        return;
-                                    }
-                                }
 
-
-                                onOpenFile(item);
-                                onClose();
-                            }}
-                            className={`flex items-center gap-3 px-3 py-2 rounded cursor-pointer group ${idx === selectedIndex ? 'bg-[var(--accent)] text-white' : 'text-[var(--text-primary)] hover:bg-[var(--bg-activity)]'}`}
-                        >
-                            <item.icon size={14} className={idx === selectedIndex ? 'text-white' : 'text-[var(--text-secondary)]'} />
-                            <div className="flex-1 min-w-0">
-                                <div className="text-sm font-mono truncate">{item.title}</div>
-                                <div className={`text-[10px] truncate ${idx === selectedIndex ? 'text-white/70' : 'text-[var(--text-secondary)]'}`}>{item.path}</div>
+                                    onOpenFile(item);
+                                    onClose();
+                                }}
+                                className={`flex items-center gap-3 px-3 py-1 cursor-pointer select-none transition-none ${idx === selectedIndex
+                                    ? 'bg-[var(--accent)] text-white'
+                                    : 'text-[var(--text-primary)] hover:bg-[var(--bg-activity)]'
+                                    }`}
+                            >
+                                <item.icon size={16} className={`shrink-0 ${idx === selectedIndex ? 'text-white' : 'text-[var(--text-secondary)]'}`} />
+                                <div className="flex-1 min-w-0 py-1">
+                                    <div className="text-[13px] font-sans truncate leading-tight">{item.title}</div>
+                                    <div className={`text-[11px] truncate ${idx === selectedIndex ? 'text-white/70' : 'text-[var(--text-secondary)] font-mono opacity-80'}`}>
+                                        {item.path}
+                                    </div>
+                                </div>
+                                {idx === selectedIndex && (
+                                    <div className="text-[10px] font-mono text-white/50 pr-2">
+                                        Enter to select
+                                    </div>
+                                )}
                             </div>
-                        </div>
-                    ))}
+                        ))}
+                    </div>
                 </div>
-                <div className="p-1 bg-[var(--bg-main)] border-t border-[var(--border)] text-[10px] text-[var(--text-secondary)] text-right px-3">
-                    Portfolio Command Palette
+                <div className="p-1 px-3 bg-[var(--bg-panel)] border-t border-[var(--border)] text-[10px] text-[var(--text-secondary)] flex justify-between items-center h-7 font-mono italic opacity-60">
+                    <span>Command Center</span>
+                    <span>Alt+P</span>
                 </div>
             </div>
         </div>

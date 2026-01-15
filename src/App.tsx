@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
-  X, MinusCircle, Copy as CopyIcon, ArrowLeft, Terminal, GitBranch,
-  AlertCircle, CheckCircle, Bell, GripHorizontal, Minimize2, Square
+  X, ArrowLeft, Terminal, GitBranch,
+  AlertCircle, CheckCircle, Bell, GripHorizontal, Minimize2, Square, PanelRight, Code
 } from 'lucide-react';
 
 // Data
@@ -19,20 +19,66 @@ import { Sidebar } from './components/Sidebar/Sidebar';
 import { ContentRenderer } from './components/Editor/ContentRenderer';
 import { IntegratedTerminal } from './components/Terminal/Terminal';
 import { CommandPalette } from './components/CommandPalette/CommandPalette';
+import { ContextMenu } from './components/UI/ContextMenu';
+import { SecondarySidebar } from './components/Sidebar/SecondarySidebar';
 
 const App = () => {
-  const [tabs, setTabs] = useState<any[]>([{ id: 'home', title: 'home.tsx', type: 'home', data: null }]);
-  const [activeTabId, setActiveTabId] = useState('home');
-  const [windows, setWindows] = useState<any[]>([]);
+  const [tabs, setTabs] = useState<any[]>(() => {
+    try {
+      const saved = localStorage.getItem('portfolio_tabs');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        // If the user closed everything and reloads, force home to reopen for better UX
+        return parsed.length > 0 ? parsed : [{ id: 'home', title: 'home.tsx', type: 'home', data: null }];
+      }
+      return [{ id: 'home', title: 'home.tsx', type: 'home', data: null }];
+    } catch (e) {
+      return [{ id: 'home', title: 'home.tsx', type: 'home', data: null }];
+    }
+  });
+  const [activeTabId, setActiveTabId] = useState(() => {
+    // Check if tabs would be force-restored to home
+    const savedTabsStr = localStorage.getItem('portfolio_tabs');
+    let savedTabs: any[] = [];
+    try {
+      savedTabs = savedTabsStr ? JSON.parse(savedTabsStr) : [];
+    } catch (e) { savedTabs = []; }
+
+    // If tabs are empty, we know the app forces 'home', so active tab must be 'home'
+    if (!savedTabs.length) return 'home';
+
+    const savedActive = localStorage.getItem('portfolio_active_tab');
+    // Verify saved active tab still exists in saved tabs
+    if (savedActive && savedTabs.some(t => t.id === savedActive)) return savedActive;
+
+    // Fallback to first available tab
+    return savedTabs[0]?.id || 'home';
+  });
+  const [windows, setWindows] = useState<any[]>(() => {
+    try {
+      const saved = localStorage.getItem('portfolio_windows');
+      return saved ? JSON.parse(saved) : [];
+    } catch (e) {
+      return [];
+    }
+  });
   const [isDragging, setIsDragging] = useState(false);
   const [dockHighlight, setDockHighlight] = useState(false);
   const [isTerminalOpen, setIsTerminalOpen] = useState(false);
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
+  const [isSecondarySidebarOpen, setIsSecondarySidebarOpen] = useState(() => {
+    const saved = localStorage.getItem('portfolio_secondary_sidebar_open');
+    return saved !== null ? JSON.parse(saved) : true;
+  });
+
+  useEffect(() => {
+    localStorage.setItem('portfolio_secondary_sidebar_open', JSON.stringify(isSecondarySidebarOpen));
+  }, [isSecondarySidebarOpen]);
 
   const [currentTheme, setCurrentTheme] = useState(() => {
     const saved = localStorage.getItem('portfolio_theme');
     // @ts-ignore
-    return saved && THEMES[saved] ? saved : 'default';
+    return saved && THEMES[saved] ? saved : 'darkModern';
   });
 
   const [contextMenu, setContextMenu] = useState<{ x: number, y: number, type: string, id: string } | null>(null);
@@ -46,6 +92,18 @@ const App = () => {
   useEffect(() => {
     localStorage.setItem('portfolio_editor_settings', JSON.stringify(editorSettings));
   }, [editorSettings]);
+
+  useEffect(() => {
+    localStorage.setItem('portfolio_tabs', JSON.stringify(tabs));
+  }, [tabs]);
+
+  useEffect(() => {
+    localStorage.setItem('portfolio_active_tab', activeTabId);
+  }, [activeTabId]);
+
+  useEffect(() => {
+    localStorage.setItem('portfolio_windows', JSON.stringify(windows));
+  }, [windows]);
 
   const tabBarRef = useRef<HTMLDivElement>(null);
   const draggingTabId = useRef<string | null>(null);
@@ -183,7 +241,8 @@ const App = () => {
 
   const closeTab = (e: React.MouseEvent | null, id: string) => {
     e?.stopPropagation();
-    if (id === 'home') return;
+    e?.stopPropagation();
+    // if (id === 'home') return;
     const newTabs = tabs.filter(t => t.id !== id);
     setTabs(newTabs);
     if (activeTabId === id && newTabs.length > 0) setActiveTabId(newTabs[newTabs.length - 1].id);
@@ -219,16 +278,18 @@ const App = () => {
       const { id, file } = e.detail;
       draggingTabId.current = id;
       dragItem.current = {
-        type: 'tab',
+        type: 'explorer-drag',
         id,
+        title: file.title,
         startX: 0,
         startY: 0,
         initialPos: null,
         initialSize: null,
-        hasDetached: false
+        hasDetached: false,
+        file: file
       };
       setIsDragging(true);
-      openFile(file);
+      // openFile(file); // Don't necessarily open on drag start
     };
     window.addEventListener('explorer-drag-start', handler);
     return () => window.removeEventListener('explorer-drag-start', handler);
@@ -310,7 +371,7 @@ const App = () => {
     const dy = e.clientY - startY;
 
     if (type === 'tab') {
-      if (id === 'home') return;
+      // if (id === 'home') return; // Allow dragging home tab
       let isOverTabBar = false;
       if (tabBarRef.current) {
         const barRect = tabBarRef.current.getBoundingClientRect();
@@ -358,6 +419,22 @@ const App = () => {
             setDropIndex(null);
           }
         }
+      }
+    }
+
+    if (type === 'explorer-drag') {
+      let isOverTabBar = false;
+      if (tabBarRef.current) {
+        const barRect = tabBarRef.current.getBoundingClientRect();
+        isOverTabBar = e.clientY >= barRect.top - 20 && e.clientY <= barRect.bottom + 20;
+      }
+
+      if (isOverTabBar) {
+        // @ts-ignore
+        const idx = getTabInsertIndexFromX(e.clientX, '');
+        setDropIndex(idx);
+      } else {
+        setDropIndex(null);
       }
     }
 
@@ -459,11 +536,35 @@ const App = () => {
       setActiveTabId(id);
     }
 
+    if (type === 'explorer-drag' && tabBarRef.current && (() => { const r = tabBarRef.current!.getBoundingClientRect(); return e.clientY >= r.top - 20 && e.clientY <= r.bottom + 20; })()) {
+      const file = dragItem.current.file;
+      if (file) {
+        // Determine where to insert the new tab
+        // @ts-ignore
+        const insertIndex = getTabInsertIndexFromX(e.clientX, '');
+
+        setTabs(prev => {
+          const existing = prev.find(t => t.id === file.id);
+          if (existing) {
+            // If already open, just move it
+            const filtered = prev.filter(t => t.id !== file.id);
+            const next = [...filtered];
+            next.splice(insertIndex, 0, existing);
+            return next;
+          }
+          const next = [...prev];
+          next.splice(insertIndex, 0, file);
+          return next;
+        });
+        setActiveTabId(file.id);
+      }
+    }
+
     setIsDragging(false);
     setDockHighlight(false);
     dragItem.current = null;
     draggingTabId.current = null;
-  }, [isDragging, windows]);
+  }, [isDragging, windows, tabs, activeTabId]);
 
   useEffect(() => {
     if (isDragging) {
@@ -478,214 +579,286 @@ const App = () => {
 
   return (
     <ThemeContext.Provider value={{ theme: currentTheme, setTheme: setCurrentTheme }}>
-      <div className="h-screen w-full bg-[var(--bg-main)] text-[var(--text-primary)] font-sans overflow-hidden flex selection:bg-[var(--selection)] selection:text-white relative transition-colors duration-300">
-        <CodeRainBackground />
-        <CustomScrollbarStyles />
-        <ToastContainer toasts={toasts} />
+      <div className="h-screen w-full bg-[var(--bg-main)] text-[var(--text-primary)] font-sans overflow-hidden flex flex-col selection:bg-[var(--selection)] selection:text-white transition-colors duration-300">
+        <div className="flex-1 flex min-h-0 relative">
+          <CodeRainBackground />
+          <CustomScrollbarStyles />
+          <ToastContainer toasts={toasts} />
 
-        {contextMenu && (
-          <div
-            className="fixed z-[9999] bg-[var(--bg-panel)] border border-[var(--border)] rounded shadow-xl py-1 min-w-[150px] animate-in fade-in zoom-in-95 duration-100"
-            style={{ left: contextMenu.x, top: contextMenu.y }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            {contextMenu.type === 'tab' && (
-              <>
-                <button onClick={() => { closeTab(null, contextMenu.id); setContextMenu(null); }} className="w-full text-left px-3 py-1.5 text-xs text-[var(--text-primary)] hover:bg-[var(--bg-activity)] flex items-center gap-2">
-                  <X size={12} /> Close
-                </button>
-                <button onClick={() => { closeOtherTabs(contextMenu.id); setContextMenu(null); }} className="w-full text-left px-3 py-1.5 text-xs text-[var(--text-primary)] hover:bg-[var(--bg-activity)] flex items-center gap-2">
-                  <MinusCircle size={12} /> Close Others
-                </button>
-                <div className="h-px bg-[var(--border)] my-1" />
-                <button onClick={() => { addToast('Path copied to clipboard'); setContextMenu(null); }} className="w-full text-left px-3 py-1.5 text-xs text-[var(--text-primary)] hover:bg-[var(--bg-activity)] flex items-center gap-2">
-                  <CopyIcon size={12} /> Copy Path
-                </button>
-              </>
-            )}
-          </div>
-        )}
+          {contextMenu && (
+            <ContextMenu
+              x={contextMenu.x}
+              y={contextMenu.y}
+              type={contextMenu.type as any}
+              id={contextMenu.id}
+              onClose={() => setContextMenu(null)}
+              onAction={(action, id) => {
+                if (action === 'close') closeTab(null, id);
+                if (action === 'closeOthers') closeOtherTabs(id);
+                if (action === 'copyPath') addToast('Path copied to clipboard');
+                if (action === 'newFile') addToast('New file feature coming soon...');
+                if (action === 'delete') addToast('Delete feature coming soon...', 'warning');
+              }}
+            />
+          )}
 
-        <Sidebar
-          onOpenFile={openFile}
-          onToast={addToast}
-          onToggleTerminal={() => setIsTerminalOpen(true)}
-          tabs={tabs}
-          activeTabId={activeTabId}
-          setActiveTabId={setActiveTabId}
-          setTabs={setTabs}
-          editorSettings={editorSettings}
-          setEditorSettings={setEditorSettings}
-        />
+          <Sidebar
+            onOpenFile={openFile}
+            onToast={addToast}
+            onToggleTerminal={() => setIsTerminalOpen(true)}
+            tabs={tabs}
+            activeTabId={activeTabId}
+            setActiveTabId={setActiveTabId}
+            setTabs={setTabs}
+            editorSettings={editorSettings}
+            setEditorSettings={setEditorSettings}
+            onContextMenu={handleContextMenu}
+            isDragging={isDragging}
+          />
 
-        <div className="flex-1 flex flex-col relative z-10 h-full overflow-hidden min-w-0">
-          <div
-            ref={(el) => { tabScrollRef.current = el; tabBarRef.current = el; }}
-            onWheel={(e) => { if (e.deltaY !== 0) { e.preventDefault(); e.currentTarget.scrollLeft += e.deltaY; } }}
-            className={`h-10 bg-[var(--bg-activity)] border-b border-[var(--border)] flex items-end px-2 gap-1 overflow-x-auto overflow-y-hidden relative transition-colors duration-300 shrink-0 whitespace-nowrap custom-scrollbar ${dockHighlight ? 'bg-[var(--accent)]/10 border-[var(--accent)]' : ''}`}
-          >
-            {dockHighlight && (
-              <div className="absolute inset-0 flex items-center justify-center pointer-events-none bg-[var(--bg-main)]/80 text-[var(--accent)] font-mono text-xs z-50">
-                <ArrowLeft size={14} className="rotate-90 mr-2" /> Release to Dock
-              </div>
-            )}
-            {(() => {
-              const draggingIndex = isDragging ? tabs.findIndex(t => t.id === draggingTabId.current) : -1;
-              const visualDropIndex = (dropIndex !== null && draggingIndex !== -1 && dropIndex > draggingIndex) ? dropIndex + 1 : dropIndex;
-              return (
-                <>
-                  {tabs.map((tab, i) => (
-                    <React.Fragment key={tab.id}>
-                      {visualDropIndex === i && <div className="w-0.5 h-5 bg-white shadow-[0_0_8px_rgba(255,255,255,0.8)] rounded-full mx-0.5 shrink-0 z-50 animate-pulse" />}
-                      <div
-                        key={tab.id}
-                        ref={(el) => { if (el) tabRefs.current[tab.id] = el; }}
-                        onMouseDown={(e) => { draggingTabId.current = tab.id; handleMouseDown(e, 'tab', tab.id); }}
-                        onClick={() => setActiveTabId(tab.id)}
-                        onContextMenu={(e) => handleContextMenu(e, 'tab', tab.id)}
-                        className={`
-                            group relative px-4 py-2 text-xs font-mono border-t border-l border-r rounded-t-lg flex items-center gap-2 cursor-pointer select-none min-w-[120px] max-w-[200px] shrink-0
-                            ${activeTabId === tab.id ? 'bg-[var(--bg-panel)] border-[var(--border)] border-b-[var(--bg-panel)] text-[var(--text-primary)] z-10' : 'border-transparent text-[var(--text-secondary)] hover:bg-[var(--bg-activity)]/50'}
+          <div className="flex-1 flex flex-col relative z-10 h-full overflow-hidden min-w-0">
+            <div
+              ref={(el) => { tabScrollRef.current = el; tabBarRef.current = el; }}
+              onWheel={(e) => { if (e.deltaY !== 0) { e.preventDefault(); e.currentTarget.scrollLeft += e.deltaY; } }}
+              className={`h-9 bg-[var(--bg-activity)] border-b border-[var(--border)] flex items-center overflow-x-auto overflow-y-hidden relative shrink-0 whitespace-nowrap custom-scrollbar ${dockHighlight ? 'bg-[var(--accent)]/10 border-[var(--accent)]' : ''}`}
+            >
+              {dockHighlight && (
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none bg-[var(--bg-main)]/80 text-[var(--accent)] font-mono text-xs z-50">
+                  <ArrowLeft size={14} className="rotate-90 mr-2" /> Release to Dock
+                </div>
+              )}
+              {(() => {
+                const draggingIndex = isDragging ? tabs.findIndex(t => t.id === draggingTabId.current) : -1;
+                const visualDropIndex = (dropIndex !== null && draggingIndex !== -1 && dropIndex > draggingIndex) ? dropIndex + 1 : dropIndex;
+                return (
+                  <>
+                    {tabs.map((tab, i) => (
+                      <React.Fragment key={tab.id}>
+                        {visualDropIndex === i && <div className="w-0.5 h-6 bg-[var(--accent)] shadow-[0_0_8px_var(--accent)] mx-0 shrink-0 z-50 animate-pulse" />}
+                        <div
+                          key={tab.id}
+                          ref={(el) => { if (el) tabRefs.current[tab.id] = el; }}
+                          onMouseDown={(e) => { draggingTabId.current = tab.id; handleMouseDown(e, 'tab', tab.id); }}
+                          onClick={() => setActiveTabId(tab.id)}
+                          onContextMenu={(e) => handleContextMenu(e, 'tab', tab.id)}
+                          className={`
+                            group relative px-3 h-full text-[11px] md:text-[13px] border-r border-[var(--border)] flex items-center gap-2 cursor-pointer select-none min-w-[120px] max-w-[200px] shrink-0
+                            ${activeTabId === tab.id
+                              ? 'bg-[var(--bg-main)] text-[var(--text-primary)] border-t border-t-[var(--accent)] z-10'
+                              : 'bg-[var(--bg-activity)] text-[var(--text-secondary)] hover:bg-[var(--bg-main)]/30'}
                             ${isDragging && draggingTabId.current === tab.id ? 'opacity-40 grayscale' : 'opacity-100'}
                           `}
-                      >
-                        {(() => {
-                          const { icon: Icon, color } = getFileIcon(tab.title);
-                          return <Icon size={12} className={color} />;
-                        })()}
-                        <span className="truncate flex-1">{tab.title}</span>
-                        {tab.id !== 'home' && <X size={12} className="opacity-0 group-hover:opacity-100 hover:text-red-400" onClick={(e) => closeTab(e, tab.id)} />}
-                      </div>
-                    </React.Fragment>
-                  ))}
-                  {visualDropIndex === tabs.length && <div className="w-0.5 h-5 bg-white shadow-[0_0_8px_rgba(255,255,255,0.8)] rounded-full mx-0.5 shrink-0 z-50 animate-pulse" />}
-                </>
-              );
-            })()}
-            {dropIndex === tabs.length && <div className="w-0.5 h-5 bg-white shadow-[0_0_8px_rgba(255,255,255,0.8)] rounded-full mx-0.5 shrink-0 z-50 animate-pulse" />}
+                        >
+                          {(() => {
+                            const { icon: Icon, color } = getFileIcon(tab.title);
+                            return <Icon size={14} className={color} />;
+                          })()}
+                          <span className="truncate flex-1">{tab.title}</span>
+                          {/* Allow closing home tab */}
+                          <div
+                            className={`w-5 h-5 flex items-center justify-center rounded hover:bg-[var(--border)] ${activeTabId === tab.id ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}
+                            onClick={(e) => closeTab(e, tab.id)}
+                          >
+                            <X size={14} />
+                          </div>
+                        </div>
+                      </React.Fragment>
+                    ))}
+                    {visualDropIndex === tabs.length && <div className="w-0.5 h-6 bg-[var(--accent)] shadow-[0_0_8px_var(--accent)] mx-0 shrink-0 z-50 animate-pulse" />}
+                  </>
+                );
+              })()}
+            </div>
+
+            {/* Layout Controls */}
+            <div className="absolute right-0 top-0 h-9 flex items-center px-3 bg-[var(--bg-activity)] border-b border-[var(--border)] z-20 shadow-[-10px_0_10px_-5px_var(--bg-activity)]">
+              <button
+                onClick={() => setIsSecondarySidebarOpen(!isSecondarySidebarOpen)}
+                className={`p-1 rounded transition-colors ${isSecondarySidebarOpen ? 'text-[var(--accent)] bg-[var(--accent)]/10' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-panel)]'}`}
+                title="Toggle Secondary Sidebar"
+              >
+                <PanelRight size={16} />
+              </button>
+            </div>
+            <div
+              ref={editorScrollRef}
+              onScroll={(e) => { scrollPositions.current[activeTabId] = e.currentTarget.scrollTop; }}
+              className="flex-1 bg-[var(--bg-main)] relative overflow-y-auto custom-scrollbar transition-colors duration-300"
+            >
+              {tabs.map(tab => (
+                <div key={tab.id} className={`h-full w-full ${activeTabId === tab.id ? 'block' : 'hidden'}`}>
+                  <ContentRenderer
+                    type={tab.type}
+                    data={tab.data}
+                    title={tab.title}
+                    content={tab.content}
+                    lang={tab.lang}
+                    onOpenFile={openFile}
+                    editorSettings={editorSettings}
+                  />
+                </div>
+              ))}
+              {tabs.length === 0 && (
+                <div className="h-full flex flex-col items-center justify-center text-[var(--text-secondary)] select-none animate-in fade-in duration-500">
+                  <div className="mb-8 opacity-20 hover:opacity-100 transition-opacity duration-700">
+                    <Code size={120} strokeWidth={1} />
+                  </div>
+                  <h2 className="text-2xl font-bold mb-4 text-[var(--accent)] tracking-tight">The Void of Creation</h2>
+                  <p className="text-[var(--text-secondary)] mb-8 font-mono text-sm opacity-60">"Every great project starts with an empty buffer."</p>
+
+                  <div className="grid grid-cols-2 gap-x-12 gap-y-4 text-sm max-w-md mb-8">
+                    <div className="flex flex-col items-end gap-1">
+                      <span className="text-[var(--text-primary)]">Command Palette</span>
+                    </div>
+                    <div className="flex flex-col items-start gap-1 font-mono text-[var(--text-secondary)]">
+                      <span className="bg-[var(--bg-activity)] px-2 py-0.5 rounded border border-[var(--border)]">Ctrl+P</span>
+                    </div>
+                  </div>
+
+                  {!windows.find(w => w.id === 'home') && (
+                    <button
+                      onClick={() => openFile({ id: 'home', title: 'home.tsx', type: 'home', data: null })}
+                      className="flex items-center gap-2 px-4 py-2 bg-[var(--accent)] text-white rounded hover:bg-[var(--accent)]/90 transition-colors"
+                    >
+                      <Terminal size={14} />
+                      <span>Reopen home.tsx</span>
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+            <IntegratedTerminal isOpen={isTerminalOpen} onClose={() => setIsTerminalOpen(false)} onOpenFile={openFile} />
           </div>
-          <div
-            ref={editorScrollRef}
-            onScroll={(e) => { scrollPositions.current[activeTabId] = e.currentTarget.scrollTop; }}
-            className="flex-1 bg-[var(--bg-panel)] relative overflow-y-auto scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent custom-scrollbar transition-colors duration-300"
-          >
-            {tabs.map(tab => (
-              <div key={tab.id} className={`h-full w-full ${activeTabId === tab.id ? 'block' : 'hidden'}`}>
+
+          <SecondarySidebar isOpen={isSecondarySidebarOpen} activeTabId={activeTabId} onClose={() => setIsSecondarySidebarOpen(false)} />
+
+          {windows.map(win => (
+            <div
+              key={win.id}
+              style={{ position: 'absolute', left: win.position.x, top: win.position.y, width: win.size.w, height: win.size.h, zIndex: win.zIndex || 40 }}
+              onMouseDown={(e) => handleMouseDown(e, 'focus', win.id)}
+              className="bg-[var(--bg-main)] border border-[var(--border)] rounded-lg shadow-2xl flex flex-col overflow-hidden ring-1 ring-black/50"
+            >
+              <div
+                className="h-8 bg-[var(--bg-activity)] border-b border-[var(--border)] flex justify-between items-center px-2 cursor-default select-none"
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleMouseDown(e, 'window', win.id);
+                }}
+                onDoubleClick={(e) => toggleMaximize(e, win.id)}
+              >
+                <div className="flex items-center gap-2 text-xs font-sans text-[var(--text-secondary)]">
+                  <GripHorizontal size={12} />
+                  {(() => {
+                    const { icon: Icon, color } = getFileIcon(win.title);
+                    return <><Icon size={12} className={color} /><span>{win.title}</span></>;
+                  })()}
+                </div>
+                <div className="flex items-center gap-1.5" onMouseDown={(e) => e.stopPropagation()}>
+                  <div className="w-6 h-6 flex items-center justify-center text-[var(--text-secondary)] hover:text-white hover:bg-[var(--bg-panel)]/50 rounded cursor-pointer" onClick={(e) => toggleMaximize(e, win.id)} title={win.isMaximized ? "Restore" : "Maximize"}>
+                    {win.isMaximized ? <Minimize2 size={13} /> : <Square size={13} />}
+                  </div>
+                  <div className="w-6 h-6 flex items-center justify-center text-[var(--text-secondary)] hover:text-white hover:bg-red-500/80 rounded cursor-pointer" onClick={(e) => closeWindow(e, win.id)} title="Close">
+                    <X size={14} />
+                  </div>
+                </div>
+              </div>
+              <div
+                onScroll={(e) => { scrollPositions.current[win.id] = e.currentTarget.scrollTop; }}
+                ref={(el) => { if (el) el.scrollTop = scrollPositions.current[win.id] ?? 0; }}
+                className="flex-1 bg-[var(--bg-main)] overflow-y-auto p-1 custom-scrollbar"
+              >
                 <ContentRenderer
-                  type={tab.type}
-                  data={tab.data}
-                  title={tab.title}
-                  content={tab.content}
-                  lang={tab.lang}
+                  type={win.type}
+                  data={win.data}
+                  title={win.title}
+                  content={win.content}
+                  lang={win.lang}
                   onOpenFile={openFile}
                   editorSettings={editorSettings}
                 />
               </div>
-            ))}
-            {tabs.length === 0 && <div className="h-full flex items-center justify-center text-[var(--text-secondary)] font-mono text-sm">No active files.</div>}
+              {!win.isMaximized && (
+                <>
+                  <div className="absolute top-0 left-4 right-4 h-1 cursor-n-resize z-50" onMouseDown={(e) => handleMouseDown(e, 'resize', win.id, { action: 'resize', dir: 'n' })} />
+                  <div className="absolute bottom-0 left-4 right-4 h-1 cursor-s-resize z-50" onMouseDown={(e) => handleMouseDown(e, 'resize', win.id, { action: 'resize', dir: 's' })} />
+                  <div className="absolute left-0 top-4 bottom-4 w-1 cursor-w-resize z-50" onMouseDown={(e) => handleMouseDown(e, 'resize', win.id, { action: 'resize', dir: 'w' })} />
+                  <div className="absolute right-0 top-4 bottom-4 w-1 cursor-e-resize z-50" onMouseDown={(e) => handleMouseDown(e, 'resize', win.id, { action: 'resize', dir: 'e' })} />
+                  <div className="absolute top-0 left-0 w-4 h-4 cursor-nw-resize z-50" onMouseDown={(e) => handleMouseDown(e, 'resize', win.id, { action: 'resize', dir: 'nw' })} />
+                  <div className="absolute top-0 right-0 w-4 h-4 cursor-ne-resize z-50" onMouseDown={(e) => handleMouseDown(e, 'resize', win.id, { action: 'resize', dir: 'ne' })} />
+                  <div className="absolute bottom-0 left-0 w-4 h-4 cursor-sw-resize z-50" onMouseDown={(e) => handleMouseDown(e, 'resize', win.id, { action: 'resize', dir: 'sw' })} />
+                  <div className="absolute bottom-0 right-0 w-4 h-4 cursor-se-resize z-50" onMouseDown={(e) => handleMouseDown(e, 'resize', win.id, { action: 'resize', dir: 'se' })} />
+                </>
+              )}
+            </div>
+          ))}
+
+        </div> {/* End of Top Section flex-1 flex */}
+
+        <div className="h-6 bg-[#007acc] md:bg-[var(--bg-activity)] border-t border-[var(--border)] flex justify-between items-center px-3 text-[10px] md:text-xs font-sans text-[var(--text-secondary)] z-30 relative shrink-0 transition-colors duration-300 select-none">
+          <div className="flex gap-4 items-center">
+            <button
+              onClick={() => setIsTerminalOpen(!isTerminalOpen)}
+              className="flex items-center gap-1 hover:text-white cursor-pointer hover:bg-slate-800 px-2 rounded transition-colors"
+            >
+              <Terminal size={10} />
+              <span className="hidden sm:inline text-white">TERMINAL</span>
+            </button>
+            <div className="hidden md:flex items-center gap-1 hover:text-white cursor-pointer">
+              <GitBranch size={10} />
+              <span>main*</span>
+            </div>
+            <div className="hidden md:flex items-center gap-1 hover:text-white cursor-pointer">
+              <AlertCircle size={10} />
+              <span>0 errors</span>
+            </div>
           </div>
-          <div className="h-6 bg-[#007acc] md:bg-[var(--bg-activity)] border-t border-[var(--border)] flex justify-between items-center px-3 text-[10px] md:text-xs font-mono text-[var(--text-secondary)] z-30 relative shrink-0 transition-colors duration-300 select-none">
-            <div className="flex gap-4 items-center">
-              <button
-                onClick={() => setIsTerminalOpen(!isTerminalOpen)}
-                className="flex items-center gap-1 hover:text-white cursor-pointer hover:bg-slate-800 px-2 rounded transition-colors"
-              >
-                <Terminal size={10} />
-                <span className="hidden sm:inline">TERMINAL</span>
-              </button>
-              <div className="hidden md:flex items-center gap-1 hover:text-white cursor-pointer">
-                <GitBranch size={10} />
-                <span>main*</span>
-              </div>
-              <div className="hidden md:flex items-center gap-1 hover:text-white cursor-pointer">
-                <AlertCircle size={10} />
-                <span>0 errors</span>
-              </div>
-            </div>
-            <div className="hidden md:flex gap-4 items-center">
-              <span className="hover:text-white cursor-pointer">Ln 12, Col 45</span>
-              <span className="hover:text-white cursor-pointer">UTF-8</span>
-              <span className="hover:text-white cursor-pointer text-emerald-500 flex items-center gap-1">
-                <CheckCircle size={10} /> Prettier
-              </span>
-              <span className="hover:text-white cursor-pointer text-blue-400 flex items-center gap-1">
-                <Bell size={10} />
-              </span>
-            </div>
+          <div className="hidden md:flex gap-4 items-center">
+            <span className="hover:text-white cursor-pointer">Ln 12, Col 45</span>
+            <span className="hover:text-white cursor-pointer">UTF-8</span>
+            <span className="hover:text-white cursor-pointer text-emerald-500 flex items-center gap-1">
+              <CheckCircle size={10} /> Prettier
+            </span>
+            <span className="hover:text-white cursor-pointer text-blue-400 flex items-center gap-1">
+              <Bell size={10} />
+            </span>
           </div>
         </div>
 
-        {windows.map(win => (
-          <div
-            key={win.id}
-            style={{ position: 'absolute', left: win.position.x, top: win.position.y, width: win.size.w, height: win.size.h, zIndex: win.zIndex || 40 }}
-            onMouseDown={(e) => handleMouseDown(e, 'focus', win.id)}
-            className="bg-[var(--bg-main)] border border-[var(--border)] rounded-lg shadow-2xl flex flex-col overflow-hidden ring-1 ring-black/50"
-          >
-            <div
-              className="h-8 bg-[var(--bg-activity)] border-b border-[var(--border)] flex justify-between items-center px-2 cursor-default select-none"
-              onMouseDown={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                handleMouseDown(e, 'window', win.id);
-              }}
-              onDoubleClick={(e) => toggleMaximize(e, win.id)}
-            >
-              <div className="flex items-center gap-2 text-xs font-mono text-[var(--text-secondary)]">
-                <GripHorizontal size={12} />
-                {(() => {
-                  const { icon: Icon, color } = getFileIcon(win.title);
-                  return <><Icon size={12} className={color} /><span>{win.title}</span></>;
-                })()}
-              </div>
-              <div className="flex items-center gap-1.5" onMouseDown={(e) => e.stopPropagation()}>
-                <div className="w-6 h-6 flex items-center justify-center text-[var(--text-secondary)] hover:text-white hover:bg-[var(--bg-panel)]/50 rounded cursor-pointer transition-colors" onClick={(e) => toggleMaximize(e, win.id)} title={win.isMaximized ? "Restore" : "Maximize"}>
-                  {win.isMaximized ? <Minimize2 size={13} /> : <Square size={13} />}
-                </div>
-                <div className="w-6 h-6 flex items-center justify-center text-[var(--text-secondary)] hover:text-white hover:bg-red-500/80 rounded cursor-pointer transition-colors" onClick={(e) => closeWindow(e, win.id)} title="Close">
-                  <X size={14} />
-                </div>
-              </div>
-            </div>
-            <div
-              onScroll={(e) => { scrollPositions.current[win.id] = e.currentTarget.scrollTop; }}
-              ref={(el) => { if (el) el.scrollTop = scrollPositions.current[win.id] ?? 0; }}
-              className="flex-1 bg-[var(--bg-panel)] overflow-y-auto p-1 scrollbar-thin scrollbar-thumb-slate-700 custom-scrollbar"
-            >
-              <ContentRenderer
-                type={win.type}
-                data={win.data}
-                title={win.title}
-                content={win.content}
-                lang={win.lang}
-                onOpenFile={openFile}
-                editorSettings={editorSettings}
-              />
-            </div>
-            {!win.isMaximized && (
-              <>
-                <div className="absolute top-0 left-4 right-4 h-1 cursor-n-resize z-50" onMouseDown={(e) => handleMouseDown(e, 'resize', win.id, { action: 'resize', dir: 'n' })} />
-                <div className="absolute bottom-0 left-4 right-4 h-1 cursor-s-resize z-50" onMouseDown={(e) => handleMouseDown(e, 'resize', win.id, { action: 'resize', dir: 's' })} />
-                <div className="absolute left-0 top-4 bottom-4 w-1 cursor-w-resize z-50" onMouseDown={(e) => handleMouseDown(e, 'resize', win.id, { action: 'resize', dir: 'w' })} />
-                <div className="absolute right-0 top-4 bottom-4 w-1 cursor-e-resize z-50" onMouseDown={(e) => handleMouseDown(e, 'resize', win.id, { action: 'resize', dir: 'e' })} />
-                <div className="absolute top-0 left-0 w-4 h-4 cursor-nw-resize z-50" onMouseDown={(e) => handleMouseDown(e, 'resize', win.id, { action: 'resize', dir: 'nw' })} />
-                <div className="absolute top-0 right-0 w-4 h-4 cursor-ne-resize z-50" onMouseDown={(e) => handleMouseDown(e, 'resize', win.id, { action: 'resize', dir: 'ne' })} />
-                <div className="absolute bottom-0 left-0 w-4 h-4 cursor-sw-resize z-50" onMouseDown={(e) => handleMouseDown(e, 'resize', win.id, { action: 'resize', dir: 'sw' })} />
-                <div className="absolute bottom-0 right-0 w-4 h-4 cursor-se-resize z-50" onMouseDown={(e) => handleMouseDown(e, 'resize', win.id, { action: 'resize', dir: 'se' })} />
-              </>
-            )}
-          </div>
-        ))}
-
-        <IntegratedTerminal isOpen={isTerminalOpen} onClose={() => setIsTerminalOpen(false)} onOpenFile={openFile} />
         <CommandPalette isOpen={isCommandPaletteOpen} onClose={() => setIsCommandPaletteOpen(false)} onOpenFile={openFile} />
-        {isDragging && dragItem.current?.type === 'tab' && (
-          <div style={{ position: 'fixed', left: mousePos.x + 10, top: mousePos.y + 10, zIndex: 9999, pointerEvents: 'none' }} className="bg-[var(--bg-panel)] border border-indigo-500/50 text-[var(--text-primary)] text-xs font-mono px-4 py-2 rounded shadow-2xl opacity-80 ">
-            {tabs.find(t => t.id === dragItem.current.id)?.title}
-          </div>
-        )}
-      </div>
-    </ThemeContext.Provider>
+        {
+          isDragging && dragItem.current && (dragItem.current.type === 'tab' || dragItem.current.type === 'explorer-drag') && (
+            <div
+              style={{
+                position: 'fixed',
+                left: mousePos.x + 12,
+                top: mousePos.y + 12,
+                zIndex: 9999,
+                pointerEvents: 'none'
+              }}
+              className="flex items-center gap-2 bg-[var(--bg-panel)] border border-[var(--accent)]/50 text-[var(--text-primary)] text-[12px] px-3 py-1.5 shadow-2xl opacity-90 backdrop-blur-md rounded-sm"
+            >
+              {(() => {
+                const { type, id, title } = dragItem.current;
+                let name = title;
+                if (type === 'tab') {
+                  const tab = tabs.find(t => t.id === id);
+                  name = tab?.title || id;
+                }
+                const { icon: Icon, color } = getFileIcon(name || '');
+                return (
+                  <>
+                    <Icon size={14} className={color} />
+                    <span>{name}</span>
+                  </>
+                );
+              })()}
+            </div>
+          )
+        }
+      </div >
+    </ThemeContext.Provider >
   );
 };
 

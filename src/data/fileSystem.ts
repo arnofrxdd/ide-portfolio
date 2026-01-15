@@ -1,5 +1,5 @@
 import {
-  Lock, GitBranch, Box, FileText, Server, FileCode, FileJson
+  Lock, GitBranch, FileText, Server, FileJson, Atom, FileCode2, Info
 } from 'lucide-react';
 import { PROJECTS_DATA } from './projects';
 
@@ -277,28 +277,28 @@ export const DraggableWindow = ({ children, x, y }) => {
 /* --- UNIFIED FILE SYSTEM CONFIGURATION --- */
 export const FILE_SYSTEM_CONFIG = {
   filenames: {
-    ".env": { icon: Lock, color: "text-orange-400" },
-    ".gitignore": { icon: GitBranch, color: "text-orange-400" },
-    "package.json": { icon: Box, color: "text-red-400" },
-    "readme.md": { icon: FileText, color: "text-purple-400" },
-    "license": { icon: FileText, color: "text-yellow-400" },
-    "dockerfile": { icon: Server, color: "text-blue-400" },
+    ".env": { icon: Lock, color: "text-amber-400" },
+    ".gitignore": { icon: GitBranch, color: "text-orange-600" },
+    "package.json": { icon: FileJson, color: "text-yellow-400" },
+    "readme.md": { icon: Info, color: "text-blue-400" },
+    "license": { icon: FileText, color: "text-yellow-600" },
+    "dockerfile": { icon: Server, color: "text-blue-500" },
   },
   extensions: {
-    tsx: { icon: FileCode, color: "text-blue-400" },
-    ts: { icon: FileCode, color: "text-blue-400" },
-    jsx: { icon: FileCode, color: "text-yellow-400" },
-    js: { icon: FileJson, color: "text-yellow-400" },
+    tsx: { icon: Atom, color: "text-cyan-400" }, // React Blue
+    ts: { icon: FileCode2, color: "text-blue-500" }, // TS Blue
+    jsx: { icon: Atom, color: "text-yellow-400" },
+    js: { icon: FileCode2, color: "text-yellow-400" },
     json: { icon: FileJson, color: "text-yellow-400" },
-    html: { icon: FileCode, color: "text-orange-400" },
-    css: { icon: FileCode, color: "text-blue-300" },
-    md: { icon: FileText, color: "text-cyan-400" },
+    html: { icon: FileCode2, color: "text-orange-500" },
+    css: { icon: FileCode2, color: "text-blue-400" },
+    md: { icon: FileText, color: "text-slate-400" },
     txt: { icon: FileText, color: "text-slate-400" },
-    env: { icon: Lock, color: "text-orange-400" },
-    py: { icon: FileCode, color: "text-green-400" },
-    go: { icon: FileCode, color: "text-sky-400" },
-    cpp: { icon: FileCode, color: "text-blue-600" },
-    c: { icon: FileCode, color: "text-slate-400" },
+    env: { icon: Lock, color: "text-amber-400" },
+    py: { icon: FileCode2, color: "text-green-500" },
+    go: { icon: FileCode2, color: "text-sky-400" },
+    cpp: { icon: FileCode2, color: "text-blue-600" },
+    c: { icon: FileCode2, color: "text-slate-400" },
   },
   default: { icon: FileText, color: "text-slate-400" }
 };

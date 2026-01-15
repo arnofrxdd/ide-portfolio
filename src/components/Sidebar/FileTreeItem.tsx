@@ -1,5 +1,5 @@
 import React from 'react';
-import { ChevronRight, ChevronDown, X, type LucideIcon } from 'lucide-react';
+import { ChevronDown, X, type LucideIcon } from 'lucide-react';
 
 interface FileTreeItemProps {
     depth?: number;
@@ -15,6 +15,10 @@ interface FileTreeItemProps {
     showClose?: boolean;
     draggableId?: string;
     onDragStart?: (e: React.MouseEvent, id: string) => void;
+    onContextMenu?: (e: React.MouseEvent, id: string, type: 'file' | 'folder') => void;
+    isDragOver?: boolean;
+    onMouseEnter?: () => void;
+    onMouseLeave?: () => void;
 }
 
 export const FileTreeItem = ({
@@ -30,9 +34,15 @@ export const FileTreeItem = ({
     onClose,
     showClose,
     draggableId,
-    onDragStart
+    onDragStart,
+    onContextMenu,
+    isDragOver,
+    onMouseEnter,
+    onMouseLeave
 }: FileTreeItemProps) => (
     <div
+        onMouseEnter={onMouseEnter}
+        onMouseLeave={onMouseLeave}
         onMouseDown={(e) => {
             if (!draggableId) return;
             const sx = e.clientX;
@@ -57,40 +67,62 @@ export const FileTreeItem = ({
                 onClick?.(e);
             }
         }}
+        onContextMenu={(e) => {
+            if (onContextMenu && draggableId) {
+                onContextMenu(e, draggableId, hasChildren ? 'folder' : 'file');
+            }
+        }}
         className={`
-    flex items-center py-1 px-3 cursor-pointer select-none transition-colors
-    ${isActive
-                ? 'bg-[var(--selection)] text-white'
-                : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-panel)]'}
-  `}
-        style={{ paddingLeft: `${depth * 12 + 12}px` }}
+            group flex items-center h-[22px] cursor-pointer select-none relative overflow-hidden
+            ${isActive
+                ? 'bg-[#37373d] text-white border-l-0 border-[var(--accent)] outline outline-1 outline-[var(--border)] -outline-offset-1'
+                : 'hover:bg-[#2a2d2e]'}
+        `}
     >
-        {showClose ? (
-            <button
-                onClick={(e) => {
-                    e.stopPropagation();
-                    onClose?.();
-                }}
-                className="w-4 h-4 flex items-center justify-center text-slate-500 hover:text-red-400"
-            >
-                <X size={10} />
-            </button>
-        ) : hasChildren ? (
-            <div
-                onClick={(e) => { e.stopPropagation(); onToggle?.(); }}
-                className="p-0.5 hover:bg-[var(--bg-panel)] rounded shrink-0"
-            >
-                {isOpen ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
-            </div>
-        ) : (
-            <span className="w-4 shrink-0" />
+        {isDragOver && (
+            <div className="absolute top-0 left-0 right-0 h-0.5 bg-[var(--accent)] z-50 pointer-events-none" />
         )}
 
-        <div className="flex items-center gap-1.5 min-w-0 flex-1">
-            <Icon size={14} className={`${color} shrink-0`} />
-            <span className="text-xs font-mono truncate min-w-0 flex-1">
+        {/* Indentation Spacer with Lines */}
+        <div className="flex h-full shrink-0">
+            {Array.from({ length: depth }).map((_, i) => (
+                <div
+                    key={i}
+                    className="w-[12px] h-full border-r border-white/5"
+                />
+            ))}
+        </div>
+
+        {/* Action/Chevron Area */}
+        <div className="w-5 flex items-center justify-center shrink-0">
+            {hasChildren ? (
+                <div
+                    onClick={(e) => { e.stopPropagation(); onToggle?.(); }}
+                    className={`transition-transform duration-150 ${isOpen ? 'rotate-0' : '-rotate-90'}`}
+                >
+                    <ChevronDown size={14} className="text-[var(--text-secondary)]" />
+                </div>
+            ) : (
+                <span className="w-4" />
+            )}
+        </div>
+
+        {/* Content Area */}
+        <div className="flex items-center gap-1.5 min-w-0 pr-2">
+            <Icon size={16} className={`${color} shrink-0`} />
+            <span className={`text-[13px] truncate flex-1 ${isActive ? 'text-white font-normal' : 'text-[var(--text-secondary)] group-hover:text-[var(--text-primary)]'}`}>
                 {name}
             </span>
         </div>
+
+        {/* Close Button (only for Open Editors style) */}
+        {showClose && (
+            <div
+                onClick={(e) => { e.stopPropagation(); onClose?.(); }}
+                className="ml-auto px-2 h-full flex items-center opacity-0 group-hover:opacity-100 text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+            >
+                <X size={14} />
+            </div>
+        )}
     </div>
 );
