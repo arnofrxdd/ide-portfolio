@@ -67,12 +67,18 @@ const App = () => {
   const [isTerminalOpen, setIsTerminalOpen] = useState(false);
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
   const [isSecondarySidebarOpen, setIsSecondarySidebarOpen] = useState(() => {
+    // On small screens, always start with sidebar closed to save space
+    if (typeof window !== 'undefined' && window.innerWidth < 1024) return false;
+
     const saved = localStorage.getItem('portfolio_secondary_sidebar_open');
     return saved !== null ? JSON.parse(saved) : true;
   });
 
   useEffect(() => {
-    localStorage.setItem('portfolio_secondary_sidebar_open', JSON.stringify(isSecondarySidebarOpen));
+    // Only persist secondary sidebar state on larger screens
+    if (window.innerWidth >= 1024) {
+      localStorage.setItem('portfolio_secondary_sidebar_open', JSON.stringify(isSecondarySidebarOpen));
+    }
   }, [isSecondarySidebarOpen]);
 
   const [currentTheme, setCurrentTheme] = useState(() => {

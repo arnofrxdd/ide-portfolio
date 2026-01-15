@@ -194,20 +194,20 @@ export const IntegratedTerminal = ({ isOpen, onClose, onOpenFile }: TerminalProp
     if (!isOpen) return null;
 
     return (
-        <div className="relative h-64 bg-[var(--bg-activity)] border-t border-[var(--border)] z-20 flex flex-col transition-all duration-300">
-            <div className="h-8 bg-[var(--bg-activity)] flex justify-between items-center px-4 select-none flex-shrink-0">
-                {/* TABS */}
-                <div className="flex items-center gap-6 h-full">
-                    <span className="text-[11px] font-sans text-[var(--text-secondary)] hover:text-[var(--text-primary)] cursor-pointer py-1 border-b border-transparent hover:border-[var(--text-secondary)] transition-colors">PROBLEMS</span>
-                    <span className="text-[11px] font-sans text-[var(--text-secondary)] hover:text-[var(--text-primary)] cursor-pointer py-1 border-b border-transparent hover:border-[var(--text-secondary)] transition-colors">OUTPUT</span>
-                    <span className="text-[11px] font-sans text-[var(--text-secondary)] hover:text-[var(--text-primary)] cursor-pointer py-1 border-b border-transparent hover:border-[var(--text-secondary)] transition-colors">DEBUG CONSOLE</span>
-                    <span className="text-[11px] font-sans text-[var(--text-primary)] cursor-pointer py-1 border-b border-[var(--accent)] font-medium">TERMINAL</span>
+        <div className="relative h-48 md:h-64 bg-[var(--bg-activity)] border-t border-[var(--border)] z-20 flex flex-col transition-all duration-300">
+            <div className="h-8 bg-[var(--bg-activity)] flex justify-between items-center px-2 md:px-4 select-none flex-shrink-0">
+                {/* TABS - Responsive scrolling */}
+                <div className="flex items-center gap-4 md:gap-6 h-full overflow-x-auto custom-scrollbar no-scrollbar whitespace-nowrap scrollbar-hide">
+                    <span className="text-[10px] md:text-[11px] font-sans text-[var(--text-secondary)] hover:text-[var(--text-primary)] cursor-pointer py-1 border-b border-transparent hover:border-[var(--text-secondary)] transition-colors">PROBLEMS</span>
+                    <span className="text-[10px] md:text-[11px] font-sans text-[var(--text-secondary)] hover:text-[var(--text-primary)] cursor-pointer py-1 border-b border-transparent hover:border-[var(--text-secondary)] transition-colors">OUTPUT</span>
+                    <span className="text-[10px] md:text-[11px] font-sans text-[var(--text-secondary)] hover:text-[var(--text-primary)] cursor-pointer py-1 border-b border-transparent hover:border-[var(--text-secondary)] transition-colors shrink-0">DEBUG CONSOLE</span>
+                    <span className="text-[10px] md:text-[11px] font-sans text-[var(--text-primary)] cursor-pointer py-1 border-b border-[var(--accent)] font-medium">TERMINAL</span>
                 </div>
 
                 {/* ACTIONS */}
-                <div className="flex items-center gap-3">
-                    <span className="text-[10px] text-[var(--text-secondary)] font-mono hidden md:inline mr-2">node ➜ v20.1.0</span>
-                    <button onClick={onClose} className="hover:text-[var(--text-primary)] text-[var(--text-secondary)] transition-colors">
+                <div className="flex items-center gap-2 md:gap-3 ml-2">
+                    <span className="text-[9px] text-[var(--text-secondary)] font-mono hidden lg:inline mr-2">node ➜ v20.1.0</span>
+                    <button onClick={onClose} className="p-1 hover:bg-[var(--bg-panel)] rounded hover:text-[var(--text-primary)] text-[var(--text-secondary)] transition-colors">
                         <X size={14} />
                     </button>
                 </div>
@@ -215,7 +215,7 @@ export const IntegratedTerminal = ({ isOpen, onClose, onOpenFile }: TerminalProp
             <div
                 ref={scrollRef}
                 style={{ fontFamily: "'Consolas', 'Monaco', 'Courier New', monospace" }}
-                className="flex-1 overflow-y-auto p-4 text-xs md:text-sm bg-[var(--bg-activity)] custom-scrollbar"
+                className="flex-1 overflow-y-auto p-3 md:p-4 text-[11px] md:text-sm bg-[var(--bg-activity)] custom-scrollbar"
                 onClick={() => {
                     if (!isProcessing) inputRef.current?.focus();
                 }}
@@ -223,27 +223,30 @@ export const IntegratedTerminal = ({ isOpen, onClose, onOpenFile }: TerminalProp
                 {history.map((line, i) => (
                     <div key={i} className="mb-1 whitespace-pre-wrap break-words">
                         {line.type === 'user' && (
-                            <div className="flex gap-2 text-[var(--text-primary)]">
-                                <span className="text-[var(--success)]">➜</span>
-                                <span className="text-[var(--info)]">~</span>
+                            <div className="flex gap-1.5 md:gap-2 text-[var(--text-primary)]">
+                                <span className="text-[var(--success)] shrink-0">➜</span>
+                                <span className="text-[var(--info)] shrink-0">~</span>
                                 <span>{line.content}</span>
                             </div>
                         )}
-                        {line.type === 'system' && <div className="text-[var(--text-secondary)] italic">{line.content}</div>}
-                        {line.type === 'output' && <div className="text-[var(--text-primary)] ml-4">{line.content}</div>}
-                        {line.type === 'success' && <div className="text-[var(--success)] ml-4">{line.content}</div>}
-                        {line.type === 'error' && <div className="text-red-400 ml-4">{line.content}</div>}
+                        {line.type === 'system' && <div className="text-[var(--text-secondary)] italic opacity-80">{line.content}</div>}
+                        {line.type === 'output' && <div className="text-[var(--text-primary)] ml-3 md:ml-4">{line.content}</div>}
+                        {line.type === 'success' && <div className="text-[var(--success)] ml-3 md:ml-4">{line.content}</div>}
+                        {line.type === 'error' && <div className="text-red-400 ml-3 md:ml-4">{line.content}</div>}
                     </div>
                 ))}
-                <div className="flex gap-2 items-center mt-2">
-                    <span className="text-[var(--success)]">➜</span>
-                    <span className="text-[var(--info)]">~</span>
+                <div className="flex gap-1.5 md:gap-2 items-center mt-2">
+                    <span className="text-[var(--success)] shrink-0">➜</span>
+                    <span className="text-[var(--info)] shrink-0">~</span>
                     <div className="relative flex-1">
                         <input
                             ref={inputRef}
                             type="text"
                             value={input}
                             disabled={isProcessing}
+                            autoCapitalize="none"
+                            autoComplete="off"
+                            autoCorrect="off"
                             onChange={(e) => setInput(e.target.value)}
                             onKeyDown={(e) => {
                                 if (e.key === 'Enter' && !isProcessing) {
@@ -251,7 +254,7 @@ export const IntegratedTerminal = ({ isOpen, onClose, onOpenFile }: TerminalProp
                                     handleCommand();
                                 }
                             }}
-                            className={`w-full bg-transparent border-none outline-none ${isProcessing ? 'text-[var(--text-secondary)] cursor-wait' : 'text-[var(--text-primary)]'}`}
+                            className={`w-full bg-transparent border-none outline-none text-[12px] md:text-sm ${isProcessing ? 'text-[var(--text-secondary)] cursor-wait' : 'text-[var(--text-primary)]'}`}
                         />
                         {isProcessing && (
                             <div className="absolute top-0 right-0">

@@ -732,7 +732,7 @@ export const Sidebar = ({
 
                 {/* SEARCH VIEW */}
                 {activeView === 'search' && (
-                    <div className="flex-1 flex flex-col min-w-0">
+                    <div className="flex-1 flex flex-col min-h-0 min-w-0">
                         <div className="h-9 px-4 flex items-center justify-between text-[11px] font-bold text-[var(--text-secondary)] tracking-wider">
                             <span>SEARCH</span>
                             <div className="flex gap-2">
@@ -855,7 +855,7 @@ export const Sidebar = ({
 
                 {/* DEPLOYMENTS VIEW */}
                 {activeView === 'deployments' && (
-                    <div className="flex-1 flex flex-col min-w-0">
+                    <div className="flex-1 flex flex-col min-h-0 min-w-0">
                         <div className="h-9 px-4 flex items-center justify-between text-[11px] font-bold text-[var(--text-secondary)] tracking-wider uppercase">
                             <span>Deployments</span>
                             <div className="flex gap-2">
@@ -974,7 +974,7 @@ export const Sidebar = ({
 
                 {/* CERTIFICATIONS VIEW */}
                 {activeView === 'certifications' && (
-                    <div className="flex-1 flex flex-col min-w-0">
+                    <div className="flex-1 flex flex-col min-h-0 min-w-0">
                         <div className="h-9 px-4 flex items-center justify-between text-[11px] font-bold text-[var(--text-secondary)] tracking-wider uppercase">
                             <span>Certifications</span>
                             <div className="flex gap-2">
@@ -1047,7 +1047,7 @@ export const Sidebar = ({
 
                 {/* SETTINGS VIEW */}
                 {activeView === 'settings' && (
-                    <div className="flex-1 flex flex-col min-w-0">
+                    <div className="flex-1 flex flex-col min-h-0 min-w-0">
                         <div className="px-4 py-2 text-xs font-bold text-[var(--text-secondary)] tracking-wider uppercase">Settings</div>
 
                         {/* Search Input */}
@@ -1178,62 +1178,64 @@ export const Sidebar = ({
 
                 {/* ACCOUNT VIEW */}
                 {activeView === 'account' && (
-                    <div className="flex-1 flex flex-col p-4 min-w-0">
-                        <div className="text-xs font-bold text-[var(--text-secondary)] mb-4 tracking-wider">ACCOUNTS</div>
+                    <div className="flex-1 flex flex-col min-h-0 min-w-0">
+                        <div className="flex-1 overflow-y-auto custom-scrollbar p-4">
+                            <div className="text-xs font-bold text-[var(--text-secondary)] mb-4 tracking-wider">ACCOUNTS</div>
 
-                        <div className="space-y-1">
-                            {/* Main Account Row */}
-                            <div className="flex items-center gap-3 p-2 rounded bg-[var(--bg-activity)]/50 border border-[var(--border)] mb-4">
-                                <div className="w-10 h-10 rounded bg-gradient-to-br from-[var(--hero-gradient-start)] to-[var(--hero-gradient-end)] flex items-center justify-center text-sm font-bold text-white shrink-0">
-                                    A
-                                </div>
-                                <div className="min-w-0">
-                                    <div className="text-sm font-bold text-[var(--text-primary)] truncate">Arnav</div>
-                                    <div className="text-[10px] text-[var(--text-secondary)] truncate">arnav@development.env</div>
-                                </div>
-                            </div>
-
-                            {/* Settings Sync Item */}
-                            <div className="flex items-center justify-between p-2 hover:bg-[var(--bg-activity)] rounded group cursor-pointer border border-transparent hover:border-[var(--border)] transition-all mb-2">
-                                <div className="flex items-center gap-2">
-                                    <div className="relative">
-                                        <Cloud size={16} className="text-[var(--accent)]" />
-                                        <div className="absolute -bottom-0.5 -right-0.5 w-1.5 h-1.5 bg-[var(--success)] rounded-full border border-[var(--bg-main)]"></div>
+                            <div className="space-y-1">
+                                {/* Main Account Row */}
+                                <div className="flex items-center gap-3 p-2 rounded bg-[var(--bg-activity)]/50 border border-[var(--border)] mb-4">
+                                    <div className="w-10 h-10 rounded bg-gradient-to-br from-[var(--hero-gradient-start)] to-[var(--hero-gradient-end)] flex items-center justify-center text-sm font-bold text-white shrink-0">
+                                        A
                                     </div>
-                                    <span className="text-xs text-[var(--text-primary)]">Settings Sync is On</span>
+                                    <div className="min-w-0">
+                                        <div className="text-sm font-bold text-[var(--text-primary)] truncate">Arnav</div>
+                                        <div className="text-[10px] text-[var(--text-secondary)] truncate">arnav@development.env</div>
+                                    </div>
                                 </div>
-                                <div className="w-2 h-2 rounded-full bg-[var(--success)] opacity-0 group-hover:opacity-100 transition-opacity"></div>
+
+                                {/* Settings Sync Item */}
+                                <div className="flex items-center justify-between p-2 hover:bg-[var(--bg-activity)] rounded group cursor-pointer border border-transparent hover:border-[var(--border)] transition-all mb-2">
+                                    <div className="flex items-center gap-2">
+                                        <div className="relative">
+                                            <Cloud size={16} className="text-[var(--accent)]" />
+                                            <div className="absolute -bottom-0.5 -right-0.5 w-1.5 h-1.5 bg-[var(--success)] rounded-full border border-[var(--bg-main)]"></div>
+                                        </div>
+                                        <span className="text-xs text-[var(--text-primary)]">Settings Sync is On</span>
+                                    </div>
+                                    <div className="w-2 h-2 rounded-full bg-[var(--success)] opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                                </div>
+
+                                <div className="pt-4 border-t border-[var(--border)] space-y-1">
+                                    <button
+                                        onClick={handleEditProfile}
+                                        className="w-full flex items-center gap-3 px-2 py-1.5 rounded text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-activity)] transition-all text-left"
+                                    >
+                                        <User size={14} />
+                                        <span>Manage Portfolio Profile</span>
+                                    </button>
+                                    <button
+                                        className="w-full flex items-center gap-3 px-2 py-1.5 rounded text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-activity)] transition-all text-left"
+                                    >
+                                        <ShieldCheck size={14} />
+                                        <span>Trust Workspace</span>
+                                    </button>
+                                    <button
+                                        onClick={handleSignOut}
+                                        className="w-full flex items-center gap-3 px-2 py-1.5 rounded text-xs text-[var(--text-secondary)] hover:bg-[var(--bg-activity)] text-red-400 hover:text-red-300 transition-all text-left"
+                                    >
+                                        <LogOut size={14} />
+                                        <span>Sign Out of Portfolio</span>
+                                    </button>
+                                </div>
                             </div>
 
-                            <div className="pt-4 border-t border-[var(--border)] space-y-1">
-                                <button
-                                    onClick={handleEditProfile}
-                                    className="w-full flex items-center gap-3 px-2 py-1.5 rounded text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-activity)] transition-all text-left"
-                                >
-                                    <User size={14} />
-                                    <span>Manage Portfolio Profile</span>
-                                </button>
-                                <button
-                                    className="w-full flex items-center gap-3 px-2 py-1.5 rounded text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-activity)] transition-all text-left"
-                                >
-                                    <ShieldCheck size={14} />
-                                    <span>Trust Workspace</span>
-                                </button>
-                                <button
-                                    onClick={handleSignOut}
-                                    className="w-full flex items-center gap-3 px-2 py-1.5 rounded text-xs text-[var(--text-secondary)] hover:bg-[var(--bg-activity)] text-red-400 hover:text-red-300 transition-all text-left"
-                                >
-                                    <LogOut size={14} />
-                                    <span>Sign Out of Portfolio</span>
-                                </button>
-                            </div>
-                        </div>
-
-                        <div className="mt-auto p-4 bg-[var(--bg-activity)]/20 border border-[var(--border)] rounded-sm">
-                            <h4 className="text-[10px] font-bold text-[var(--text-secondary)] uppercase mb-2">Developer Status</h4>
-                            <div className="flex items-center gap-2 text-[11px] text-[var(--success)] font-medium">
-                                <div className="w-1.5 h-1.5 rounded-full bg-[var(--success)] animate-pulse" />
-                                <span>Verified Architect</span>
+                            <div className="mt-8 p-4 bg-[var(--bg-activity)]/20 border border-[var(--border)] rounded-sm">
+                                <h4 className="text-[10px] font-bold text-[var(--text-secondary)] uppercase mb-2">Developer Status</h4>
+                                <div className="flex items-center gap-2 text-[11px] text-[var(--success)] font-medium">
+                                    <div className="w-1.5 h-1.5 rounded-full bg-[var(--success)] animate-pulse" />
+                                    <span>Verified Architect</span>
+                                </div>
                             </div>
                         </div>
                     </div>
