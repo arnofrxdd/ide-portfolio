@@ -13,7 +13,7 @@ interface ToastContainerProps {
 
 export const ToastContainer = ({ toasts, onClose }: ToastContainerProps) => {
     return (
-        <div className="fixed bottom-10 right-4 z-[9999] flex flex-col gap-3 pointer-events-none max-w-[420px] w-full items-end">
+        <div className="fixed z-[9999] flex flex-col gap-3 pointer-events-none items-end bottom-4 right-4 left-4 md:left-auto md:bottom-10 md:right-4 w-auto md:w-full md:max-w-[420px] ml-auto">
             {toasts.map(toast => (
                 <div
                     key={toast.id}

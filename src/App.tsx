@@ -262,7 +262,7 @@ const App = () => {
   }, [activeTabId]);
 
   const addToast = (msg: string, type: 'success' | 'error' | 'warning' | 'info' = 'info') => {
-    const id = Date.now();
+    const id = Date.now() + Math.random();
     setToasts(prev => [...prev, { id, msg, type }]);
     setTimeout(() => { setToasts(prev => prev.filter(t => t.id !== id)); }, 7000);
   };
@@ -280,12 +280,13 @@ const App = () => {
     setInstalledThemes(prev => prev.filter(t => t !== themeKey));
     // @ts-ignore
     const name = THEMES[themeKey]?.name || themeKey;
-    addToast(`Theme uninstalled: ${name}`, 'info');
 
     // Safety: If the uninstalled theme was the active one, revert to default
     if (currentTheme === themeKey) {
       setCurrentTheme('darkModern');
-      addToast('Active theme uninstalled. Reverting to Dark Modern.', 'warning');
+      addToast(`Uninstalled active theme '${name}'. Reverting to Dark Modern.`, 'warning');
+    } else {
+      addToast(`Theme uninstalled: ${name}`, 'info');
     }
   };
 
