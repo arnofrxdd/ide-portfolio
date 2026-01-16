@@ -88,10 +88,21 @@ const App = () => {
   });
 
   const [installedThemes, setInstalledThemes] = useState<string[]>(() => {
-    const saved = localStorage.getItem('portfolio_installed_themes');
-    if (saved) return JSON.parse(saved);
-    // Default installed themes
-    return ['darkModern', 'vscode', 'githubDark', 'nord', 'oneDarkPro', 'dracula'];
+    const savedInstalled = localStorage.getItem('portfolio_installed_themes');
+    const activeTheme = localStorage.getItem('portfolio_theme') || 'darkModern';
+
+    let list = savedInstalled
+      ? JSON.parse(savedInstalled)
+      : ['darkModern', 'vscode', 'githubDark', 'nord', 'oneDarkPro', 'dracula'];
+
+    // Migration/Safety: If their active theme isn't in the installed list, add it automatically
+    // This prevents "Not Installed" state for currently active themes on first load after the update
+    // @ts-ignore
+    if (activeTheme && THEMES[activeTheme] && !list.includes(activeTheme)) {
+      list.push(activeTheme);
+    }
+
+    return list;
   });
 
   useEffect(() => {
