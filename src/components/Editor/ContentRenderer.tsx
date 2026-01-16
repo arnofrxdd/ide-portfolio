@@ -349,9 +349,9 @@ export const ContentRenderer = ({ type, data, title, onOpenFile, content, editor
                                         type: 'projects'
                                     })
                                 }
-                                className="group flex items-center gap-3 px-6 py-3 bg-[var(--accent)] text-white rounded-md hover:bg-[var(--accent)]/90 transition-all font-sans text-sm font-medium shadow-md"
+                                className="group flex items-center gap-3 px-6 py-3 bg-[var(--accent)] text-[var(--accent-fg)] rounded-md hover:bg-[var(--accent)]/90 transition-all font-sans text-sm font-medium shadow-md"
                             >
-                                <Terminal size={16} className="text-white" />
+                                <Terminal size={16} className="text-[var(--accent-fg)]" />
                                 <span className="tracking-wide">Explore All Projects</span>
                             </button>
                         </div>
@@ -456,7 +456,7 @@ export const ContentRenderer = ({ type, data, title, onOpenFile, content, editor
                                     <div className="flex gap-2 flex-wrap">
                                         {allTech.map(t => (
                                             <button key={t} onClick={() => toggleFilter(t, setTechFilters)}
-                                                className={`px-2 py-0.5 text-[10px] border rounded-sm font-mono transition-all ${techFilters.includes(t) ? 'bg-[var(--accent)] border-[var(--accent)] text-white' : 'border-[var(--border)] text-[var(--text-secondary)] hover:border-[var(--text-primary)]'}`}>
+                                                className={`px-2 py-0.5 text-[10px] border rounded-sm font-mono transition-all ${techFilters.includes(t) ? 'bg-[var(--accent)] border-[var(--accent)] text-[var(--accent-fg)]' : 'border-[var(--border)] text-[var(--text-secondary)] hover:border-[var(--text-primary)]'}`}>
                                                 {t}
                                             </button>
                                         ))}
@@ -467,7 +467,7 @@ export const ContentRenderer = ({ type, data, title, onOpenFile, content, editor
                                     <div className="flex gap-2 flex-wrap">
                                         {allLanguages.map(l => (
                                             <button key={l} onClick={() => toggleFilter(l, setLangFilters)}
-                                                className={`px-2 py-0.5 text-[10px] border rounded-sm font-mono transition-all ${langFilters.includes(l) ? 'bg-[var(--accent)] border-[var(--accent)] text-white' : 'border-[var(--border)] text-[var(--text-secondary)] hover:border-[var(--text-primary)]'}`}>
+                                                className={`px-2 py-0.5 text-[10px] border rounded-sm font-mono transition-all ${langFilters.includes(l) ? 'bg-[var(--accent)] border-[var(--accent)] text-[var(--accent-fg)]' : 'border-[var(--border)] text-[var(--text-secondary)] hover:border-[var(--text-primary)]'}`}>
                                                 {l}
                                             </button>
                                         ))}
@@ -591,7 +591,7 @@ export const ContentRenderer = ({ type, data, title, onOpenFile, content, editor
                                 <div className="flex flex-wrap gap-3">
                                     {data.links?.live && (
                                         <a href={data.links.live} target="_blank" rel="noopener noreferrer"
-                                            className="px-4 py-1.5 bg-[var(--accent)] hover:bg-[var(--accent)]/90 text-white text-sm font-medium rounded-sm transition-all shadow-sm flex items-center gap-2">
+                                            className="px-4 py-1.5 bg-[var(--accent)] hover:bg-[var(--accent)]/90 text-[var(--accent-fg)] text-sm font-medium rounded-sm transition-all shadow-sm flex items-center gap-2">
                                             Run Project <Globe size={14} />
                                         </a>
                                     )}
@@ -784,7 +784,7 @@ export const ContentRenderer = ({ type, data, title, onOpenFile, content, editor
                         <a
                             href="./resume.pdf"
                             download
-                            className="flex items-center gap-2 px-3 py-1 bg-[var(--accent)] hover:bg-[var(--accent)]/80 text-white text-[10px] rounded-[2px] transition-all"
+                            className="flex items-center gap-2 px-3 py-1 bg-[var(--accent)] hover:bg-[var(--accent)]/80 text-[var(--accent-fg)] text-[10px] rounded-[2px] transition-all"
                         >
                             <Zap size={12} /> Download PDF
                         </a>

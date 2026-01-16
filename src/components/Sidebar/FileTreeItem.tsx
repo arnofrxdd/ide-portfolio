@@ -110,7 +110,7 @@ export const FileTreeItem = ({
         {/* Content Area */}
         <div className="flex items-center gap-1.5 min-w-0 pr-2">
             <Icon size={16} className={`${color} shrink-0`} />
-            <span className="text-[13px] truncate flex-1 font-normal inherit">
+            <span className={`text-[13px] truncate flex-1 font-normal ${isActive ? 'text-[var(--text-primary)]' : 'group-hover:text-[var(--text-primary)] transition-colors'}`}>
                 {name}
             </span>
         </div>

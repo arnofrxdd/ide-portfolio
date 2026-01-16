@@ -86,6 +86,20 @@ const App = () => {
     // @ts-ignore
     return saved && THEMES[saved] ? saved : 'darkModern';
   });
+
+  const [installedThemes, setInstalledThemes] = useState<string[]>(() => {
+    const saved = localStorage.getItem('portfolio_installed_themes');
+    if (saved) return JSON.parse(saved);
+    // Default installed themes
+    return ['darkModern', 'vscode', 'githubDark', 'nord', 'oneDarkPro', 'dracula'];
+  });
+
+  useEffect(() => {
+    localStorage.setItem('portfolio_installed_themes', JSON.stringify(installedThemes));
+  }, [installedThemes]);
+
+
+
   const [homepageLayout, setHomepageLayout] = useState<'modern' | 'vscode'>(() => {
     const saved = localStorage.getItem('portfolio_homepage_layout');
     return (saved === 'modern' || saved === 'vscode') ? saved as any : 'modern';
@@ -172,6 +186,10 @@ const App = () => {
     // @ts-ignore
     const themeColors = THEMES[currentTheme].colors;
     const root = document.documentElement;
+
+    // Set defaults for variables that might not be in every theme
+    root.style.setProperty('--accent-fg', '#ffffff');
+
     // @ts-ignore
     for (const [key, value] of Object.entries(themeColors)) {
       root.style.setProperty(key, value as string);
@@ -236,6 +254,28 @@ const App = () => {
     const id = Date.now();
     setToasts(prev => [...prev, { id, msg, type }]);
     setTimeout(() => { setToasts(prev => prev.filter(t => t.id !== id)); }, 7000);
+  };
+
+  const installTheme = (themeKey: string) => {
+    if (!installedThemes.includes(themeKey)) {
+      setInstalledThemes(prev => [...prev, themeKey]);
+      // @ts-ignore
+      const name = THEMES[themeKey]?.name || themeKey;
+      addToast(`Theme installed: ${name}`, 'success');
+    }
+  };
+
+  const uninstallTheme = (themeKey: string) => {
+    setInstalledThemes(prev => prev.filter(t => t !== themeKey));
+    // @ts-ignore
+    const name = THEMES[themeKey]?.name || themeKey;
+    addToast(`Theme uninstalled: ${name}`, 'info');
+
+    // Safety: If the uninstalled theme was the active one, revert to default
+    if (currentTheme === themeKey) {
+      setCurrentTheme('darkModern');
+      addToast('Active theme uninstalled. Reverting to Dark Modern.', 'warning');
+    }
   };
 
   const openFile = useCallback((file: any) => {
@@ -616,6 +656,9 @@ const App = () => {
     <ThemeContext.Provider value={{
       theme: currentTheme,
       setTheme: setCurrentTheme,
+      installedThemes,
+      installTheme,
+      uninstallTheme,
       homepageLayout,
       setHomepageLayout
     }}>
@@ -660,7 +703,7 @@ const App = () => {
             <div
               ref={(el) => { tabScrollRef.current = el; tabBarRef.current = el; }}
               onWheel={(e) => { if (e.deltaY !== 0) { e.preventDefault(); e.currentTarget.scrollLeft += e.deltaY; } }}
-              className={`h-9 bg-[var(--bg-activity)] border-b border-[var(--border)] flex items-center overflow-x-auto overflow-y-hidden relative shrink-0 whitespace-nowrap custom-scrollbar ${dockHighlight ? 'bg-[var(--accent)]/10 border-[var(--accent)]' : ''}`}
+              className={`h-9 bg-[var(--bg-activity)] border-b border-[var(--border)] flex items-center overflow-x-auto overflow-y-hidden relative shrink-0 whitespace-nowrap custom-scrollbar ${dockHighlight ? 'bg-[var(--accent)] border-[var(--accent)] text-[var(--accent-fg)]' : ''}`}
             >
               {dockHighlight && (
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none bg-[var(--bg-main)]/80 text-[var(--accent)] font-mono text-xs z-50">
@@ -711,6 +754,8 @@ const App = () => {
                       </React.Fragment>
                     ))}
                     {visualDropIndex === tabs.length && <div style={indicatorStyle} className="h-6 mx-0 shrink-0 z-50" />}
+                    {/* Padding spacer to prevent last tab from being hidden by absolute layout controls */}
+                    <div className="w-12 shrink-0 h-full pointer-events-none" />
                   </>
                 );
               })()}
@@ -720,7 +765,7 @@ const App = () => {
             <div className="absolute right-0 top-0 h-9 flex items-center px-3 bg-[var(--bg-activity)] border-b border-[var(--border)] z-20 shadow-[-10px_0_10px_-5px_var(--bg-activity)]">
               <button
                 onClick={() => setIsSecondarySidebarOpen(!isSecondarySidebarOpen)}
-                className={`p-1 rounded transition-colors ${isSecondarySidebarOpen ? 'text-[var(--accent)] bg-[var(--accent)]/10' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-panel)]'}`}
+                className={`p-1 rounded transition-colors ${isSecondarySidebarOpen ? 'text-[var(--accent-fg)] bg-[var(--accent)] hover:bg-[var(--accent)]/90' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-panel)]'}`}
                 title="Toggle Secondary Sidebar"
               >
                 <PanelRight size={16} />
@@ -764,7 +809,7 @@ const App = () => {
                   {!windows.find(w => w.id === 'home') && (
                     <button
                       onClick={() => openFile({ id: 'home', title: 'home.tsx', type: 'home', data: null })}
-                      className="flex items-center gap-2 px-4 py-2 bg-[var(--accent)] text-white rounded hover:bg-[var(--accent)]/90 transition-colors"
+                      className="flex items-center gap-2 px-4 py-2 bg-[var(--accent)] text-[var(--accent-fg)] rounded hover:bg-[var(--accent)]/90 transition-colors"
                     >
                       <Terminal size={14} />
                       <span>Reopen home.tsx</span>
@@ -880,37 +925,37 @@ const App = () => {
 
         </div> {/* End of Top Section flex-1 flex */}
 
-        <div className="h-6 bg-[#007acc] md:bg-[var(--bg-activity)] border-t border-[var(--border)] flex justify-between items-center px-3 text-[10px] md:text-xs font-sans text-[var(--text-secondary)] z-30 relative shrink-0 transition-colors duration-300 select-none">
+        <div className="h-6 bg-[var(--bg-status)] border-t border-[var(--border)] flex justify-between items-center px-3 text-[10px] md:text-xs font-sans text-[var(--fg-status)] z-30 relative shrink-0 transition-colors duration-300 select-none">
           <div className="flex gap-4 items-center">
             <button
               onClick={() => setIsTerminalOpen(!isTerminalOpen)}
-              className="flex items-center gap-1 hover:text-white cursor-pointer hover:bg-slate-800 px-2 rounded transition-colors"
+              className="flex items-center gap-1 hover:text-[var(--fg-status)] cursor-pointer hover:bg-white/10 px-2 rounded transition-colors"
             >
               <Terminal size={10} />
-              <span className="hidden sm:inline text-white">TERMINAL</span>
+              <span className="hidden sm:inline">TERMINAL</span>
             </button>
-            <div className="hidden md:flex items-center gap-1 hover:text-white cursor-pointer">
+            <div className="hidden md:flex items-center gap-1 hover:opacity-80 cursor-pointer">
               <GitBranch size={10} />
               <span>main*</span>
             </div>
-            <div className="hidden md:flex items-center gap-1 hover:text-white cursor-pointer">
+            <div className="hidden md:flex items-center gap-1 hover:opacity-80 cursor-pointer">
               <AlertCircle size={10} />
               <span>0 errors</span>
             </div>
           </div>
           <div className="hidden md:flex gap-4 items-center">
-            <span className="hover:text-white cursor-pointer">Ln 12, Col 45</span>
-            <span className="hover:text-white cursor-pointer">UTF-8</span>
-            <span className="hover:text-white cursor-pointer text-emerald-500 flex items-center gap-1">
+            <span className="hover:opacity-80 cursor-pointer">Ln 12, Col 45</span>
+            <span className="hover:opacity-80 cursor-pointer">UTF-8</span>
+            <span className="hover:opacity-80 cursor-pointer flex items-center gap-1">
               <CheckCircle size={10} /> Prettier
             </span>
             <button
               onClick={() => setToasts([])}
-              className="hover:text-white cursor-pointer text-blue-400 flex items-center gap-1 relative"
+              className="hover:opacity-80 cursor-pointer flex items-center gap-1 relative"
             >
               <Bell size={10} />
               {toasts.length > 0 && (
-                <span className="absolute -top-1.5 -right-1.5 min-w-[12px] h-[12px] flex items-center justify-center bg-[var(--accent)] text-white text-[8px] rounded-full px-0.5 shadow-sm">
+                <span className="absolute -top-1.5 -right-1.5 min-w-[12px] h-[12px] flex items-center justify-center bg-[var(--accent)] text-[var(--accent-fg)] text-[8px] rounded-full px-0.5 shadow-sm">
                   {toasts.length}
                 </span>
               )}

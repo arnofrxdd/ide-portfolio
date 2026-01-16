@@ -1,15 +1,99 @@
 import React, { useState, useRef, useEffect, useContext } from 'react';
 import {
-    Files, Search, Blocks, UserCircle, Settings2,
+    Files, Search, UserCircle, Settings2,
     MoreHorizontal as MoreHorizontalIcon, ChevronDown, Folder, FolderOpen,
     RefreshCw, Plus, CheckCircle, ToggleRight, ToggleLeft, FileJson,
-    Cloud, ShieldCheck, LogOut, User, ChevronRight, CaseSensitive, WholeWord, Regex, RotateCcw, Globe, Trophy, Award, LayoutGrid, Filter, ExternalLink
+    Cloud, ShieldCheck, LogOut, User, ChevronRight, CaseSensitive, WholeWord, Regex, RotateCcw, Globe, Trophy, Award, LayoutGrid, Filter, ExternalLink, Palette, Trash2
 } from 'lucide-react';
 import { ThemeContext } from '../../context/ThemeContext';
 import { PROJECTS_DATA } from '../../data/projects';
 import { FILE_CONTENTS, getFileIcon } from '../../data/fileSystem';
-import { THEMES } from '../../data/themes';
+import { THEMES, THEME_CATEGORIES } from '../../data/themes';
+import { ThemeMarketplace } from '../ThemeMarketplace/ThemeMarketplace';
 import { FileTreeItem } from './FileTreeItem';
+
+const ThemeCollapsibleGroup = ({
+    title,
+    themes,
+    activeTheme,
+    setTheme,
+    uninstallTheme,
+    search
+}: {
+    title: string,
+    themes: [string, any][],
+    activeTheme: string,
+    setTheme: (k: string) => void,
+    uninstallTheme: (k: string) => void,
+    search: string
+}) => {
+    const [isOpen, setIsOpen] = useState(false);
+
+    const filteredThemes = themes.filter(([_, data]) =>
+        data.name.toLowerCase().includes(search.toLowerCase()) ||
+        "color theme".includes(search.toLowerCase())
+    );
+
+    if (filteredThemes.length === 0) return null;
+
+    const isBuiltIn = (key: string) => ['darkModern', 'vscode', 'githubDark', 'nord', 'oneDarkPro', 'dracula'].includes(key) || title === 'Core Favorites';
+
+    return (
+        <div className="mb-px">
+            <div
+                onClick={() => setIsOpen(!isOpen)}
+                className="h-[22px] flex items-center px-1 bg-[var(--bg-activity)]/40 cursor-pointer hover:bg-[var(--bg-activity)] transition-colors rounded-sm"
+            >
+                <ChevronDown
+                    size={14}
+                    className={`text-[var(--text-secondary)] transition-transform duration-150 ${isOpen ? '' : '-rotate-90'}`}
+                />
+                <span className="text-[10px] font-bold text-[var(--text-secondary)] ml-1 tracking-tight uppercase opacity-80">{title}</span>
+                <span className="ml-auto text-[9px] text-[var(--text-secondary)] opacity-40 px-1.5">{filteredThemes.length}</span>
+            </div>
+            {isOpen && (
+                <div className="grid grid-cols-1 gap-0.5 mt-1 pl-1">
+                    {filteredThemes.map(([key, themeData]) => (
+                        <button
+                            key={key}
+                            onClick={() => setTheme(key)}
+                            className={`flex items-center gap-2 px-2 py-1.5 rounded-sm transition-all text-[11px] font-sans group
+                                ${activeTheme === key
+                                    ? 'bg-[var(--accent)]/10 text-[var(--accent)]'
+                                    : 'text-[var(--text-secondary)] hover:bg-[var(--bg-activity)] hover:text-[var(--text-primary)]'}
+                            `}
+                        >
+                            <div
+                                className="w-3.5 h-3.5 rounded-full border border-white/20 shadow-sm shrink-0 overflow-hidden relative"
+                                style={{ backgroundColor: themeData.colors['--bg-main'] }}
+                            >
+                                <div
+                                    className="absolute inset-0"
+                                    style={{
+                                        background: themeData.colors['--accent'],
+                                        clipPath: 'polygon(100% 0, 100% 100%, 0 100%)'
+                                    }}
+                                />
+                            </div>
+                            <span className="truncate">{themeData.name}</span>
+                            {activeTheme === key && <CheckCircle size={10} className="ml-auto" />}
+
+                            {!isBuiltIn(key) && (
+                                <div
+                                    onClick={(e) => { e.stopPropagation(); uninstallTheme(key); }}
+                                    className="ml-auto opacity-0 group-hover:opacity-100 hover:text-red-500 transition-all p-0.5"
+                                    title="Uninstall Theme"
+                                >
+                                    <Trash2 size={12} />
+                                </div>
+                            )}
+                        </button>
+                    ))}
+                </div>
+            )}
+        </div>
+    );
+};
 
 interface SidebarProps {
     onOpenFile: (file: any) => void;
@@ -39,8 +123,8 @@ export const Sidebar = ({
     isDragging
 }: SidebarProps) => {
 
-    const { theme, setTheme, homepageLayout, setHomepageLayout } = useContext(ThemeContext);
-    const [activeView, setActiveView] = useState<'explorer' | 'search' | 'deployments' | 'certifications' | 'account' | 'settings'>('explorer');
+    const { theme, setTheme, homepageLayout, setHomepageLayout, installedThemes, uninstallTheme } = useContext(ThemeContext);
+    const [activeView, setActiveView] = useState<'explorer' | 'search' | 'deployments' | 'certifications' | 'marketplace' | 'account' | 'settings'>('explorer');
 
 
     const [settingsSearch, setSettingsSearch] = useState('');
@@ -170,7 +254,7 @@ export const Sidebar = ({
     };
 
 
-    const handleActivityClick = (view: 'explorer' | 'search' | 'deployments' | 'certifications' | 'account' | 'settings') => {
+    const handleActivityClick = (view: 'explorer' | 'search' | 'deployments' | 'certifications' | 'marketplace' | 'account' | 'settings') => {
         if (activeView === view) {
             setIsPanelVisible(!isPanelVisible);
         } else {
@@ -308,6 +392,14 @@ export const Sidebar = ({
                 >
                     {activeView === 'certifications' && isPanelVisible && <div className="absolute left-0 top-0 bottom-0 w-[2px] bg-[var(--accent)]" />}
                     <Trophy size={24} strokeWidth={1.5} />
+                </div>
+                <div
+                    className={`w-full h-12 flex items-center justify-center cursor-pointer transition-all relative ${activeView === 'marketplace' && isPanelVisible ? 'text-[var(--text-primary)]' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}
+                    onClick={() => handleActivityClick('marketplace')}
+                    title="Theme Marketplace"
+                >
+                    {activeView === 'marketplace' && isPanelVisible && <div className="absolute left-0 top-0 bottom-0 w-[2px] bg-[var(--accent)]" />}
+                    <Palette size={24} strokeWidth={1.5} />
                 </div>
 
                 <div className="mt-auto w-full flex flex-col items-center">
@@ -893,7 +985,7 @@ export const Sidebar = ({
                                             <div className="flex items-center gap-2 ml-6 mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                                 <button
                                                     onClick={(e) => { e.stopPropagation(); window.open((p.links as any).live || p.links.github, '_blank'); }}
-                                                    className="px-2 py-0.5 bg-[var(--accent)] hover:bg-[var(--accent)]/80 text-white text-[10px] rounded-[2px]"
+                                                    className="px-2 py-0.5 bg-[var(--accent)] hover:bg-[var(--accent)]/80 text-[var(--accent-fg)] text-[10px] rounded-[2px]"
                                                 >
                                                     Open App
                                                 </button>
@@ -1021,7 +1113,7 @@ export const Sidebar = ({
                                             <div className="flex items-center gap-3 mt-2">
                                                 <button
                                                     onClick={(e) => { e.stopPropagation(); handleVerifyCert(cert.name); }}
-                                                    className="px-2 py-0.5 bg-[var(--accent)] hover:bg-[var(--accent)]/80 text-white text-[10px] rounded-[2px] font-medium transition-colors"
+                                                    className="px-2 py-0.5 bg-[var(--accent)] hover:bg-[var(--accent)]/80 text-[var(--accent-fg)] text-[10px] rounded-[2px] font-medium transition-colors"
                                                 >
                                                     Verify
                                                 </button>
@@ -1109,31 +1201,36 @@ export const Sidebar = ({
                             ) && (
                                     <div>
                                         <h3 className="text-[10px] font-bold text-[var(--accent)] uppercase mb-3 tracking-tighter">Workbench</h3>
-                                        <div className="space-y-3">
-                                            <div className="text-xs text-[var(--text-primary)] font-medium mb-2">Color Theme</div>
-                                            <div className="grid grid-cols-1 gap-1.5">
-                                                {Object.entries(THEMES)
-                                                    .filter(([_, themeData]) =>
-                                                        "workbench".includes(settingsSearch.toLowerCase()) ||
-                                                        "color theme".includes(settingsSearch.toLowerCase()) ||
-                                                        themeData.name.toLowerCase().includes(settingsSearch.toLowerCase())
-                                                    )
-                                                    .map(([key, themeData]) => (
-                                                        <button
-                                                            key={key}
-                                                            onClick={() => setTheme(key)}
-                                                            className={`flex items-center gap-2.5 px-2 py-1.5 rounded transition-all text-[11px] font-sans border
-                                                            ${theme === key
-                                                                    ? 'bg-[var(--accent)]/10 border-[var(--accent)] text-[var(--accent)]'
-                                                                    : 'bg-[var(--bg-activity)]/30 border-transparent text-[var(--text-secondary)] hover:bg-[var(--bg-activity)]'}
-                                                        `}
-                                                        >
-                                                            <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: themeData.colors['--bg-main'] }}></div>
-                                                            <span className="truncate">{themeData.name}</span>
-                                                            {theme === key && <CheckCircle size={10} className="ml-auto" />}
-                                                        </button>
-                                                    ))
-                                                }
+                                        <div className="space-y-4">
+                                            <div className="text-xs text-[var(--text-primary)] font-medium mb-1">Color Theme</div>
+
+                                            <div className="space-y-1">
+                                                {Object.entries(THEME_CATEGORIES).map(([catTitle, themeKeys]) => {
+                                                    const installedInCategory = themeKeys.filter(k => installedThemes.includes(k));
+                                                    if (installedInCategory.length === 0) return null;
+
+                                                    return (
+                                                        <ThemeCollapsibleGroup
+                                                            key={catTitle}
+                                                            title={catTitle}
+                                                            themes={Object.entries(THEMES).filter(([k]) => installedInCategory.includes(k))}
+                                                            activeTheme={theme}
+                                                            setTheme={setTheme}
+                                                            uninstallTheme={uninstallTheme}
+                                                            search={settingsSearch}
+                                                        />
+                                                    );
+                                                })}
+
+                                                {/* AUTHENTIC LINK TO MARKETPLACE */}
+                                                {(settingsSearch === '' || "install additional color themes".includes(settingsSearch.toLowerCase())) && (
+                                                    <button
+                                                        onClick={() => setActiveView('marketplace')}
+                                                        className="w-full mt-2 flex items-center gap-2 px-2 py-1.5 text-[11px] text-[var(--accent)] hover:bg-[var(--bg-activity)] transition-all text-left font-medium"
+                                                    >
+                                                        <span>Install Additional Color Themes...</span>
+                                                    </button>
+                                                )}
                                             </div>
                                         </div>
                                     </div>
@@ -1166,14 +1263,22 @@ export const Sidebar = ({
                                         <FileJson size={14} />
                                         <span>Open settings.json</span>
                                     </button>
-                                    <button className="w-full flex items-center gap-2.5 px-2 py-1.5 rounded text-[11px] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-activity)] transition-all text-left">
-                                        <Blocks size={14} />
-                                        <span>Configure Extensions</span>
+                                    <button
+                                        onClick={() => setActiveView('marketplace')}
+                                        className="w-full flex items-center gap-2.5 px-2 py-1.5 rounded text-[11px] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-activity)] transition-all text-left"
+                                    >
+                                        <Palette size={14} />
+                                        <span>Configure Themes</span>
                                     </button>
                                 </div>
                             )}
                         </div>
                     </div>
+                )}
+
+                {/* MARKETPLACE VIEW */}
+                {activeView === 'marketplace' && (
+                    <ThemeMarketplace />
                 )}
 
                 {/* ACCOUNT VIEW */}

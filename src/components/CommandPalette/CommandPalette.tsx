@@ -6,6 +6,8 @@ import {
 import { PROJECTS_DATA } from '../../data/projects';
 import { THEMES } from '../../data/themes';
 import { FILE_CONTENTS } from '../../data/fileSystem';
+import { ThemeContext } from '../../context/ThemeContext';
+import { useContext } from 'react';
 
 interface CommandPaletteProps {
     isOpen: boolean;
@@ -14,6 +16,7 @@ interface CommandPaletteProps {
 }
 
 export const CommandPalette = ({ isOpen, onClose, onOpenFile }: CommandPaletteProps) => {
+    const { installedThemes } = useContext(ThemeContext);
     const [query, setQuery] = useState("");
     const [selectedIndex, setSelectedIndex] = useState(0);
     const inputRef = useRef<HTMLInputElement>(null);
@@ -47,15 +50,17 @@ export const CommandPalette = ({ isOpen, onClose, onOpenFile }: CommandPalettePr
             items.push({ id: p.id, title: `${p.title}.tsx`, type: 'detail', data: p, icon: FileCode, path: `src/projects/${p.title}.tsx` });
         });
         Object.entries(THEMES).forEach(([key, theme]) => {
-            items.push({
-                id: `theme_${key}`,
-                title: `Theme: ${theme.name}`,
-                type: 'command',
-                action: 'set_theme',
-                themeKey: key,
-                icon: Palette,
-                path: 'Preferences / Theme'
-            });
+            if (installedThemes.includes(key)) {
+                items.push({
+                    id: `theme_${key}`,
+                    title: `Theme: ${theme.name}`,
+                    type: 'command',
+                    action: 'set_theme',
+                    themeKey: key,
+                    icon: Palette,
+                    path: 'Preferences / Theme'
+                });
+            }
         });
         // --- INSERT THIS BLOCK ---
         items.push({
@@ -111,7 +116,7 @@ export const CommandPalette = ({ isOpen, onClose, onOpenFile }: CommandPalettePr
         items.push({ id: 'skills', title: 'skills.json', type: 'code', content: FILE_CONTENTS.skills_json, lang: 'json', icon: FileJson, path: 'recruiter/skills.json' });
 
         return items;
-    }, []);
+    }, [installedThemes]);
 
     const filteredItems = useMemo(() => {
         if (!query) return allItems;
@@ -239,11 +244,11 @@ export const CommandPalette = ({ isOpen, onClose, onOpenFile }: CommandPalettePr
                                     onClose();
                                 }}
                                 className={`flex items-center gap-3 px-3 py-1 cursor-pointer select-none transition-none ${idx === selectedIndex
-                                    ? 'bg-[var(--accent)] text-white'
+                                    ? 'bg-[var(--accent)] text-[var(--accent-fg)]'
                                     : 'text-[var(--text-primary)] hover:bg-[var(--bg-activity)]'
                                     }`}
                             >
-                                <item.icon size={16} className={`shrink-0 ${idx === selectedIndex ? 'text-white' : 'text-[var(--text-secondary)]'}`} />
+                                <item.icon size={16} className={`shrink-0 ${idx === selectedIndex ? 'text-[var(--accent-fg)]' : 'text-[var(--text-secondary)]'}`} />
                                 <div className="flex-1 min-w-0 py-1">
                                     <div className="text-[13px] font-sans truncate leading-tight">{item.title}</div>
                                     <div className={`text-[11px] truncate ${idx === selectedIndex ? 'text-white/70' : 'text-[var(--text-secondary)] font-mono opacity-80'}`}>
