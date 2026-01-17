@@ -325,6 +325,11 @@ const App = () => {
     setActiveTabId(id);
   };
 
+  const closeAllTabs = () => {
+    setTabs([]);
+    setActiveTabId('');
+  };
+
   const closeWindow = (e: React.MouseEvent, id: string) => {
     e.stopPropagation();
     setWindows(prev => prev.filter(w => w.id !== id));
@@ -690,6 +695,7 @@ const App = () => {
               onAction={(action, id) => {
                 if (action === 'close') closeTab(null, id);
                 if (action === 'closeOthers') closeOtherTabs(id);
+                if (action === 'closeAll') closeAllTabs();
                 if (action === 'copyPath') addToast('Path copied to clipboard');
                 if (action === 'newFile') addToast('New file feature coming soon...');
                 if (action === 'delete') addToast('Delete feature coming soon...', 'warning');
