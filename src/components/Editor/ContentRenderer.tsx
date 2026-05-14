@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext, useRef } from 'react';
 import {
     Zap, ExternalLink, Terminal, GitBranch, Filter, LayoutGrid, List,
-    FileText, Github, Globe, Eye, Edit3, FileCode, Linkedin
+    FileText, Github, Globe, Eye, Edit3, FileCode, Linkedin, Code2, ArrowLeft
 } from 'lucide-react';
 import { ThemeContext } from '../../context/ThemeContext';
 import { PROJECTS_DATA } from '../../data/projects';
@@ -20,10 +20,12 @@ interface ContentRendererProps {
     content?: string;
     lang?: string;
     editorSettings: any;
+    isNavBarVisible?: boolean;
+    onScroll?: (e: React.UIEvent<HTMLElement>) => void;
 }
 
-export const ContentRenderer = ({ type, data, title, onOpenFile, content, editorSettings }: ContentRendererProps) => {
-    const { theme, homepageLayout } = useContext(ThemeContext);
+export const ContentRenderer = ({ type, data, title, onOpenFile, content, editorSettings, isNavBarVisible = true, onScroll }: ContentRendererProps) => {
+    const { theme, homepageLayout, easyMode } = useContext(ThemeContext);
     const editorScrollRef = useRef<HTMLDivElement>(null);
 
     const [activeTab, setActiveTab] = useState('details');
@@ -31,6 +33,15 @@ export const ContentRenderer = ({ type, data, title, onOpenFile, content, editor
 
     // Logic to get breadcrumb path
     const getPath = () => {
+        if (easyMode) {
+            if (type === 'home') return 'Home';
+            if (type === 'projects') return 'Projects';
+            if (type === 'detail' && data) return data.title;
+            if (type === 'readme') return 'Readme';
+            if (type === 'pdf') return 'Resume';
+            return title || '';
+        }
+
         if (type === 'home') return 'src/pages/home.tsx';
         if (type === 'projects') return 'src/pages/projects.tsx';
 
@@ -70,34 +81,39 @@ export const ContentRenderer = ({ type, data, title, onOpenFile, content, editor
         const lines = cleanContent ? cleanContent.split('\n') : [];
 
         return (
-            <div className="h-full flex flex-col bg-[var(--bg-main)]">
-                <Breadcrumbs path={path} />
+            <div className={`h-full flex flex-col bg-[var(--bg-main)] overflow-hidden relative`}>
+                {!easyMode && (
+                    <div className={`absolute md:relative top-9 md:top-0 left-0 w-full z-30 transition-all duration-300 ease-in-out md:translate-y-0 ${!isNavBarVisible ? '-translate-y-[71px] opacity-0 pointer-events-none' : 'translate-y-0 opacity-100'}`}>
+                        <Breadcrumbs path={path} />
+                    </div>
+                )}
+                <div
+                    ref={editorScrollRef}
+                    onScroll={onScroll}
+                    className="flex-1 overflow-auto custom-scrollbar flex flex-col pt-[71px] md:pt-0"
+                >
 
-                <div className="flex-1 overflow-hidden flex relative">
-
-                    {/* Main Scrollable Editor Area */}
-                    <div
-                        ref={editorScrollRef}
-                        className="flex-1 overflow-auto custom-scrollbar flex flex-col"
-                    >
+                    <div className="flex-1 flex relative">
                         <div className="min-w-fit min-h-full py-4">
                             {lines.map((line, i) => (
                                 <div key={i} className="flex flex-row hover:bg-[var(--bg-activity)]/30 w-full">
 
-                                    {/* Line Number */}
-                                    <div className="w-12 shrink-0 text-right pr-4 text-[var(--line-number)] font-mono text-sm select-none opacity-40 leading-[1.5]">
-                                        {i + 1}
-                                    </div>
+                                    {/* Line Number (Hidden in Easy Mode) */}
+                                    {!easyMode && (
+                                        <div className="w-12 shrink-0 text-right pr-4 text-[var(--line-number)] font-mono text-sm select-none opacity-40 leading-[1.5]">
+                                            {i + 1}
+                                        </div>
+                                    )}
 
                                     {/* Code Content */}
                                     <div
                                         className={`
-                      flex-1 pl-2 font-mono text-sm text-[var(--text-primary)] leading-[1.5] min-w-0 pr-4
-                      ${editorSettings.wordWrap
+                                            flex-1 pl-2 font-mono text-sm text-[var(--text-primary)] leading-[1.5] min-w-0 pr-4
+                                            ${editorSettings.wordWrap
                                                 ? "whitespace-pre-wrap break-words break-all"
                                                 : "whitespace-pre"
                                             }
-                    `}
+                                        `}
                                     >
                                         {line || " "}
                                     </div>
@@ -108,15 +124,15 @@ export const ContentRenderer = ({ type, data, title, onOpenFile, content, editor
                                 <div className="pl-14 text-[var(--text-secondary)] italic text-xs">No content.</div>
                             )}
                         </div>
-                    </div>
 
-                    {/* REAL MINIMAP */}
-                    {editorSettings.minimap && (
-                        <RealMinimap
-                            content={cleanContent}
-                            editorRef={editorScrollRef as React.RefObject<HTMLDivElement>}
-                        />
-                    )}
+                        {/* REAL MINIMAP */}
+                        {editorSettings.minimap && (
+                            <RealMinimap
+                                content={cleanContent}
+                                editorRef={editorScrollRef as React.RefObject<HTMLDivElement>}
+                            />
+                        )}
+                    </div>
                 </div>
             </div>
         );
@@ -130,6 +146,143 @@ export const ContentRenderer = ({ type, data, title, onOpenFile, content, editor
             { action: "Refining", target: "developer experience", time: "constant" },
             { action: "Building", target: "production-ready tools", time: "always" },
         ];
+
+        if (easyMode) {
+            return (
+                <div className="h-full flex flex-col bg-[var(--bg-main)]">
+                    <div className="flex-1 overflow-y-auto custom-scrollbar" onScroll={onScroll}>
+                        <div className="max-w-6xl mx-auto px-6 md:px-12 py-6 md:py-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
+
+                            <div className="mb-12 px-6 md:px-0">
+                                <div className="max-w-4xl">
+                                    <h1 className="text-3xl md:text-6xl lg:text-7xl font-bold text-[var(--text-primary)] tracking-tight mb-6 leading-[1.1] md:leading-[1.05]">
+                                        Hello, I'm <br />
+                                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-[var(--hero-gradient-start)] to-[var(--hero-gradient-end)]">
+                                            <TypingEffect text="Arnav" speed={150} />
+                                        </span>
+                                        <span className="text-[var(--accent)] animate-[blink_1s_steps(1)_infinite]">_</span>
+                                    </h1>
+                                    <p className="text-base md:text-xl text-[var(--text-secondary)] leading-relaxed mb-10 opacity-90 font-sans max-w-lg">
+                                        A Full-Stack Engineer crafting high-performance digital experiences and developer-centric engineering solutions.
+                                    </p>
+
+                                    {/* STATUS GRID - INTEGRATED */}
+                                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-6 pt-8 border-t border-[var(--border)]">
+                                        {[
+                                            { label: "Current Role", value: "Full Stack Engineer", color: "text-[var(--warning)]" },
+                                            { label: "Location", value: "Remote", color: "text-[var(--success)]" },
+                                            { label: "Status", value: "Building cool things", color: "text-[var(--info)]" }
+                                        ].map((item, idx) => (
+                                            <div key={idx} className="flex flex-col gap-1">
+                                                <span className={`font-sans text-[10px] md:text-[11px] font-bold uppercase tracking-wider ${item.color}`}>
+                                                    {item.label}
+                                                </span>
+                                                <span className="text-[var(--text-primary)] font-sans text-xs md:text-sm font-medium">
+                                                    {item.value}
+                                                </span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+
+
+                            {/* PINNED PROJECTS - AMAZING IMAGE GRID */}
+                            <div className="mb-12">
+                                <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 md:mb-10 gap-4">
+                                    <h2 className="text-xl md:text-2xl font-bold text-[var(--text-primary)] flex items-center gap-3">
+                                        <Zap size={22} className="text-[var(--warning)]" />
+                                        Pinned Deployments
+                                    </h2>
+                                    <button
+                                        onClick={() => onOpenFile({ id: 'projects_tsx', title: 'projects.tsx', type: 'projects' })}
+                                        className="text-[var(--accent)] hover:text-[var(--accent)]/80 text-sm font-bold flex items-center gap-2 group transition-all self-start md:self-auto"
+                                    >
+                                        Explore Projects
+                                        <ArrowLeft className="rotate-180 group-hover:translate-x-1 transition-transform" size={16} />
+                                    </button>
+                                </div>
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                                    {featuredProjects.slice(0, 3).map((p, i) => (
+                                        <div
+                                            key={p.id}
+                                            onClick={() => onOpenFile({ id: p.id, title: `${p.title}.tsx`, type: 'detail', data: p })}
+                                            className="group relative bg-[var(--bg-panel)] border border-[var(--border)] rounded-sm overflow-hidden cursor-pointer hover:border-[var(--accent)] hover:shadow-2xl hover:shadow-[var(--accent)]/5 transition-all flex flex-col animate-in fade-in slide-in-from-bottom-4"
+                                            style={{ animationDelay: `${i * 100}ms` }}
+                                        >
+                                            <div className="aspect-[16/10] relative overflow-hidden bg-[var(--bg-activity)]">
+                                                <img
+                                                    src={p.image}
+                                                    alt={p.title}
+                                                    className="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500"
+                                                />
+                                                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                                                <div className="absolute top-4 left-4 flex gap-1">
+                                                    {p.languages?.slice(0, 2).map((lang: any) => (
+                                                        <span key={lang.name} className="px-2 py-0.5 bg-black/40 backdrop-blur-md border border-white/10 rounded-sm text-[9px] font-bold text-white uppercase tracking-wider">
+                                                            {lang.name}
+                                                        </span>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                            <div className="p-6">
+                                                <div className="flex items-center justify-between mb-3">
+                                                    <h3 className="text-lg font-bold text-[var(--text-primary)] group-hover:text-[var(--accent)] transition-colors line-clamp-1">{p.title}</h3>
+                                                    <ExternalLink size={14} className="text-[var(--text-secondary)] group-hover:text-[var(--accent)]" />
+                                                </div>
+                                                <p className="text-sm text-[var(--text-secondary)] opacity-80 line-clamp-2 leading-relaxed h-10 font-sans">
+                                                    {p.description}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* CONTRIBUTION MAP SECTION */}
+                            <div className="mb-12 relative group">
+                                <div className="relative z-10">
+                                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
+                                        <div>
+                                            <h2 className="text-2xl font-bold text-[var(--text-primary)] mb-1">Code Contributions</h2>
+                                            <p className="text-sm text-[var(--text-secondary)] opacity-70">Consistent activity throughout the year across various engineering domains.</p>
+                                        </div>
+                                    </div>
+                                    <div className="overflow-hidden">
+                                        <CanvasContributionMap theme={theme} />
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* RECENT ACTIVITY - FULL WIDTH */}
+                            <div className="w-full">
+                                <h2 className="text-sm font-bold text-[var(--text-secondary)] mb-6 flex items-center gap-2 font-sans uppercase tracking-[0.2em] opacity-60">
+                                    <GitBranch size={14} className="text-[var(--info)]" />
+                                    Recent Activity
+                                </h2>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    {recentActivity.map((act, i) => (
+                                        <div
+                                            key={i}
+                                            className="flex items-center justify-between text-sm bg-[var(--bg-panel)] border border-[var(--border)] p-4 rounded-sm hover:border-[var(--accent)] hover:bg-[var(--bg-activity)]/40 transition-all group"
+                                        >
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-1.5 h-1.5 rounded-full bg-[var(--info)] shadow-[0_0_8px_rgba(var(--accent-rgb),0.5)]" />
+                                                <span className="text-[var(--text-secondary)] font-sans">
+                                                    {act.action} <span className="text-[var(--text-primary)] font-bold group-hover:text-[var(--accent)] transition-colors">{act.target}</span>
+                                                </span>
+                                            </div>
+                                            <span className="text-[10px] text-[var(--text-secondary)] font-mono opacity-50">{act.time}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            );
+        }
 
         if (homepageLayout === 'vscode') {
             return (
@@ -260,9 +413,11 @@ export const ContentRenderer = ({ type, data, title, onOpenFile, content, editor
         }
 
         return (
-            <div className="h-full flex flex-col">
-                <Breadcrumbs path={path} />
-                <div className="flex-1 overflow-y-auto custom-scrollbar">
+            <div className="h-full flex flex-col bg-[var(--bg-main)] relative">
+                <div className={`absolute md:relative top-9 md:top-0 left-0 w-full z-30 transition-all duration-300 ease-in-out md:translate-y-0 ${!isNavBarVisible ? '-translate-y-[71px] opacity-0 pointer-events-none' : 'translate-y-0 opacity-100'}`}>
+                    <Breadcrumbs path={path} />
+                </div>
+                <div className="flex-1 overflow-y-auto custom-scrollbar pt-[71px] md:pt-0" onScroll={onScroll}>
                     <div className="p-4 md:p-12 max-w-5xl mx-auto animate-in fade-in zoom-in-95 duration-300 pb-20">
 
                         {/* HERO SECTION */}
@@ -385,12 +540,13 @@ export const ContentRenderer = ({ type, data, title, onOpenFile, content, editor
     if (type === 'projects') {
         const [viewMode, setViewMode] = useState<'grid' | 'list'>(() => {
             const saved = localStorage.getItem('projects_view_mode');
-            return (saved === 'grid' || saved === 'list') ? saved : 'list';
+            return (saved === 'grid' || saved === 'list') ? saved : (easyMode ? 'grid' : 'list');
         });
 
         useEffect(() => {
             localStorage.setItem('projects_view_mode', viewMode);
         }, [viewMode]);
+
         const [showFilters, setShowFilters] = useState(false);
         const [techFilters, setTechFilters] = useState<string[]>([]);
         const [langFilters, setLangFilters] = useState<string[]>([]);
@@ -408,10 +564,110 @@ export const ContentRenderer = ({ type, data, title, onOpenFile, content, editor
             setFn(prev => prev.includes(value) ? prev.filter(v => v !== value) : [...prev, value]);
         };
 
+        if (easyMode) {
+            return (
+                <div className="h-full flex flex-col bg-[var(--bg-main)]">
+                    <div className="flex-1 overflow-y-auto custom-scrollbar px-6 md:px-12 py-12" onScroll={onScroll}>
+                        <div className="max-w-6xl mx-auto">
+                            <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-16">
+                                <div>
+                                    <h1 className="text-4xl md:text-5xl font-bold text-[var(--text-primary)] mb-4 tracking-tight">Project Portfolio</h1>
+                                    <p className="text-[var(--text-secondary)] opacity-80 text-lg max-w-2xl">
+                                        A curated collection of my most significant engineering projects, ranging from immersive web experiences to low-level system internal tools.
+                                    </p>
+                                </div>
+                                <div className="flex items-center gap-3">
+                                    <button
+                                        onClick={() => setShowFilters(!showFilters)}
+                                        className={`flex items-center gap-2 px-4 py-2 rounded-sm border transition-all text-sm font-bold
+                                            ${showFilters ? 'bg-[var(--accent)] border-[var(--accent)] text-white' : 'bg-[var(--bg-activity)] border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}
+                                        `}
+                                    >
+                                        <Filter size={16} /> Filters
+                                    </button>
+                                </div>
+                            </div>
+
+                            {showFilters && (
+                                <div className="mb-12 p-8 bg-[var(--bg-activity)]/40 border border-[var(--border)] rounded-sm animate-in fade-in slide-in-from-top-4 duration-300">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                        <div>
+                                            <h3 className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-widest mb-4 opacity-60">Tech Stack</h3>
+                                            <div className="flex flex-wrap gap-2">
+                                                {allTech.map(t => (
+                                                    <button key={t} onClick={() => toggleFilter(t, setTechFilters)}
+                                                        className={`px-3 py-1 text-xs rounded-sm border transition-all 
+                                                            ${techFilters.includes(t) ? 'bg-[var(--accent)] border-[var(--accent)] text-white' : 'border-[var(--border)] text-[var(--text-secondary)] hover:border-[var(--text-primary)]'}`}>
+                                                        {t}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <h3 className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-widest mb-4 opacity-60">Core Languages</h3>
+                                            <div className="flex flex-wrap gap-2">
+                                                {allLanguages.map(l => (
+                                                    <button key={l} onClick={() => toggleFilter(l, setLangFilters)}
+                                                        className={`px-3 py-1 text-xs rounded-sm border transition-all
+                                                            ${langFilters.includes(l) ? 'bg-[var(--accent)] border-[var(--accent)] text-white' : 'border-[var(--border)] text-[var(--text-secondary)] hover:border-[var(--text-primary)]'}`}>
+                                                        {l}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                                {filteredProjects.map(p => (
+                                    <div
+                                        key={p.id}
+                                        onClick={() => onOpenFile({ id: p.id, title: `${p.title}.tsx`, type: "detail", data: p })}
+                                        className="group relative bg-[var(--bg-activity)]/20 border border-[var(--border)] rounded-sm overflow-hidden cursor-pointer hover:border-[var(--accent)] transition-all flex flex-col h-full"
+                                    >
+                                        <div className="aspect-video relative overflow-hidden bg-[var(--bg-activity)]">
+                                            <img src={p.image} alt={p.title} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-all duration-700" />
+                                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-6">
+                                                <span className="text-white text-xs font-bold flex items-center gap-2">
+                                                    View Case Study <ExternalLink size={14} />
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div className="p-6 flex-1 flex flex-col">
+                                            <div className="flex items-center gap-2 mb-3">
+                                                {p.languages?.slice(0, 2).map((lang: any) => (
+                                                    <span key={lang.name} className="px-2 py-0.5 text-[9px] font-bold uppercase tracking-tighter border border-[var(--border)] rounded-sm flex items-center gap-1.5 text-[var(--text-secondary)]">
+                                                        <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: lang.color }} />
+                                                        {lang.name}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                            <h3 className="text-xl font-bold text-[var(--text-primary)] mb-3 group-hover:text-[var(--accent)] transition-colors">{p.title}</h3>
+                                            <p className="text-sm text-[var(--text-secondary)] line-clamp-2 md:line-clamp-3 leading-relaxed mb-6 opacity-80">{p.description}</p>
+
+                                            <div className="mt-auto pt-4 border-t border-[var(--border)] flex items-center justify-between">
+                                                {/* Tech stack icons removed for cleaner easy mode */}
+                                                <span className="text-[10px] font-mono text-[var(--text-secondary)] opacity-40">v1.0.0</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
         return (
-            <div className="h-full flex flex-col bg-[var(--bg-main)]">
-                <Breadcrumbs path={path} />
-                <div className="flex-1 overflow-hidden flex flex-col">
+            <div className="h-full flex flex-col bg-[var(--bg-main)] relative">
+                {!easyMode && (
+                    <div className={`absolute md:relative top-9 md:top-0 left-0 w-full z-30 transition-all duration-300 ease-in-out md:translate-y-0 ${!isNavBarVisible ? '-translate-y-[71px] opacity-0 pointer-events-none' : 'translate-y-0 opacity-100'}`}>
+                        <Breadcrumbs path={path} />
+                    </div>
+                )}
+                <div className="flex-1 overflow-hidden flex flex-col pt-[71px] md:pt-0">
                     <div className="px-4 py-1.5 md:py-2 border-b border-[var(--border)] bg-[var(--bg-panel)] flex flex-row justify-between items-center shrink-0">
                         <div className="flex items-center gap-3">
                             <div className="text-[var(--text-secondary)] text-[10px] md:text-xs uppercase tracking-widest font-sans font-bold flex items-center gap-2">
@@ -478,7 +734,7 @@ export const ContentRenderer = ({ type, data, title, onOpenFile, content, editor
                     )}
 
                     {/* CONTENT AREA */}
-                    <div className="flex-1 overflow-y-auto custom-scrollbar px-4 md:px-8 pt-0 pb-8">
+                    <div className="flex-1 overflow-y-auto custom-scrollbar px-4 md:px-8 pt-0 pb-8" onScroll={onScroll}>
                         <div className="max-w-6xl mx-auto w-full pt-1 md:pt-2 pb-4">
                             {filteredProjects.length === 0 ? (
                                 <div className="text-center text-[var(--text-secondary)] mt-20 font-mono text-sm">No extensions found matching your criteria.</div>
@@ -558,10 +814,141 @@ export const ContentRenderer = ({ type, data, title, onOpenFile, content, editor
     }
 
     if (type === 'detail' && data) {
+        if (easyMode) {
+            return (
+                <div className="h-full flex flex-col bg-[var(--bg-main)]">
+                    <div className="flex-1 overflow-y-auto custom-scrollbar" onScroll={onScroll}>
+                        {/* Immersive Detail Header */}
+                        <div className="relative h-[40vh] min-h-[300px] w-full overflow-hidden">
+                            <img src={data.image} alt={data.title} className="w-full h-full object-cover" />
+                            <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg-main)] via-[var(--bg-main)]/60 to-transparent" />
+                            <div className="absolute bottom-0 left-0 w-full p-8 md:p-16">
+                                <div className="max-w-5xl mx-auto">
+                                    <div className="flex items-center gap-3 mb-6">
+                                        {data.languages?.map((lang: any) => (
+                                            <span key={lang.name} className="px-3 py-1 bg-white/10 backdrop-blur-md border border-white/20 rounded-sm text-[10px] font-bold text-white uppercase tracking-widest">
+                                                {lang.name}
+                                            </span>
+                                        ))}
+                                    </div>
+                                    <h1 className="text-4xl md:text-6xl font-black text-white mb-6 tracking-tight animate-in slide-in-from-left-4 duration-700">{data.title}</h1>
+                                    <div className="flex flex-wrap gap-4">
+                                        {data.links?.live && (
+                                            <a href={data.links.live} target="_blank" rel="noopener noreferrer"
+                                                className="px-8 py-3 bg-[var(--accent)] text-white text-sm font-bold rounded-sm shadow-xl shadow-[var(--accent)]/30 hover:scale-105 transition-transform flex items-center gap-2">
+                                                Launch Application <Globe size={18} />
+                                            </a>
+                                        )}
+                                        {data.links?.github && (
+                                            <a href={data.links.github} target="_blank" rel="noopener noreferrer"
+                                                className="px-8 py-3 bg-white/10 backdrop-blur-md border border-white/20 text-white text-sm font-bold rounded-sm hover:bg-white/20 transition-all flex items-center gap-2">
+                                                <Github size={18} /> Source Code
+                                            </a>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="max-w-5xl mx-auto px-8 md:px-16 py-16 grid grid-cols-1 lg:grid-cols-3 gap-16">
+                            <div className="lg:col-span-2 space-y-12">
+                                <section>
+                                    <h2 className="text-2xl font-bold text-[var(--text-primary)] mb-6 flex items-center gap-3">
+                                        <div className="w-2 h-8 bg-[var(--accent)] rounded-sm" /> Narrative
+                                    </h2>
+                                    <p className="text-lg text-[var(--text-secondary)] leading-loose opacity-90 font-medium">
+                                        {data.longDescription || data.description}
+                                    </p>
+                                </section>
+
+                                {data.architecture && (
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-[var(--text-primary)] mb-6">System Architecture</h2>
+                                        <div className="bg-[var(--bg-activity)] border border-[var(--border)] rounded-sm p-8 overflow-hidden relative">
+                                            <div className="absolute top-0 right-0 p-4 opacity-10">
+                                                <Code2 size={120} />
+                                            </div>
+                                            <pre className="relative z-10 font-mono text-sm text-[var(--text-primary)] leading-relaxed whitespace-pre-wrap">
+                                                {data.architecture}
+                                            </pre>
+                                        </div>
+                                    </section>
+                                )}
+
+                                {data.snippet && (
+                                    <section>
+                                        <h2 className="text-2xl font-bold text-[var(--text-primary)] mb-6">Core Implementation</h2>
+                                        <div className="bg-[var(--bg-panel)] border border-[var(--border)] rounded-sm overflow-hidden shadow-lg">
+                                            <div className="bg-[var(--bg-activity)] px-4 py-2 border-b border-[var(--border)] flex justify-between items-center">
+                                                <span className="text-xs font-mono text-[var(--text-secondary)]">implementation.ts</span>
+                                                <div className="flex gap-1.5">
+                                                    <div className="w-2.5 h-2.5 rounded-full bg-red-500/20" />
+                                                    <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/20" />
+                                                    <div className="w-2.5 h-2.5 rounded-full bg-green-500/20" />
+                                                </div>
+                                            </div>
+                                            <div className="p-6 overflow-x-auto custom-scrollbar">
+                                                <pre className="font-mono text-xs text-[var(--success)] leading-relaxed">{data.snippet}</pre>
+                                            </div>
+                                        </div>
+                                    </section>
+                                )}
+                            </div>
+
+                            <div className="space-y-12">
+                                <div className="p-8 bg-[var(--bg-activity)]/40 border border-[var(--border)] rounded-sm sticky top-8">
+                                    {/* Switched to standard VS Code like Project Details to match authentic look */}
+                                    <div className="space-y-8">
+                                        <div>
+                                            <h3 className="text-xs uppercase font-bold text-[var(--text-secondary)] mb-4 tracking-wider font-sans">Technologies</h3>
+                                            <div className="flex flex-wrap gap-2">
+                                                {data.tech?.map((t: string) => (
+                                                    <span key={t} className="px-2 py-1 bg-[var(--bg-main)] text-[var(--text-primary)] text-[11px] rounded-sm border border-[var(--border)] font-sans">{t}</span>
+                                                ))}
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <h3 className="text-xs uppercase font-bold text-[var(--text-secondary)] mb-4 tracking-wider font-sans">Resources</h3>
+                                            <div className="text-xs space-y-3 text-[var(--text-primary)] font-sans">
+                                                <div className="flex justify-between py-1.5 border-b border-[var(--border)] border-dashed">
+                                                    <span>Version</span>
+                                                    <span className="text-[var(--text-secondary)] font-mono">{data.deployHistory?.[0]?.version || 'v1.0.0'}</span>
+                                                </div>
+                                                <div className="flex justify-between py-1.5 border-b border-[var(--border)] border-dashed">
+                                                    <span>Last Update</span>
+                                                    <span className="text-[var(--text-secondary)]">Recently</span>
+                                                </div>
+                                                <div className="flex justify-between py-1.5">
+                                                    <span>License</span>
+                                                    <span className="text-[var(--text-secondary)] font-mono">MIT</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <button
+                                        onClick={() => onOpenFile({ id: 'projects.tsx', title: 'projects.tsx', type: 'projects' })}
+                                        className="w-full mt-12 py-4 bg-[var(--bg-activity)] border border-[var(--border)] rounded-sm text-[var(--text-primary)] text-sm font-bold hover:bg-[var(--bg-panel)] transition-all flex items-center justify-center gap-2"
+                                    >
+                                        Back to Assignments
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
         return (
-            <div className="h-full flex flex-col bg-[var(--bg-main)]">
-                <Breadcrumbs path={path} />
-                <div className="flex-1 overflow-y-auto custom-scrollbar">
+            <div className="h-full flex flex-col bg-[var(--bg-main)] relative">
+                {!easyMode && (
+                    <div className={`absolute md:relative top-9 md:top-0 left-0 w-full z-30 transition-all duration-300 ease-in-out md:translate-y-0 ${!isNavBarVisible ? '-translate-y-[71px] opacity-0 pointer-events-none' : 'translate-y-0 opacity-100'}`}>
+                        <Breadcrumbs path={path} />
+                    </div>
+                )}
+                <div className="flex-1 overflow-y-auto custom-scrollbar pt-[71px] md:pt-0" onScroll={onScroll}>
                     {/* EXTENSION HEADER */}
                     <div className="px-4 md:px-12 max-w-5xl mx-auto w-full py-8">
                         <div className="flex flex-col md:flex-row gap-6 mb-6">
@@ -723,59 +1110,70 @@ export const ContentRenderer = ({ type, data, title, onOpenFile, content, editor
 
     if (type === 'readme') {
         return (
-            <div className="h-full flex flex-col">
-                <Breadcrumbs path={path} />
-                <div className="p-4 md:p-12 max-w-4xl mx-auto w-full h-full flex flex-col">
-                    <div className="flex items-center justify-between mb-6 pb-4 border-b border-[var(--border)]">
-                        <div className="flex items-center gap-2 text-[var(--text-primary)] font-mono font-bold text-xl">
-                            <FileText size={20} className="text-[var(--info)]" />
-                            <span>README.md</span>
-                        </div>
-                        <div className="flex bg-[var(--bg-activity)] rounded-lg p-1 border border-[var(--border)]">
-                            <button onClick={() => setIsPreview(true)} className={`flex items-center gap-2 px-3 py-1.5 rounded text-xs font-medium transition-all ${isPreview ? 'bg-[var(--bg-main)] text-[var(--accent)] shadow-sm' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}>
-                                <Eye size={14} /> Preview
-                            </button>
-                            <button onClick={() => setIsPreview(false)} className={`flex items-center gap-2 px-3 py-1.5 rounded text-xs font-medium transition-all ${!isPreview ? 'bg-[var(--bg-main)] text-[var(--accent)] shadow-sm' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}>
-                                <Edit3 size={14} /> Source
-                            </button>
-                        </div>
+            <div className="h-full flex flex-col relative">
+                {!easyMode && (
+                    <div className={`absolute md:relative top-9 md:top-0 left-0 w-full z-30 transition-all duration-300 ease-in-out md:translate-y-0 ${!isNavBarVisible ? '-translate-y-[71px] opacity-0 pointer-events-none' : 'translate-y-0 opacity-100'}`}>
+                        <Breadcrumbs path={path} />
                     </div>
-                    <div className="flex-1 overflow-y-auto custom-scrollbar">
-                        {isPreview ? (
-                            <div className="prose prose-invert prose-slate max-w-none font-sans text-[var(--text-primary)]">
-                                <h1 className="flex items-center gap-3 text-3xl font-bold mb-4"><span className="text-4xl">⚙️</span><span>Hi, I’m Arnav</span></h1>
-                                <p className="lead text-lg text-[var(--text-secondary)] mb-6">Developer focused on building performant interfaces, low-level tooling, and systems that actually ship.</p>
-                                <hr className="border-[var(--border)] my-8" />
-                                <h3 className="text-[var(--success)] text-xl font-bold mb-4">🧠 What I Work On</h3>
-                                <p className="mb-6 text-[var(--text-primary)] leading-relaxed">I build full-stack applications with React and Node.js, desktop tools in C++ and Python, and infrastructure-level solutions involving networking, automation, and system internals.</p>
-                                <h3 className="text-[var(--accent)] text-xl font-bold mb-4">🛠 Core Stack</h3>
-                                <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3 list-none pl-0 mb-8">
-                                    <li className="flex items-center gap-2 bg-[var(--bg-activity)]/50 p-2 rounded border border-[var(--border)]"><span className="text-cyan-400">⚛️</span> React / Vite / Tailwind</li>
-                                    <li className="flex items-center gap-2 bg-[var(--bg-activity)]/50 p-2 rounded border border-[var(--border)]"><span className="text-green-500">🟢</span> Node.js / Express</li>
-                                    <li className="flex items-center gap-2 bg-[var(--bg-activity)]/50 p-2 rounded border border-[var(--border)]"><span className="text-blue-400">🔷</span> TypeScript / JavaScript</li>
-                                    <li className="flex items-center gap-2 bg-[var(--bg-activity)]/50 p-2 rounded border border-[var(--border)]"><span className="text-orange-400">🧠</span> C++ / Win32 / System APIs</li>
-                                    <li className="flex items-center gap-2 bg-[var(--bg-activity)]/50 p-2 rounded border border-[var(--border)]"><span className="text-yellow-400">🐍</span> Python / Automation</li>
-                                    <li className="flex items-center gap-2 bg-[var(--bg-activity)]/50 p-2 rounded border border-[var(--border)]"><span className="text-sky-400">🌐</span> Networking / Proxies / Tunnels</li>
-                                </ul>
+                )}
+                <div className="flex-1 overflow-y-auto custom-scrollbar pt-[71px] md:pt-0">
+                    <div className="p-4 md:p-12 max-w-4xl mx-auto w-full flex flex-col">
+                        <div className="flex items-center justify-between mb-6 pb-4 border-b border-[var(--border)]">
+                            <div className="flex items-center gap-2 text-[var(--text-primary)] font-mono font-bold text-xl">
+                                <FileText size={20} className="text-[var(--info)]" />
+                                <span>README.md</span>
                             </div>
-                        ) : (
-                            <div className="flex">
-                                <div className="w-8 border-r border-[var(--border)] text-right pr-2 text-[var(--line-number)] select-none">1<br />2<br />3</div>
-                                <div className="pl-2 font-mono text-sm text-[var(--text-primary)] whitespace-pre-wrap leading-relaxed">
-                                    {`# ⚙️ Hi, I’m Arnav\n\nDeveloper focused on building performant interfaces...`}
+                            <div className="flex bg-[var(--bg-activity)] rounded-lg p-1 border border-[var(--border)]">
+                                <button onClick={() => setIsPreview(true)} className={`flex items-center gap-2 px-3 py-1.5 rounded text-xs font-medium transition-all ${isPreview ? 'bg-[var(--bg-main)] text-[var(--accent)] shadow-sm' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}>
+                                    <Eye size={14} /> Preview
+                                </button>
+                                <button onClick={() => setIsPreview(false)} className={`flex items-center gap-2 px-3 py-1.5 rounded text-xs font-medium transition-all ${!isPreview ? 'bg-[var(--bg-main)] text-[var(--accent)] shadow-sm' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}>
+                                    <Edit3 size={14} /> Source
+                                </button>
+                            </div>
+                        </div>
+                        <div className="flex-1 overflow-y-auto custom-scrollbar">
+                            {isPreview ? (
+                                <div className="prose prose-invert prose-slate max-w-none font-sans text-[var(--text-primary)]">
+                                    <h1 className="flex items-center gap-3 text-3xl font-bold mb-4"><span className="text-4xl">⚙️</span><span>Hi, I’m Arnav</span></h1>
+                                    <p className="lead text-lg text-[var(--text-secondary)] mb-6">Developer focused on building performant interfaces, low-level tooling, and systems that actually ship.</p>
+                                    <hr className="border-[var(--border)] my-8" />
+                                    <h3 className="text-[var(--success)] text-xl font-bold mb-4">🧠 What I Work On</h3>
+                                    <p className="mb-6 text-[var(--text-primary)] leading-relaxed">I build full-stack applications with React and Node.js, desktop tools in C++ and Python, and infrastructure-level solutions involving networking, automation, and system internals.</p>
+                                    <h3 className="text-[var(--accent)] text-xl font-bold mb-4">🛠 Core Stack</h3>
+                                    <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3 list-none pl-0 mb-8">
+                                        <li className="flex items-center gap-2 bg-[var(--bg-activity)]/50 p-2 rounded border border-[var(--border)]"><span className="text-cyan-400">⚛️</span> React / Vite / Tailwind</li>
+                                        <li className="flex items-center gap-2 bg-[var(--bg-activity)]/50 p-2 rounded border border-[var(--border)]"><span className="text-green-500">🟢</span> Node.js / Express</li>
+                                        <li className="flex items-center gap-2 bg-[var(--bg-activity)]/50 p-2 rounded border border-[var(--border)]"><span className="text-blue-400">🔷</span> TypeScript / JavaScript</li>
+                                        <li className="flex items-center gap-2 bg-[var(--bg-activity)]/50 p-2 rounded border border-[var(--border)]"><span className="text-orange-400">🧠</span> C++ / Win32 / System APIs</li>
+                                        <li className="flex items-center gap-2 bg-[var(--bg-activity)]/50 p-2 rounded border border-[var(--border)]"><span className="text-yellow-400">🐍</span> Python / Automation</li>
+                                        <li className="flex items-center gap-2 bg-[var(--bg-activity)]/50 p-2 rounded border border-[var(--border)]"><span className="text-sky-400">🌐</span> Networking / Proxies / Tunnels</li>
+                                    </ul>
                                 </div>
-                            </div>
-                        )}
+                            ) : (
+                                <div className="flex">
+                                    <div className="w-8 border-r border-[var(--border)] text-right pr-2 text-[var(--line-number)] select-none">1<br />2<br />3</div>
+                                    <div className="pl-2 font-mono text-sm text-[var(--text-primary)] whitespace-pre-wrap leading-relaxed">
+                                        {`# ⚙️ Hi, I’m Arnav\n\nDeveloper focused on building performant interfaces...`}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>
         );
     }
+
     if (type === 'pdf') {
         return (
-            <div className="h-full flex flex-col bg-[var(--bg-main)]">
-                <Breadcrumbs path={path} />
-                <div className="flex-1 flex flex-col min-h-0">
+            <div className="h-full flex flex-col bg-[var(--bg-main)] relative">
+                {!easyMode && (
+                    <div className={`absolute md:relative top-9 md:top-0 left-0 w-full z-30 transition-all duration-300 ease-in-out md:translate-y-0 ${!isNavBarVisible ? '-translate-y-[71px] opacity-0 pointer-events-none' : 'translate-y-0 opacity-100'}`}>
+                        <Breadcrumbs path={path} />
+                    </div>
+                )}
+                <div className="flex-1 flex flex-col min-h-0 pt-[71px] md:pt-0">
                     <div className="flex items-center justify-between px-4 py-1.5 border-b border-[var(--border)] bg-[var(--bg-panel)]">
                         <div className="flex items-center gap-2 text-[var(--accent)] font-mono font-bold text-[11px]">
                             <FileText size={14} />
@@ -801,5 +1199,6 @@ export const ContentRenderer = ({ type, data, title, onOpenFile, content, editor
             </div>
         );
     }
+
     return null;
 };

@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect, useContext } from 'react';
 import {
     Files, Search, UserCircle, Settings2,
     MoreHorizontal as MoreHorizontalIcon, ChevronDown, Folder, FolderOpen,
-    RefreshCw, Plus, CheckCircle, ToggleRight, ToggleLeft, FileJson,
+    RefreshCw, Plus, CheckCircle, ToggleRight, ToggleLeft, FileJson, Zap,
     Cloud, ShieldCheck, LogOut, User, ChevronRight, CaseSensitive, WholeWord, Regex, RotateCcw, Globe, Trophy, Award, LayoutGrid, Filter, ExternalLink, Palette, Trash2
 } from 'lucide-react';
 import { ThemeContext } from '../../context/ThemeContext';
@@ -123,7 +123,7 @@ export const Sidebar = ({
     isDragging
 }: SidebarProps) => {
 
-    const { theme, setTheme, homepageLayout, setHomepageLayout, installedThemes, uninstallTheme } = useContext(ThemeContext);
+    const { theme, setTheme, homepageLayout, setHomepageLayout, installedThemes, uninstallTheme, easyMode } = useContext(ThemeContext);
     const [activeView, setActiveView] = useState<'explorer' | 'search' | 'deployments' | 'certifications' | 'marketplace' | 'account' | 'settings'>('explorer');
 
 
@@ -422,24 +422,18 @@ export const Sidebar = ({
                 </div>
             </div>
 
-            {/* Mobile backdrop */}
-            {isPanelVisible && (
-                <div
-                    className="fixed inset-0 z-10 bg-black/40 md:hidden"
-                    onClick={() => setIsPanelVisible(false)}
-                />
-            )}
+
 
             {/* SIDEBAR PANEL CONTENT */}
             <div
                 ref={sidebarRef}
                 style={{ width: isPanelVisible ? sidebarWidth : 0 }}
                 className={`
-        flex flex-col bg-[var(--bg-panel)] border-r border-[var(--border)]
-        fixed md:relative top-0 bottom-0 left-12 md:left-0 z-20 overflow-hidden
-        ${!isResizing ? '' : ''}
-        ${isPanelVisible ? '' : 'md:border-none'}
-      `}>
+                    flex flex-col bg-[var(--bg-panel)] border-r border-[var(--border)]
+                    h-full overflow-hidden transition-all duration-300 md:transition-none
+                    ${!isPanelVisible ? 'md:border-none' : ''}
+                `}
+            >
                 <div
                     className="absolute right-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-[var(--accent)] transition-colors z-50 opacity-0 hover:opacity-100"
                     onMouseDown={startResizing}
@@ -475,65 +469,111 @@ export const Sidebar = ({
                         </div>
 
                         <div className="flex-1 overflow-y-auto custom-scrollbar select-none">
-                            {/* SECTION: OPEN EDITORS */}
-                            <div
-                                className="h-[22px] flex items-center px-1 bg-[var(--bg-activity)]/30 cursor-pointer border-t border-white/5"
-                                onClick={() => setExpandedFolders(prev => ({ ...prev, 'open_editors': !prev['open_editors'] }))}
-                            >
-                                <ChevronDown
-                                    size={14}
-                                    className={`text-[var(--text-secondary)] transition-transform duration-150 ${(expandedFolders['open_editors'] ?? true) ? '' : '-rotate-90'}`}
-                                />
-                                <span className="text-[11px] font-bold text-[var(--text-secondary)] ml-1 tracking-tight">OPEN EDITORS</span>
-                            </div>
+                            {/* PORTFOLIO NAVIGATOR (Easy Mode only) */}
+                            {easyMode && (
+                                <div className="flex flex-col py-3 px-3 space-y-1.5 border-b border-[var(--border)] mb-2">
+                                    <h3 className="px-2 text-[10px] font-bold text-[var(--accent)] uppercase opacity-60 mb-1 tracking-widest">Bookmarks</h3>
 
-                            {(expandedFolders['open_editors'] ?? true) && (
-                                <div className="mb-2">
-                                    {tabs.map(tab => {
-                                        const { icon, color } = getFileIcon(tab.title);
-                                        return renderFileTreeItem({
-                                            id: tab.id,
-                                            name: tab.title,
-                                            icon,
-                                            color,
-                                            type: 'file',
-                                            depth: 0,
-                                            onClick: () => setActiveTabId(tab.id),
-                                            showClose: true,
-                                            onDragStart: (_e, id) => {
-                                                const tab = tabs.find(t => t.id === id);
-                                                if (tab) {
-                                                    window.dispatchEvent(
-                                                        new CustomEvent("explorer-drag-start", {
-                                                            detail: { id, file: tab }
-                                                        })
-                                                    );
-                                                }
-                                            },
-                                            onClose: () => {
-                                                // if (tab.id === 'home') return;
-                                                const newTabs = tabs.filter(t => t.id !== tab.id);
-                                                setTabs(newTabs);
-                                                if (activeTabId === tab.id) {
-                                                    const nextTab = newTabs[newTabs.length - 1];
-                                                    setActiveTabId(nextTab ? nextTab.id : (null as any));
-                                                }
-                                            }
-                                        });
-                                    })}
+                                    <button
+                                        onClick={() => onOpenFile({ id: 'home.tsx', title: 'home.tsx', type: 'home' })}
+                                        className={`flex items-center gap-3 px-3 py-2 rounded-sm transition-all text-xs font-medium border
+                                            ${activeTabId === 'home.tsx'
+                                                ? 'bg-[var(--accent)]/10 text-[var(--accent)] border-[var(--accent)]/30 shadow-sm'
+                                                : 'text-[var(--text-primary)] hover:bg-[var(--bg-activity)] border-transparent'}
+                                        `}
+                                    >
+                                        <Folder className="w-3.5 h-3.5 opacity-70" />
+                                        <span>Home Overview</span>
+                                    </button>
+
+                                    <button
+                                        onClick={() => onOpenFile({ id: 'projects.tsx', title: 'projects.tsx', type: 'projects' })}
+                                        className={`flex items-center gap-3 px-3 py-2 rounded-sm transition-all text-xs font-medium border
+                                            ${activeTabId === 'projects.tsx'
+                                                ? 'bg-[var(--accent)]/10 text-[var(--accent)] border-[var(--accent)]/30 shadow-sm'
+                                                : 'text-[var(--text-primary)] hover:bg-[var(--bg-activity)] border-transparent'}
+                                        `}
+                                    >
+                                        <LayoutGrid className="w-3.5 h-3.5 opacity-70" />
+                                        <span>Featured Projects</span>
+                                    </button>
+
+                                    <button
+                                        onClick={() => onOpenFile({ id: 'skills.json', title: 'skills.json', type: 'code', content: FILE_CONTENTS.skills_json, lang: 'json' })}
+                                        className={`flex items-center gap-3 px-3 py-2 rounded-sm transition-all text-xs font-medium border
+                                            ${activeTabId === 'skills.json'
+                                                ? 'bg-[var(--accent)]/10 text-[var(--accent)] border-[var(--accent)]/30 shadow-sm'
+                                                : 'text-[var(--text-primary)] hover:bg-[var(--bg-activity)] border-transparent'}
+                                        `}
+                                    >
+                                        <Zap className="w-3.5 h-3.5 opacity-70" />
+                                        <span>Tech Stack & Skills</span>
+                                    </button>
                                 </div>
+                            )}
+
+                            {/* SECTION: OPEN EDITORS (Hidden in Easy Mode) */}
+                            {!easyMode && (
+                                <>
+                                    <div
+                                        className="h-[22px] flex items-center px-1 bg-[var(--bg-activity)]/30 cursor-pointer border-t border-white/5"
+                                        onClick={() => setExpandedFolders(prev => ({ ...prev, 'open_editors': !prev['open_editors'] }))}
+                                    >
+                                        <ChevronDown
+                                            size={14}
+                                            className={`text-[var(--text-secondary)] transition-transform duration-150 ${(expandedFolders['open_editors'] ?? true) ? '' : '-rotate-90'}`}
+                                        />
+                                        <span className="text-[11px] font-bold text-[var(--text-secondary)] ml-1 tracking-tight">OPEN EDITORS</span>
+                                    </div>
+
+                                    {(expandedFolders['open_editors'] ?? true) && (
+                                        <div className="mb-2">
+                                            {tabs.map(tab => {
+                                                const { icon, color } = getFileIcon(tab.title);
+                                                return renderFileTreeItem({
+                                                    id: tab.id,
+                                                    name: tab.title,
+                                                    icon,
+                                                    color,
+                                                    type: 'file',
+                                                    depth: 0,
+                                                    onClick: () => setActiveTabId(tab.id),
+                                                    showClose: true,
+                                                    onDragStart: (_e, id) => {
+                                                        const tab = tabs.find(t => t.id === id);
+                                                        if (tab) {
+                                                            window.dispatchEvent(
+                                                                new CustomEvent("explorer-drag-start", {
+                                                                    detail: { id, file: tab }
+                                                                })
+                                                            );
+                                                        }
+                                                    },
+                                                    onClose: () => {
+                                                        const newTabs = tabs.filter(t => t.id !== tab.id);
+                                                        setTabs(newTabs);
+                                                        if (activeTabId === tab.id) {
+                                                            const nextTab = newTabs[newTabs.length - 1];
+                                                            setActiveTabId(nextTab ? nextTab.id : (null as any));
+                                                        }
+                                                    }
+                                                });
+                                            })}
+                                        </div>
+                                    )}
+                                </>
                             )}
 
                             {/* SECTION: WORKSPACE (PORTFOLIO) */}
                             <div
-                                className="h-[22px] flex items-center px-1 bg-[var(--bg-activity)]/30 cursor-pointer border-t border-white/5"
+                                className={`h-[22px] flex items-center px-1 bg-[var(--bg-activity)]/30 cursor-pointer ${easyMode ? '' : 'border-t border-white/5'}`}
                                 onClick={() => setExpandedFolders(prev => ({ ...prev, 'workspace': !prev['workspace'] }))}
                             >
                                 <ChevronDown
                                     size={14}
                                     className={`text-[var(--text-secondary)] transition-transform duration-150 ${(expandedFolders['workspace'] ?? true) ? '' : '-rotate-90'}`}
                                 />
-                                <span className="text-[11px] font-bold text-[var(--text-secondary)] ml-1 tracking-tight uppercase">Portfolio</span>
+                                <span className="text-[11px] font-bold text-[var(--text-secondary)] ml-1 tracking-tight uppercase">{easyMode ? 'Files' : 'Portfolio'}</span>
                             </div>
 
                             {(expandedFolders['workspace'] ?? true) && (
@@ -637,7 +677,7 @@ export const Sidebar = ({
                                                 </>
                                             )}
 
-                                            {/* Components Folder - uses Info Color */}
+                                            {/* Components Folder */}
                                             {renderFileTreeItem({
                                                 id: 'components', name: 'components', icon: expandedFolders['components'] ? FolderOpen : Folder, color: "text-[var(--text-secondary)]",
                                                 type: 'folder', depth: 1, hasChildren: true, isOpen: expandedFolders['components'], onToggle: () => toggleFolder('components')
@@ -744,6 +784,47 @@ export const Sidebar = ({
                                         </>
                                     )}
 
+                                    {/* Recruiter Folder */}
+                                    {renderFileTreeItem({
+                                        id: 'recruiter', name: 'recruiter', icon: expandedFolders['recruiter'] ? FolderOpen : Folder, color: "text-[var(--text-secondary)]",
+                                        type: 'folder', depth: 0, hasChildren: true, isOpen: expandedFolders['recruiter'], onToggle: () => toggleFolder('recruiter')
+                                    })}
+                                    {expandedFolders['recruiter'] && (
+                                        <>
+                                            {[
+                                                { name: "hire_me.json", content: FILE_CONTENTS.hire_me, lang: 'json' },
+                                                { name: "skills.json", content: FILE_CONTENTS.skills_json, lang: 'json' },
+                                                { name: "career_path.txt", content: FILE_CONTENTS.career_path, lang: 'text' }
+                                            ].map(f => {
+                                                const fileMeta = getFileIcon(f.name);
+                                                return renderFileTreeItem({
+                                                    id: `recruiter_${f.name}`,
+                                                    name: f.name,
+                                                    icon: fileMeta.icon,
+                                                    color: fileMeta.color,
+                                                    type: 'file',
+                                                    depth: 1,
+                                                    onDragStart: (_e, id) => {
+                                                        window.dispatchEvent(
+                                                            new CustomEvent("explorer-drag-start", {
+                                                                detail: { id, file: { id, title: `recruiter/${f.name}`, type: 'code', content: f.content, lang: f.lang } }
+                                                            })
+                                                        );
+                                                    },
+                                                    onClick: () =>
+                                                        onOpenFile({
+                                                            id: `recruiter_${f.name}`,
+                                                            title: `recruiter/${f.name}`,
+                                                            type: "code",
+                                                            content: f.content,
+                                                            lang: f.lang
+                                                        })
+                                                });
+                                            })}
+                                        </>
+                                    )}
+
+                                    {/* ROOT FILES */}
                                     {[
                                         { name: ".env", type: 'code', content: FILE_CONTENTS.env, lang: 'bash' },
                                         { name: ".gitignore", type: 'code', content: FILE_CONTENTS.gitignore, lang: 'bash' },
@@ -776,46 +857,6 @@ export const Sidebar = ({
                                                 })
                                         });
                                     })}
-
-                                    {/* Recruiter Folder - uses Info Color */}
-                                    {renderFileTreeItem({
-                                        id: 'recruiter', name: 'recruiter', icon: expandedFolders['recruiter'] ? FolderOpen : Folder, color: "text-[var(--text-secondary)]",
-                                        type: 'folder', depth: 0, hasChildren: true, isOpen: expandedFolders['recruiter'], onToggle: () => toggleFolder('recruiter')
-                                    })}
-                                    {expandedFolders['recruiter'] && (
-                                        <>
-                                            {[
-                                                { name: "hire_me.json", content: FILE_CONTENTS.hire_me, lang: 'json' },
-                                                { name: "skills.json", content: FILE_CONTENTS.skills_json, lang: 'json' },
-                                                { name: "career_path.txt", content: FILE_CONTENTS.career_path, lang: 'text' }
-                                            ].map(f => {
-                                                const fileMeta = getFileIcon(f.name);
-                                                return renderFileTreeItem({
-                                                    id: `recruiter_${f.name}`,
-                                                    name: f.name,
-                                                    icon: fileMeta.icon,
-                                                    color: fileMeta.color,
-                                                    type: 'file',
-                                                    depth: 1,
-                                                    onDragStart: (_e, id) => {
-                                                        window.dispatchEvent(
-                                                            new CustomEvent("explorer-drag-start", {
-                                                                detail: { id, file: { id: `recruiter_${f.name}`, title: `recruiter/${f.name}`, type: "code", content: f.content, lang: f.lang } }
-                                                            })
-                                                        );
-                                                    },
-                                                    onClick: () =>
-                                                        onOpenFile({
-                                                            id: `recruiter_${f.name}`,
-                                                            title: `recruiter/${f.name}`,
-                                                            type: "code",
-                                                            content: f.content,
-                                                            lang: f.lang
-                                                        })
-                                                });
-                                            })}
-                                        </>
-                                    )}
                                 </div>
                             )}
                         </div>
@@ -1241,13 +1282,29 @@ export const Sidebar = ({
                                 <div>
                                     <h3 className="text-[10px] font-bold text-[var(--accent)] uppercase mb-3 tracking-tighter">Portfolio</h3>
                                     <div className="space-y-4">
-                                        <div className="flex items-start justify-between gap-4">
+                                        <div className={`flex items-start justify-between gap-4 ${easyMode ? 'opacity-40 cursor-not-allowed pointer-events-none' : ''}`}>
                                             <div className="min-w-0">
                                                 <div className="text-xs text-[var(--text-primary)] font-medium">Authentic VS Code Layout</div>
                                                 <div className="text-[10px] text-[var(--text-secondary)] mt-0.5 leading-tight opacity-70">Toggle between high-fidelity VS Code and Stylish home layouts.</div>
                                             </div>
-                                            <button onClick={() => setHomepageLayout(homepageLayout === 'modern' ? 'vscode' : 'modern')} className="shrink-0">
+                                            <button
+                                                onClick={() => !easyMode && setHomepageLayout(homepageLayout === 'modern' ? 'vscode' : 'modern')}
+                                                className="shrink-0"
+                                                disabled={easyMode}
+                                            >
                                                 {homepageLayout === 'vscode'
+                                                    ? <ToggleRight size={22} className="text-[var(--accent)]" />
+                                                    : <ToggleLeft size={22} className="text-[var(--text-secondary)] opacity-50" />}
+                                            </button>
+                                        </div>
+
+                                        <div className="flex items-start justify-between gap-4">
+                                            <div className="min-w-0">
+                                                <div className="text-xs text-[var(--text-primary)] font-medium">Easy Mode</div>
+                                                <div className="text-[10px] text-[var(--text-secondary)] mt-0.5 leading-tight opacity-70">Simplifies the UI for non-developers by removing complex VS Code elements.</div>
+                                            </div>
+                                            <button onClick={() => window.dispatchEvent(new CustomEvent('toggle-easy-mode'))} className="shrink-0">
+                                                {easyMode
                                                     ? <ToggleRight size={22} className="text-[var(--accent)]" />
                                                     : <ToggleLeft size={22} className="text-[var(--text-secondary)] opacity-50" />}
                                             </button>
@@ -1347,6 +1404,6 @@ export const Sidebar = ({
                 )}
 
             </div>
-        </div>
+        </div >
     );
 };

@@ -81,6 +81,14 @@ export const CommandPalette = ({ isOpen, onClose, onOpenFile }: CommandPalettePr
             icon: FileText,
             path: 'Preferences'
         });
+        items.push({
+            id: 'toggle_easy_mode',
+            title: 'View: Toggle Easy Mode',
+            type: 'command',
+            action: 'toggle_easy_mode',
+            icon: ToggleLeft,
+            path: 'Preferences'
+        });
         // Config files
         items.push({ id: 'env', title: '.env', type: 'code', content: FILE_CONTENTS.env, lang: 'bash', icon: Lock, path: '.env' });
         items.push({ id: 'gitignore', title: '.gitignore', type: 'code', content: FILE_CONTENTS.gitignore, lang: 'bash', icon: GitBranch, path: '.gitignore' });
@@ -169,6 +177,13 @@ export const CommandPalette = ({ isOpen, onClose, onOpenFile }: CommandPalettePr
                     onClose();
                     return;
                 }
+                if (item.action === 'toggle_easy_mode') {
+                    window.dispatchEvent(
+                        new CustomEvent('toggle-easy-mode')
+                    );
+                    onClose();
+                    return;
+                }
             }
 
 
@@ -233,6 +248,13 @@ export const CommandPalette = ({ isOpen, onClose, onOpenFile }: CommandPalettePr
                                         if (item.action === 'toggle_setting') {
                                             window.dispatchEvent(
                                                 new CustomEvent('toggle-setting', { detail: item.settingKey })
+                                            );
+                                            onClose();
+                                            return;
+                                        }
+                                        if (item.action === 'toggle_easy_mode') {
+                                            window.dispatchEvent(
+                                                new CustomEvent('toggle-easy-mode')
                                             );
                                             onClose();
                                             return;

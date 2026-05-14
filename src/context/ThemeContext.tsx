@@ -7,5 +7,7 @@ export const ThemeContext = createContext({
     installTheme: (_theme: string) => { },
     uninstallTheme: (_theme: string) => { },
     homepageLayout: 'modern' as 'modern' | 'vscode',
-    setHomepageLayout: (_layout: 'modern' | 'vscode') => { }
+    setHomepageLayout: (_layout: 'modern' | 'vscode') => { },
+    easyMode: false,
+    setEasyMode: (_easy: boolean) => { }
 });

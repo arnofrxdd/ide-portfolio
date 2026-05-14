@@ -66,4 +66,4 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md) for a detailed guide on:
 
 ## 📄 License
 
-MIT © [Arnav]
+MIT © Arnav

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   X, ArrowLeft, Terminal, GitBranch,
-  AlertCircle, CheckCircle, Bell, GripHorizontal, Minimize2, Square, PanelRight, Code, Minus
+  AlertCircle, CheckCircle, Bell, Minimize2, Square, PanelRight, Code, Minus, Menu
 } from 'lucide-react';
 
 // Data
@@ -12,7 +12,6 @@ import { getFileIcon } from './data/fileSystem';
 import { ThemeContext } from './context/ThemeContext';
 
 // Components
-import { CodeRainBackground } from './components/Effects/CodeRain';
 import { CustomScrollbarStyles } from './components/Styles/CustomScrollbar';
 import { ToastContainer } from './components/UI/Toast';
 import { Sidebar } from './components/Sidebar/Sidebar';
@@ -120,6 +119,35 @@ const App = () => {
     localStorage.setItem('portfolio_homepage_layout', homepageLayout);
   }, [homepageLayout]);
 
+  const [easyMode, setEasyMode] = useState<boolean>(() => {
+    const saved = localStorage.getItem('portfolio_easy_mode');
+    return saved === 'true';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('portfolio_easy_mode', easyMode.toString());
+  }, [easyMode]);
+
+  const easyModeRef = useRef(easyMode);
+  const [isSidebarVisible, setIsSidebarVisible] = useState(true);
+
+  // NAVBAR AUTO-HIDE STATE
+  const [isNavBarVisible, setIsNavBarVisible] = useState(true);
+  const lastScrollTop = useRef(0);
+
+  // Initial mobile sidebar state
+  useEffect(() => {
+    if (window.innerWidth < 768) {
+      setIsSidebarVisible(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    easyModeRef.current = easyMode;
+    // Always reset navbar visibility when entering/exiting easy mode
+    setIsNavBarVisible(true);
+  }, [easyMode]);
+
   const [contextMenu, setContextMenu] = useState<{ x: number, y: number, type: string, id: string } | null>(null);
   const [toasts, setToasts] = useState<any[]>([]);
 
@@ -190,6 +218,22 @@ const App = () => {
     };
     window.addEventListener('toggle-setting', handler);
     return () => window.removeEventListener('toggle-setting', handler);
+  }, []);
+
+  useEffect(() => {
+    const handler = () => {
+      const next = !easyModeRef.current;
+      setEasyMode(next);
+
+      // Handle side effects once per event trigger
+      addToast(`Easy Mode ${next ? 'Enabled' : 'Disabled'}`, next ? 'success' : 'info');
+      if (next) {
+        setHomepageLayout('modern');
+        setEditorSettings((s: any) => ({ ...s, minimap: false }));
+      }
+    };
+    window.addEventListener('toggle-easy-mode', handler);
+    return () => window.removeEventListener('toggle-easy-mode', handler);
   }, []);
 
   useEffect(() => {
@@ -672,11 +716,12 @@ const App = () => {
       installTheme,
       uninstallTheme,
       homepageLayout,
-      setHomepageLayout
+      setHomepageLayout,
+      easyMode,
+      setEasyMode
     }}>
       <div className="h-screen w-full bg-[var(--bg-main)] text-[var(--text-primary)] font-sans overflow-hidden flex flex-col selection:bg-[var(--selection)] selection:text-white transition-colors duration-300">
         <div className="flex-1 flex min-h-0 relative">
-          <CodeRainBackground />
           <CustomScrollbarStyles />
           <ToastContainer toasts={toasts} onClose={(id) => setToasts(prev => prev.filter(t => t.id !== id))} />
 
@@ -697,43 +742,64 @@ const App = () => {
             />
           )}
 
-          <Sidebar
-            onOpenFile={openFile}
-            onToast={addToast}
-            onToggleTerminal={() => setIsTerminalOpen(true)}
-            tabs={tabs}
-            activeTabId={activeTabId}
-            setActiveTabId={setActiveTabId}
-            setTabs={setTabs}
-            editorSettings={editorSettings}
-            setEditorSettings={setEditorSettings}
-            onContextMenu={handleContextMenu}
-            isDragging={isDragging}
+          {/* Mobile Sidebar Backdrop */}
+          <div
+            className={`fixed inset-0 bg-black/40 backdrop-blur-sm z-[90] md:hidden transition-opacity duration-300 ${isSidebarVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+            onClick={() => setIsSidebarVisible(false)}
           />
+
+          <div className={`
+            flex shrink-0 h-full
+            fixed md:relative top-0 left-0 z-[100] md:z-auto
+            transition-transform duration-300 ease-in-out md:transition-none
+            ${(isSidebarVisible) ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
+            ${!isSidebarVisible ? 'pointer-events-none md:pointer-events-auto' : ''}
+          `}>
+            <Sidebar
+              onOpenFile={openFile}
+              onToast={addToast}
+              onToggleTerminal={() => setIsTerminalOpen(true)}
+              tabs={tabs}
+              activeTabId={activeTabId}
+              setActiveTabId={setActiveTabId}
+              setTabs={setTabs}
+              editorSettings={editorSettings}
+              setEditorSettings={setEditorSettings}
+              onContextMenu={handleContextMenu}
+              isDragging={isDragging}
+            />
+          </div>
 
           <div className="flex-1 flex flex-col relative z-10 h-full overflow-hidden min-w-0">
             <div
               ref={(el) => { tabScrollRef.current = el; tabBarRef.current = el; }}
               onWheel={(e) => { if (e.deltaY !== 0) { e.preventDefault(); e.currentTarget.scrollLeft += e.deltaY; } }}
-              className={`h-9 bg-[var(--bg-activity)] border-b border-[var(--border)] flex items-center overflow-x-auto overflow-y-hidden relative shrink-0 whitespace-nowrap custom-scrollbar ${dockHighlight ? 'bg-[var(--accent)] border-[var(--accent)] text-[var(--accent-fg)]' : ''}`}
+              className={`h-9 bg-[var(--bg-activity)] border-b border-[var(--border)] flex items-center overflow-x-auto overflow-y-hidden absolute md:relative top-0 left-0 w-full md:w-auto shrink-0 whitespace-nowrap custom-scrollbar z-40 md:z-auto ${dockHighlight ? 'bg-[var(--accent)] border-[var(--accent)] text-[var(--accent-fg)]' : ''} transition-all duration-300 ease-in-out ${!isNavBarVisible ? 'md:translate-y-0 -translate-y-full opacity-0 pointer-events-none' : 'translate-y-0 opacity-100'}`}
             >
               {dockHighlight && (
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none bg-[var(--bg-main)]/80 text-[var(--accent)] font-mono text-xs z-50">
                   <ArrowLeft size={14} className="rotate-90 mr-2" /> Release to Dock
                 </div>
               )}
+              <button
+                onClick={() => setIsSidebarVisible(!isSidebarVisible)}
+                className={`md:hidden h-full px-3 hover:bg-[var(--bg-main)] border-r border-[var(--border)] flex items-center justify-center shrink-0 transition-colors ${isSidebarVisible ? 'text-[var(--accent)] bg-[var(--accent)]/10' : 'text-[var(--text-secondary)]'}`}
+                title="Toggle Menu"
+              >
+                <Menu size={16} />
+              </button>
               {(() => {
                 const draggingIndex = (isDragging && dragItem.current?.type === 'tab') ? tabs.findIndex(t => t.id === draggingTabId.current) : -1;
                 const visualDropIndex = (dropIndex !== null && draggingIndex !== -1 && dropIndex > draggingIndex) ? dropIndex + 1 : dropIndex;
-                const indicatorColor = 'var(--text-primary)'; // Theme-aware: white in dark mode, dark in light mode
+                const indicatorColor = 'var(--text-primary)';
                 const indicatorStyle = {
                   backgroundColor: indicatorColor,
-                  width: '2px', // VS Code uses a 2px indicator
-                  transition: 'none', // ENSURE INSTANT MOVEMENT
+                  width: '2px',
+                  transition: 'none',
                 };
                 return (
                   <>
-                    {tabs.map((tab, i) => (
+                    {tabs.map((tab: any, i: number) => (
                       <React.Fragment key={tab.id}>
                         {visualDropIndex === i && <div style={indicatorStyle} className="h-6 mx-0 shrink-0 z-50" />}
                         <div
@@ -755,7 +821,6 @@ const App = () => {
                             return <Icon size={14} className={color} />;
                           })()}
                           <span className="truncate flex-1">{tab.title}</span>
-                          {/* Allow closing home tab */}
                           <div
                             className={`w-5 h-5 flex items-center justify-center rounded hover:bg-[var(--border)] ${activeTabId === tab.id ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}
                             onClick={(e) => closeTab(e, tab.id)}
@@ -766,15 +831,14 @@ const App = () => {
                       </React.Fragment>
                     ))}
                     {visualDropIndex === tabs.length && <div style={indicatorStyle} className="h-6 mx-0 shrink-0 z-50" />}
-                    {/* Padding spacer to prevent last tab from being hidden by absolute layout controls */}
                     <div className="w-12 shrink-0 h-full pointer-events-none" />
                   </>
                 );
               })()}
             </div>
 
-            {/* Layout Controls */}
-            <div className="absolute right-0 top-0 h-9 flex items-center px-3 bg-[var(--bg-activity)] border-b border-[var(--border)] z-20 shadow-[-10px_0_10px_-5px_var(--bg-activity)]">
+            {/* Layout Controls - Always Visible */}
+            <div className="absolute right-0 top-0 h-9 flex items-center px-3 bg-[var(--bg-activity)] border-b border-[var(--border)] z-50 shadow-[-10px_0_10px_-5px_var(--bg-activity)]">
               <button
                 onClick={() => setIsSecondarySidebarOpen(!isSecondarySidebarOpen)}
                 className={`p-1 rounded transition-colors ${isSecondarySidebarOpen ? 'text-[var(--accent-fg)] bg-[var(--accent)] hover:bg-[var(--accent)]/90' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-panel)]'}`}
@@ -785,8 +849,7 @@ const App = () => {
             </div>
             <div
               ref={editorScrollRef}
-              onScroll={(e) => { scrollPositions.current[activeTabId] = e.currentTarget.scrollTop; }}
-              className="flex-1 bg-[var(--bg-main)] relative overflow-y-auto custom-scrollbar transition-colors duration-300"
+              className={`flex-1 bg-[var(--bg-main)] relative overflow-hidden custom-scrollbar transition-colors duration-300`}
             >
               {tabs.map(tab => (
                 <div key={tab.id} className={`h-full w-full ${activeTabId === tab.id ? 'block' : 'hidden'}`}>
@@ -798,6 +861,29 @@ const App = () => {
                     lang={tab.lang}
                     onOpenFile={openFile}
                     editorSettings={editorSettings}
+                    isNavBarVisible={isNavBarVisible}
+                    onScroll={(e) => {
+                      const currentScroll = e.currentTarget.scrollTop;
+                      const maxScroll = e.currentTarget.scrollHeight - e.currentTarget.clientHeight;
+                      scrollPositions.current[activeTabId] = currentScroll;
+
+                      // Mobile Auto-Hide Logic (Any Mode)
+                      if (window.innerWidth < 768) {
+                        // Hide when scrolling down
+                        if (currentScroll > lastScrollTop.current && currentScroll > 50) {
+                          setIsNavBarVisible(false);
+                        }
+                        // Show when scrolling up, BUT ignore bottom rubber-band/overscroll (common on mobile)
+                        // Only show if we are safely away from the bottom edge (> 100px)
+                        else if (currentScroll < lastScrollTop.current && (maxScroll - currentScroll > 100)) {
+                          setIsNavBarVisible(true);
+                        }
+
+                        lastScrollTop.current = Math.max(0, currentScroll);
+                      } else {
+                        setIsNavBarVisible(true);
+                      }
+                    }}
                   />
                 </div>
               ))}
