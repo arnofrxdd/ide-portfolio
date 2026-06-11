@@ -87,13 +87,12 @@ export const ContentRenderer = ({ type, data, title, onOpenFile, content, editor
                         <Breadcrumbs path={path} />
                     </div>
                 )}
-                <div
-                    ref={editorScrollRef}
-                    onScroll={onScroll}
-                    className="flex-1 overflow-auto custom-scrollbar flex flex-col pt-[71px] md:pt-0"
-                >
-
-                    <div className="flex-1 flex relative">
+                <div className="flex-1 flex flex-row overflow-hidden relative pt-[71px] md:pt-0">
+                    <div
+                        ref={editorScrollRef}
+                        onScroll={onScroll}
+                        className="flex-1 overflow-auto custom-scrollbar flex flex-col"
+                    >
                         <div className="min-w-fit min-h-full py-4">
                             {lines.map((line, i) => (
                                 <div key={i} className="flex flex-row hover:bg-[var(--bg-activity)]/30 w-full">
@@ -124,15 +123,15 @@ export const ContentRenderer = ({ type, data, title, onOpenFile, content, editor
                                 <div className="pl-14 text-[var(--text-secondary)] italic text-xs">No content.</div>
                             )}
                         </div>
-
-                        {/* REAL MINIMAP */}
-                        {editorSettings.minimap && (
-                            <RealMinimap
-                                content={cleanContent}
-                                editorRef={editorScrollRef as React.RefObject<HTMLDivElement>}
-                            />
-                        )}
                     </div>
+
+                    {/* REAL MINIMAP */}
+                    {editorSettings.minimap && (
+                        <RealMinimap
+                            content={cleanContent}
+                            editorRef={editorScrollRef as React.RefObject<HTMLDivElement>}
+                        />
+                    )}
                 </div>
             </div>
         );
